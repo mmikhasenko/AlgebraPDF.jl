@@ -33,6 +33,8 @@ let
   stephist!(data, norm=true, c=:black, bins=50, lab="data")
 end
 ```
+![example](plots/gaus.background.png)
+
 
 # Todo:
  - fixing parameters
