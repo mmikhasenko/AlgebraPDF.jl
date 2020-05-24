@@ -17,8 +17,6 @@ p2v(p,pdf) = [getproperty(p, k) for k in keys(pdf.p0)]
 # calls
 (d::pdf)(x; p=d.p0, norm_according_to=d) = d.f(x; p=p) / quadgk(x->norm_according_to.f(x; p=p), d.lims...)[1]
 (d::pdf)(x, v) = d(x; p=v2p(v,d))
-# components
-(d::pdf)(x, v)
 
 # operation
 *(c, d::pdf) = *(d::pdf, c) # commutation
