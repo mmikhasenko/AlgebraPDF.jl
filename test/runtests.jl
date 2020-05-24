@@ -3,4 +3,5 @@ using Test
 
 @testset "AlgebraPDF.jl" begin
     include("operations_on_pdfs.jl")
+    include("show_case.jl")
 end

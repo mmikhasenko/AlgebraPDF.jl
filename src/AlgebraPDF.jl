@@ -13,6 +13,9 @@ include("fit.jl")
 export pdf, npars, p2v, v2p
 include("pdf.jl")
 
+export generate
+include("generation.jl")
+
 # export pol0, pol1, pol2, pol3, pol4
 # export gaus, BW
 # include("basic_lineshapes.jl")
