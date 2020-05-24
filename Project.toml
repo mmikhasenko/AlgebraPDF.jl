@@ -1,10 +1,10 @@
 name = "AlgebraPDF"
 uuid = "e09e93a3-870c-4c75-9b71-3eefe58c6e5b"
 authors = ["Misha Mikhasenko"]
-version = "0.1.0"
+version = "0.0.1"
 
 [compat]
-julia = "0.1"
+julia = "1.3"
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
