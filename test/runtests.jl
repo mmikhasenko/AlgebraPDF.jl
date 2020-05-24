@@ -2,5 +2,5 @@ using AlgebraPDF
 using Test
 
 @testset "AlgebraPDF.jl" begin
-    # Write your own tests here.
+    include("operations_on_pdfs.jl")
 end
