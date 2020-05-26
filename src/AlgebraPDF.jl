@@ -7,10 +7,11 @@ using Optim
 import Base.+
 import Base.*
 
-export fit_llh
+export fit_llh, llh
 include("fit.jl")
 
 export pdf, npars, p2v, v2p
+export integral
 include("pdf.jl")
 
 export generate
