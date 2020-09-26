@@ -34,3 +34,6 @@ integral(d::pdf; p=d.p0) = quadgk(x->d.f(x; p=p), d.lims...)[1]
 +(d1::pdf, d2::pdf) = pdf((x;p)->d1.f(x;p=p) + d2.f(x;p=p);
         p0 = merge(d1.p0, d2.p0), lims = d1.lims)
 #
+# fix parameters
+fix_parameters(d::pdf, values::NamedTuple) = pdf((e;p)->d.f(e;p=merge(p,values)); p0=Base.structdiff(d.p0, values), lims=d.lims)
+fix_parameters(d::pdf, symb::T where T<:Union{Tuple,Array{Symbol}}) = fix_parameters(d, NamedTuple{Tuple(symb)}(getproperty.(Ref(d.p0),symb)))
