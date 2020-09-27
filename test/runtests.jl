@@ -84,7 +84,23 @@ end
     @test length(data) == 10000
     
     # fitting
-    pfr = v2p(fit_llh(data, pdf_sum;
-      init_pars=p2v(pdf_sum.p0, pdf_sum)), pdf_sum)
+    fr = fit_llh(data, pdf_sum; init_pars=p2v(pdf_sum.p0, pdf_sum))
+    pfr = v2p(fr.minimizer, pdf_sum)
+    @test length(pfr) == 4
+end
+
+let
+    # tests
+    snl = pdf(@. (x;p) -> exp(-(x-p.μ)^2/(2*p.σ^2)); p0 = (μ=1.4, σ=0.15), lims=(0, 3))
+    bkg = pdf(@. (x;p) -> sqrt(x)*exp(-p.α*x); p0 = (α=1.3,), lims=(0, 3))
+    bkg *= (fb=2.5,)
+    pdf_sum = snl + bkg
+    
+    # generating
+    data = generate(10000, pdf_sum; p=pdf_sum.p0);
+    
+    # fitting
+    fr = fit_llh(data, pdf_sum; init_pars=p2v(pdf_sum.p0, pdf_sum))
+    pfr = v2p(fr.minimizer, pdf_sum)
     @test length(pfr) == 4
 end
