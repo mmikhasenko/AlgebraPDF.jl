@@ -4,6 +4,7 @@ using Parameters
 using QuadGK
 using Optim
 using Random
+using RecipesBase
 #
 import Base: +, *, /
 
@@ -26,5 +27,7 @@ include("convolution.jl")
 
 export sumpdf
 include("sumpdf.jl")
+
+include("plottingrecipe.jl")
 
 end # module
