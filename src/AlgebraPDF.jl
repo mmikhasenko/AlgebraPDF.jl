@@ -17,6 +17,7 @@ export pdf, npars, p2v, v2p
 export integral
 export fix_parameters
 export fixedshapepdf
+export noparsf, noparsnormf
 include("pdf.jl")
 
 export generate

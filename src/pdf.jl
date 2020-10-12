@@ -45,3 +45,7 @@ fix_parameters(d::pdf, values::NamedTuple) = pdf((e;p=∅)->d.f(e;p=merge(p,valu
 fix_parameters(d::pdf, symb::T where T<:Union{Tuple,Array{Symbol}}) = fix_parameters(d, NamedTuple{Tuple(symb)}(getproperty.(Ref(d.p0),symb)))
 #
 fixedshapepdf(f, lims) = pdf((x;p=∅)->f(x); lims=lims, p0=∅)
+
+#
+noparsf(d::pdf; p=d.p0) = x->d.f(x;p=p)
+noparsnormf(d::pdf; p=d.p0) = (ns=integral(d;p=p); x->d.f(x;p=p)/ns)

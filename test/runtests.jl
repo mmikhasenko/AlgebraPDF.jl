@@ -125,3 +125,16 @@ end
     sum3 = sumpdf(pdf1, pdf2, 0.3)
     @test length(sum3.p0) == 0
 end
+
+
+@testset "no-parameters f and no-parameters normalized f" begin
+    d0 = pdf(@. (e;p)->e^2+p.a; p0=(a=1.0,), lims=(-1,2))
+
+    f = noparsf(d0)
+    xr = d0.lims[1]+rand()*(d0.lims[2]-d0.lims[1])
+    @test d0.f(xr;p=d0.p0) ≈ f(xr)
+    #
+    fn = noparsnormf(d::pdf; p=d.p0) = (ns=integral(d;p=p); x->d.f(x;p=p)/ns)
+    ananorm = ((8+1)/3+1.0*3)
+    @test d0(xr) ≈ f(xr)/ananorm
+end
