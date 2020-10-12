@@ -22,6 +22,9 @@ using SpecialFunctions
     #
     pdf_sum = pdf1 + pdf2
     @test npars(pdf_sum) == 5
+
+    pdf_ratio = pdf1 / pdf2
+    @test npars(pdf_ratio) == 5
 end
 
 function df(f1,f2,lims; Ns = 10)
@@ -93,4 +96,32 @@ end
     d = pdf(@. (e;p)->e^2+p.a; p0=(a=1.0,), lims=(-1,2))
     @test p2v(d) == [1.0]
     @test p2v((a=3.0,), d) == [3.0]
+end
+
+@testset "fixed-shape pdf" begin
+    d1 = fixedshapepdf(x->exp.(-(x .* 4).^2), (-1, 2))
+    @test length(d1.p0) == 0
+end
+
+@testset "sum pdf" begin
+    g(x) = exp.(-(x .* 4).^2)
+    e(x) = exp.(-x)
+    lims = (-1, 2)
+    # 
+    sum0 = sumpdf(g,e,lims)
+    @test length(sum0.p0) == 1
+    # 
+    pdf1 = fixedshapepdf(g, lims)
+    pdf2 = fixedshapepdf(e, lims)
+    sum1 = sumpdf(pdf1, pdf2)
+    @test length(sum1.p0) == 1
+    #
+    xr = lims[1]+rand()*(lims[2]-lims[1])
+    @test sum0(xr) ≈ sum1(xr)
+    # 
+    sum2 = sumpdf(pdf1, pdf2, :xf)
+    @test keys(sum2.p0)[1] == :xf
+    # 
+    sum3 = sumpdf(pdf1, pdf2, 0.3)
+    @test length(sum3.p0) == 0
 end

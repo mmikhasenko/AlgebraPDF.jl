@@ -3,9 +3,11 @@ module AlgebraPDF
 using Parameters
 using QuadGK
 using Optim
+using Random
 #
-import Base.+
-import Base.*
+import Base: +, *, /
+
+export ∅
 
 export fit_llh, llh
 include("fit.jl")
@@ -13,6 +15,7 @@ include("fit.jl")
 export pdf, npars, p2v, v2p
 export integral
 export fix_parameters
+export fixedshapepdf
 include("pdf.jl")
 
 export generate
@@ -20,5 +23,8 @@ include("generation.jl")
 
 export conv_with_gauss, conv_with_gauss_sampling
 include("convolution.jl")
+
+export sumpdf
+include("sumpdf.jl")
 
 end # module
