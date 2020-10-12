@@ -103,29 +103,46 @@ end
     @test length(d1.p0) == 0
 end
 
+g(x) = exp.(-(x .* 4).^2)
+e(x) = exp.(-x)
+lims = (-1, 2)
+# 
+sum0 = sumpdf(g,e,lims)
+pdf1 = fixedshapepdf(g, lims)
+pdf2 = fixedshapepdf(e, lims)
+# 
+sum1 = sumpdf(pdf1, pdf2)
+sum2 = sumpdf(pdf1, pdf2, :xf)
+sum3 = sumpdf(pdf1, pdf2, 0.3)
+# 
+xr = lims[1]+rand()*(lims[2]-lims[1])
+
 @testset "sum pdf" begin
-    g(x) = exp.(-(x .* 4).^2)
-    e(x) = exp.(-x)
-    lims = (-1, 2)
     # 
-    sum0 = sumpdf(g,e,lims)
     @test length(sum0.p0) == 1
-    # 
-    pdf1 = fixedshapepdf(g, lims)
-    pdf2 = fixedshapepdf(e, lims)
-    sum1 = sumpdf(pdf1, pdf2)
     @test length(sum1.p0) == 1
-    #
-    xr = lims[1]+rand()*(lims[2]-lims[1])
     @test sum0(xr) ≈ sum1(xr)
-    # 
-    sum2 = sumpdf(pdf1, pdf2, :xf)
     @test keys(sum2.p0)[1] == :xf
-    # 
-    sum3 = sumpdf(pdf1, pdf2, 0.3)
     @test length(sum3.p0) == 0
 end
 
+@testset "example with sum pdf" begin
+    # let
+    #     plot(sum1, 2)
+    #     plot!(fix_parameters(sum1, (f=1,)))
+    #     plot!(fix_parameters(sum1, (f=0,)))
+    # end
+    ds = generate(5000, sum1)
+    # histogram(ds, bins=50, norm=true)
+    # plot!(sum1)
+    # 
+    ft = fit_llh(ds,sum1; init_pars=[0.3])
+    pfr = ft.minimizer
+    sum1_fit = fix_parameters(sum1, v2p(pfr,sum1))
+    # plot!(fix_parameters(sum1, v2p(pfr,sum1)), 1)
+    println("δf = ", (pfr[1] - sum1.p0[1]) / sum1.p0[1])
+    @test (pfr[1] - sum1.p0[1]) / sum1.p0[1] < 0.05
+end
 
 @testset "no-parameters f and no-parameters normalized f" begin
     d0 = pdf(@. (e;p)->e^2+p.a; p0=(a=1.0,), lims=(-1,2))
@@ -138,3 +155,14 @@ end
     ananorm = ((8+1)/3+1.0*3)
     @test d0(xr) ≈ f(xr)/ananorm
 end
+
+sWeights_signal, sWeights_backgr = sWeights(pdf1, pdf2, 0.9)
+xv = range(pdf1.lims...,length=100)
+sum_of_w = sWeights_signal(xv) + sWeights_backgr(xv)
+
+@testset "sWeights" begin
+    xv = range(pdf1.lims...,length=100)
+    sum_of_w = sWeights_signal(xv) + sWeights_backgr(xv)
+    @test prod(sum_of_w .- sum_of_w[30] .< 1e-10)
+end
+

@@ -31,4 +31,7 @@ include("sumpdf.jl")
 
 include("plottingrecipe.jl")
 
+export sWeights
+include("sWeights.jl")
+
 end # module
