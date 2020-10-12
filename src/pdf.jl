@@ -11,8 +11,10 @@ pdf(f;p0,lims) = pdf(;f=f,lims=lims,p0=p0)
 #
 # properties
 npars(p::pdf) = length(p.p0)
-v2p(v,pdf) = NamedTuple{keys(pdf.p0)}(v)
-p2v(p,pdf) = [getproperty(p, k) for k in keys(pdf.p0)]
+v2p(v,d::pdf) = NamedTuple{keys(d.p0)}(v)
+p2v(p,d::pdf) = [getproperty(p, k) for k in keys(d.p0)]
+p2v(d::pdf) = p2v(d.p0, d)
+
 integral(d::pdf; p=d.p0) = quadgk(x->d.f(x; p=p), d.lims...)[1]
 #
 # calls

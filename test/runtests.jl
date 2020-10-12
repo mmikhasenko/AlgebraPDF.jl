@@ -89,3 +89,8 @@ end
     @test length(pfr) == 4
 end
 
+@testset "parameters to values" begin
+    d = pdf(@. (e;p)->e^2+p.a; p0=(a=1.0,), lims=(-1,2))
+    @test p2v(d) == [1.0]
+    @test p2v((a=3.0,), d) == [3.0]
+end
