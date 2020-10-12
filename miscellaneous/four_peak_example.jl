@@ -45,7 +45,7 @@ function construct_pdf_modular_integral_conv()
     pdf2 = pdf(@. (e;p)->abs2(BWmth(e, p.m2, p.Γ2));  p0 = (m2=Mv[2]-mth, Γ2=Γv[2]), lims = fitlims)
     pdf3 = pdf(@. (e;p)->abs2(BWmth(e, p.m3, p.Γ3));  p0 = (m3=Mv[3]-mth, Γ3=Γv[3]), lims = fitlims)
     pdf4 = pdf(@. (e;p)->abs2(BWmth(e, p.m4, p.Γ4));  p0 = (m4=Mv[4]-mth, Γ4=Γv[4]), lims = fitlims)
-    pdfb = pdf(@. (e;p)->bgd(e, αv, βv) * pqmth(e);  p0 = NamedTuple(), lims = fitlims)
+    pdfb = pdf(@. (e;p)->bgd(e, αv, βv);  p0 = NamedTuple(), lims = fitlims)
     pdfS = [
         conv_with_gauss(pdf1, σev[1]),
         conv_with_gauss(pdf2, σev[2]),
@@ -54,7 +54,7 @@ function construct_pdf_modular_integral_conv()
         pdfb]
     #
     phsp = pdf(@. (e;p)->pqmth(e);  p0 = NamedTuple(), lims = fitlims)
-    [d *= phsp for d in pdfS]
+    pdfS = [d * phsp for d in pdfS]
     #
     pdfS[2] *= (f2=5.0,)
     pdfS[3] *= (f3=0.2,)
@@ -65,6 +65,24 @@ function construct_pdf_modular_integral_conv()
     return pdf_modular
 end
 
+
+
+function construct_pdf_light_modular_integral_conv()
+    pdf1 = pdf(@. (e;p)->abs2(BWmth(e, p.m1, p.Γ1)) * pqmth(e) * 1.0 ;  p0 = (m1=Mv[1]-mth, Γ1=Γv[1]          ), lims = fitlims)
+    pdf2 = pdf(@. (e;p)->abs2(BWmth(e, p.m2, p.Γ2)) * pqmth(e) * p.f2;  p0 = (m2=Mv[2]-mth, Γ2=Γv[2], f2 = 5.0), lims = fitlims)
+    pdf3 = pdf(@. (e;p)->abs2(BWmth(e, p.m3, p.Γ3)) * pqmth(e) * p.f3;  p0 = (m3=Mv[3]-mth, Γ3=Γv[3], f3 = 0.2), lims = fitlims)
+    pdf4 = pdf(@. (e;p)->abs2(BWmth(e, p.m4, p.Γ4)) * pqmth(e) * p.f4;  p0 = (m4=Mv[4]-mth, Γ4=Γv[4], f4 = 0.1), lims = fitlims)
+    pdfb = pdf(@. (e;p)->bgd(e, αv, βv) * pqmth(e) * p.f4;  p0 = (fb=0.1,), lims = fitlims)
+    pdfS = [
+        conv_with_gauss(pdf1, σev[1]),
+        conv_with_gauss(pdf2, σev[2]),
+        conv_with_gauss(pdf3, σev[3]),
+        conv_with_gauss(pdf4, σev[4]),
+        pdfb]
+    #
+    return pdfS
+end
+
 # benchmark
 const xv = range(fitlims..., length=10)
 # 
@@ -73,8 +91,13 @@ pdf_direct = construct_pdf_directly_integral_conv()
 @btime pdf_direct(xv)  # 20 ms
 #
 pdf_modular = construct_pdf_modular_integral_conv()
-@btime pdf_modular(0.1) # 221 ms
-@btime pdf_modular(xv) # 212 ms 
+@btime pdf_modular(0.1) # 182 ms
+@btime pdf_modular(xv) # 190 ms 
+#
+pdfs_light = construct_pdf_light_modular_integral_conv()
+pdf_light = sum(pdfs_light)
+@btime pdf_light(0.1) # 225 ms
+@btime pdf_modular(xv) # 197 ms 
 
 using Plots
 using HEPRecipes # https://github.com/mmikhasenko/HEPRecipes.jl
