@@ -5,6 +5,7 @@ using QuadGK
 using Optim
 using Random
 using RecipesBase
+using StaticArrays
 #
 import Base: +, *, /
 
@@ -33,5 +34,9 @@ include("plottingrecipe.jl")
 
 export sWeights
 include("sWeights.jl")
+
+export xProductPDF
+include("multidim.jl")
+
 
 end # module
