@@ -176,5 +176,8 @@ end
     @test length(s) == 100
     @test hasproperty(s[1], :x)
     @test hasproperty(s[1], :y)
+    # 
+    s = generate(50, X; Nbins=300)
+    @test length(s) == 50
 end
 
