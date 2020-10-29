@@ -24,6 +24,7 @@ include("pdf.jl")
 
 export MixedModel
 export update_namedtuple
+export fractions
 include("mixedmodel.jl")
 
 export generate
