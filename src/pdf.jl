@@ -9,17 +9,24 @@ end
 pdf(f,p0,lims) = pdf(;f=f,lims=lims,p0=p0)
 pdf(f;p0,lims) = pdf(;f=f,lims=lims,p0=p0)
 #
-# properties
-npars(p::pdf) = length(p.p0)
-v2p(v,d::pdf) = NamedTuple{keys(d.p0)}(v)
-p2v(p,d::pdf) = [getproperty(p, k) for k in keys(d.p0)]
-p2v(d::pdf) = p2v(d.p0, d)
+collectpars(d::pdf) = d.p0
 
 integral(d::pdf; p=d.p0) = quadgk(x->d.f(x; p=p), d.lims...)[1]
-#
+
 # calls
-(d::pdf)(x; p=d.p0, norm_according_to=d) = d.f(x; p=p) / integral(norm_according_to; p=p)
+function (d::pdf)(x; p=d.p0, norm_according_to=d)
+    normalization = integral(norm_according_to; p=p)
+    normalization ≈ 0.0 && error("norm = 0 with p = $(p)!")
+    return d.f(x; p=p) / normalization
+end
 (d::pdf)(x, v) = d(x; p=v2p(v,d))
+
+# properties
+npars(d) = length(collectpars(d))
+v2p(v,d) = NamedTuple{keys(collectpars(d))}(v)
+p2v(p,d) = [getproperty(p, k) for k in keys(collectpars(d))]
+p2v(  d) = p2v(collectpars(d), d)
+
 
 ∅ = NamedTuple()
 # operation

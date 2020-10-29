@@ -1,4 +1,5 @@
 using AlgebraPDF
+using StaticArrays
 using Test
 using SpecialFunctions
 
@@ -181,3 +182,20 @@ end
     @test length(s) == 50
 end
 
+@testset "Mixed Model" begin
+   
+    g1 = pdf(@. (x;p)->1/p.σ1*exp(-(x-p.μ1)^2/(2*p.σ1^2)); p0=(μ1= 2.1, σ1=0.7 ), lims=(-3, 3))
+    g2 = pdf(@. (x;p)->1/p.σ2*exp(-(x-p.μ2)^2/(2*p.σ2^2)); p0=(μ2=-0.7, σ2=0.7 ), lims=(-3, 3))
+    mm0 = MixedModel(SVector(g1, g2), (f1=0.33,))
+
+    @test typeof(collectpars(mm0)) <: NamedTuple
+    @test npars(mm0) == 5
+    @test v2p(p2v(mm0),mm0) == collectpars(mm0)
+    #
+    sample = vcat((0.5.*randn(1000) .- 1.0), (0.7.*randn(100) .+ 2.0))
+    sample = filter(x->-3<x<3, sample)
+    # 
+    fr = fit_llh(sample, mm0, init_pars=p2v(mm0))
+    pfr = v2p(fr.minimizer, mm0)
+    @test abs(pfr.μ2 + 1.0) < 0.1 && abs(pfr.μ1 - 2.0) < 0.5
+end

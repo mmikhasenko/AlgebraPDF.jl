@@ -19,7 +19,12 @@ export integral
 export fix_parameters
 export fixedshapepdf
 export noparsf, noparsnormf
+export collectpars
 include("pdf.jl")
+
+export MixedModel
+export update_namedtuple
+include("mixedmodel.jl")
 
 export generate
 include("generation.jl")
