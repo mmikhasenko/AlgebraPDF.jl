@@ -1,3 +1,5 @@
+∅ = NamedTuple()
+
 @with_kw struct pdf
     f::Function
     lims::Tuple{Real,Real}
@@ -9,6 +11,8 @@ end
 pdf(f,p0,lims) = pdf(;f=f,lims=lims,p0=p0)
 pdf(f;p0,lims) = pdf(;f=f,lims=lims,p0=p0)
 #
+collectpars(f::Function) = ∅
+
 collectpars(d::pdf) = d.p0
 
 integral(d::pdf; p=d.p0) = quadgk(x->d.f(x; p=p), d.lims...)[1]
@@ -28,7 +32,6 @@ p2v(p,d) = [getproperty(p, k) for k in keys(collectpars(d))]
 p2v(  d) = p2v(collectpars(d), d)
 
 
-∅ = NamedTuple()
 # operation
 *(c, d::pdf) = *(d::pdf, c) # commutation
 *(d::pdf, c::NamedTuple) = pdf((x;p=∅)->d.f(x;p=p) * getproperty(p, keys(c)[1]);
@@ -54,5 +57,5 @@ fix_parameters(d::pdf, symb::T where T<:Union{Tuple,Array{Symbol}}) = fix_parame
 fixedshapepdf(f, lims) = pdf((x;p=∅)->f(x); lims=lims, p0=∅)
 
 #
-noparsf(d::pdf; p=d.p0) = x->d.f(x;p=p)
-noparsnormf(d::pdf; p=d.p0) = (ns=integral(d;p=p); x->d.f(x;p=p)/ns)
+noparsf(d::pdf; p=d.p0) = (x;kw...)->d.f(x;p=p)
+noparsnormf(d::pdf; p=d.p0) = (ns=integral(d;p=p); (x;kw...)->d.f(x;p=p)/ns)
