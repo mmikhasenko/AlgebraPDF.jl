@@ -203,7 +203,6 @@ end
 
 g1 = pdf(@. (x;p)->1/p.σ1*exp(-(x-p.μ1)^2/(2*p.σ1^2)); p=(μ1= 2.1, σ1=0.7 ), lims=(-3, 3))
 g2 = pdf(@. (x;p)->1/p.σ2*exp(-(x-p.μ2)^2/(2*p.σ2^2)); p=(μ2=-0.7, σ2=0.7 ), lims=(-3, 3))
-mm0 = MixedModel(SVector(g1, g2), (f1=0.33,))
 mm0 = MixedModel([g1, g2], (f1=0.33,))
 
 @testset "parameters of the mixed model" begin
@@ -227,4 +226,13 @@ end
     pfr = v2p(fr.minimizer, mm0)
     @test abs(pfr.μ2 + 1.0) < 0.1 && abs(pfr.μ1 - 2.0) < 0.5
     #
+end
+
+@testset "Densities" begin
+    pdf1 = aGauss((mΩb = 6030, σ=17.0), (5600, 6400))
+    @test collectpars(pdf1) === (mΩb = 6030, σ=17.0)
+    pdf2 = aBreitWigner((mΩb = 6030, Γ=17.0), (5600, 6400))
+    @test collectpars(pdf2) === (mΩb = 6030, Γ=17.0)
+    pdf3 = aExp((τ = -1.1,), (-2, 2))
+    @test collectpars(pdf3) === (τ = -1.1,)
 end

@@ -45,5 +45,8 @@ include("sWeights.jl")
 export xProductPDF
 include("multidim.jl")
 
+export aGauss, aBreitWigner, aExp
+include("densities.jl")
+
 
 end # module
