@@ -12,22 +12,22 @@ function sumpdf(f1,f2,lims)
 end
 
 function sumpdf(d1::pdf, d2::pdf, sfS::Symbol=randfractionsymbol())
-    d1.lims != d2.lims && error("lims are different: ", d1.lims, " != ", d2.lims)
+    lims(d1) != lims(d2) && error("lims are different: ", lims(d1), " != ", lims(d2))
     n1 = normalizationintegral(d1)
     n2 = normalizationintegral(d2)
     d = pdf(
-        (x;p)->getproperty(p, sfS) .* d1.f(x;p=p) ./ n1 + (1-getproperty(p, sfS)) .* d2.f(x;p=p) ./ n2;
-        lims=d1.lims, p=merge(d1.p, d2.p, NamedTuple{(sfS,)}(0.5)))
+        (x;p)->getproperty(p, sfS) .* func(d1,x;p=p) ./ n1 + (1-getproperty(p, sfS)) .* func(d2,x;p=p) ./ n2;
+        lims=lims(d1), p=merge(collectpars(d1), collectpars(d2), NamedTuple{(sfS,)}(0.5)))
     return d
 end
 
 function sumpdf(d1::pdf, d2::pdf, f1::Float64)
-    d1.lims != d2.lims && error("lims are different: ", d1.lims, " != ", d2.lims)
+    lims(d1) != lims(d2) && error("lims are different: ", lims(d1), " != ", lims(d2))
     n1 = normalizationintegral(d1)
     n2 = normalizationintegral(d2)
     d = pdf(
-        (x;p)->f1 .* d1.f(x;p=p) ./ n1 + (1-f1) .* d2.f(x;p=p) ./ n2;
-        lims=d1.lims, p=merge(d1.p, d2.p))
+        (x;p)->f1 .* func(d1,x;p=p) ./ n1 + (1-f1) .* func(d2,x;p=p) ./ n2;
+        lims=lims(d1), p=merge(collectpars(d1), collectpars(d2)))
     return d
 end
 

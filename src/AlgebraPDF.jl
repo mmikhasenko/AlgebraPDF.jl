@@ -16,7 +16,7 @@ export integral
 export fixpars, fixpar
 export fixedshapepdf
 export noparsf, noparsnormf
-export collectpars
+export collectpars, func, lims
 export subtractpars, selectpars, updatepars
 include("pdf.jl")
 

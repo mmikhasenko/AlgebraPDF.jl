@@ -49,17 +49,17 @@ end
         p = merge(c, collectpars(d)), lims = lims(d))
 *(d::pdf, c::Number) = pdf((x;p=∅)->func(d,x;p=p) * c;
         p = collectpars(d), lims = lims(d))
-*(d1::pdf, d2::pdf) = pdf((x;p=∅)->d1.f(x;p=p) .* d2.f(x;p=p);
-        p = merge(d1.p, d2.p), lims = d1.lims)
+*(d1::pdf, d2::pdf) = pdf((x;p=∅)->func(d1,x;p=p) .* func(d2,x;p=p);
+        p = merge(collectpars(d1), collectpars(d2)), lims = lims(d1))
 #
-/(d1::pdf, d2::pdf) = pdf((x;p=∅)->d1.f(x;p=p) ./ d2.f(x;p=p);
-    p = merge(d1.p, d2.p), lims = d1.lims)
+/(d1::pdf, d2::pdf) = pdf((x;p=∅)->func(d1,x;p=p) ./ func(d2,x;p=p);
+    p = merge(collectpars(d1), collectpars(d2)), lims = lims(d1))
 # 
 +(c::NamedTuple, d::pdf) = pdf((x;p=∅)->func(d,x;p=p) + getproperty(p,keys(c)[1]);
         p = merge(c, collectpars(d)), lims = lims(d))
 # pdf + pdf
-+(d1::pdf, d2::pdf) = pdf((x;p=∅)->d1.f(x;p=p) + d2.f(x;p=p);
-        p = merge(d1.p, d2.p), lims = d1.lims)
++(d1::pdf, d2::pdf) = pdf((x;p=∅)->func(d1,x;p=p) + func(d2,x;p=p);
+        p = merge(collectpars(d1), collectpars(d2)), lims = lims(d1))
 #
 # fix parameters
 
@@ -76,6 +76,3 @@ fixpars(d::pdf, pars::NamedTuple) =
 #
 noparsf(d::pdf; p=collectpars(d)) = (x;kw...)->func(d,x;p=p)
 noparsnormf(d::pdf; p=collectpars(d)) = (ns=normalizationintegral(d;p=p); (x;kw...)->func(d,x;p=p)/ns)
-
-
-intersect((:p1,:p2,:a), (:a,:b))

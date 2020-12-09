@@ -10,7 +10,7 @@ function Wmatrix(pdfS::pdf, pdfB::pdf, f)
     dS = noparsnormf(pdfS)
     dB = noparsnormf(pdfB)
     #
-    return Wmatrix(dS, dB, f, pdfS.lims)
+    return Wmatrix(dS, dB, f, lims(pdfS))
 end
 
 """

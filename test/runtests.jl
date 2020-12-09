@@ -39,7 +39,7 @@ end
     @test pdf2(x0, v0) == pdf2(x0; p=v2p(v0, pdf2))
     #
     pdf2 *= (f2=3.0,)
-    @test length(pdf2.p) == 3
+    @test length(collectpars(pdf2)) == 3
     #
     pdf_sum = pdf1 + pdf2
     @test npars(pdf_sum) == 5
@@ -67,33 +67,33 @@ end
     #
     step = pdf(@. (e;p)->e>0; p=NamedTuple(), lims=(-1,1))
     smeared_step = conv_with_gauss(step, σ0)
-    nconv(e) = smeared_step.f(e; p=smeared_step.p)
+    nconv(e) = func(smeared_step, e)
     @test df(nconv, aconv, (-1, 1); Ns=1000) < 0.01
     # 
     smeared_step_sampling = conv_with_gauss_sampling(step, σ0; Ns=50)
-    nconv(e) = smeared_step_sampling.f(e; p=smeared_step_sampling.p)
+    nconv(e) = func(smeared_step_sampling, e)
     @test df(nconv, aconv, (-1, 1); Ns=1000) < 0.01
     # 
     smeared_step_sampling = conv_with_gauss_sampling(step, σ0; Ns=10)
-    nconv(e) = smeared_step_sampling.f(e; p=smeared_step_sampling.p)
+    nconv(e) = func(smeared_step_sampling, e)
     @test 0.01 < df(nconv, aconv, (-1, 1); Ns=1000) < 0.04
 end
 
 @testset "fix parameters example" begin
     d0 = pdf(@. (e;p)->e^2+p.a; p=(a=1.0,), lims=(-1,2))
-    @test d0.f(1.0; p=d0.p) == 2.0
+    @test func(d0, 1.0) == 2.0
     # 
     d1 = fixpars(d0, (:a,))
-    @test d1.p === NamedTuple()
-    @test d1.f(1.0; p=d0.p) == 2.0
+    @test collectpars(d1) === ∅
+    @test func(d1, 1.0) == 2.0
     # 
     d1′ = fixpars(d0, [:a])
-    @test d1′.p === NamedTuple()
-    @test d1′.f(1.0; p=d0.p) == 2.0
+    @test collectpars(d1′) === ∅
+    @test func(d1′, 1.0) == 2.0
     # 
     d2 = fixpars(d0, (a=2,))
-    @test d2.p === NamedTuple()
-    @test d2.f(1.0; p=d2.p) == 3.0
+    @test collectpars(d2) === ∅
+    @test func(d2, 1.0) == 3.0
 end
 
 @testset "example of usage" begin
@@ -104,11 +104,11 @@ end
     pdf_sum = snl + bkg
     
     # generating
-    data = generate(10000, pdf_sum; p=pdf_sum.p);
+    data = generate(10000, pdf_sum; p=collectpars(pdf_sum));
     @test length(data) == 10000
     
     # fitting
-    fr = fit_llh(data, pdf_sum; init_pars=p2v(pdf_sum.p, pdf_sum))
+    fr = fit_llh(data, pdf_sum; init_pars=p2v(collectpars(pdf_sum), pdf_sum))
     pfr = v2p(fr.minimizer, pdf_sum)
     @test length(pfr) == 4
 end
@@ -121,30 +121,30 @@ end
 
 @testset "fixed-shape pdf" begin
     d1 = fixedshapepdf(x->exp.(-(x .* 4).^2), (-1, 2))
-    @test length(d1.p) == 0
+    @test length(collectpars(d1)) == 0
 end
 
 g(x) = exp.(-(x .* 4).^2)
 e(x) = exp.(-x)
-lims = (-1, 2)
+mylims = (-1, 2)
 # 
-sum0 = sumpdf(g,e,lims)
-pdf1 = fixedshapepdf(g, lims)
-pdf2 = fixedshapepdf(e, lims)
+sum0 = sumpdf(g,e,mylims)
+pdf1 = fixedshapepdf(g, mylims)
+pdf2 = fixedshapepdf(e, mylims)
 # 
 sum1 = sumpdf(pdf1, pdf2)
 sum2 = sumpdf(pdf1, pdf2, :xf)
 sum3 = sumpdf(pdf1, pdf2, 0.3)
 # 
-xr = lims[1]+rand()*(lims[2]-lims[1])
+xr = mylims[1]+rand()*(mylims[2]-mylims[1])
 
 @testset "sum pdf" begin
     # 
-    @test length(sum0.p) == 1
-    @test length(sum1.p) == 1
+    @test length(collectpars(sum0)) == 1
+    @test length(collectpars(sum1)) == 1
     @test sum0(xr) ≈ sum1(xr)
-    @test keys(sum2.p)[1] == :xf
-    @test length(sum3.p) == 0
+    @test keys(collectpars(sum2))[1] == :xf
+    @test length(collectpars(sum3)) == 0
 end
 
 @testset "example with sum pdf" begin
@@ -169,20 +169,19 @@ end
     d0 = pdf(@. (e;p)->e^2+p.a; p=(a=1.0,), lims=(-1,2))
 
     f = noparsf(d0)
-    xr = d0.lims[1]+rand()*(d0.lims[2]-d0.lims[1])
-    @test d0.f(xr;p=d0.p) ≈ f(xr)
+    xr = lims(d0)[1]+rand()*(lims(d0)[2]-lims(d0)[1])
+    @test func(d0,xr) ≈ f(xr)
     #
-    fn = noparsnormf(d::pdf; p=d.p) = (ns=integral(d;p=p); x->d.f(x;p=p)/ns)
     ananorm = ((8+1)/3+1.0*3)
     @test d0(xr) ≈ f(xr)/ananorm
 end
 
 sWeights_signal, sWeights_backgr = sWeights(pdf1, pdf2, 0.9)
-xv = range(pdf1.lims...,length=100)
+xv = range(lims(pdf1)...,length=100)
 sum_of_w = sWeights_signal(xv) + sWeights_backgr(xv)
 
 @testset "sWeights" begin
-    xv = range(pdf1.lims...,length=100)
+    xv = range(lims(pdf1)...,length=100)
     sum_of_w = sWeights_signal(xv) + sWeights_backgr(xv)
     @test prod(sum_of_w .- sum_of_w[30] .< 1e-10)
 end

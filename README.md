@@ -18,18 +18,17 @@ bkg *= (fb=2.5,)
 pdf_sum = snl + bkg
 
 # generating
-const data = generate(1000, pdf_sum; p=pdf_sum.p);
+const data = generate(1000, pdf_sum);
 
 # fitting
-pfr = v2p(fit_llh(data, pdf_sum;
-  init_pars=p2v(pdf_sum.p, pdf_sum)), pdf_sum)
+pfr = v2p(fit_llh(data, pdf_sum; init_pars=p2v(pdf_sum)), pdf_sum)
 
 # plotting
 let
   plot()
-  plot!(x->pdf_sum(x; p=pfr), pdf_sum.lims..., lab="fit")
-  plot!(x->snl(x; p=pfr, norm_according_to=pdf_sum), pdf_sum.lims..., lab="signal")
-  plot!(x->bkg(x; p=pfr, norm_according_to=pdf_sum), pdf_sum.lims..., lab="background")
+  plot!(x->pdf_sum(x; p=pfr), lims(pdf_sum)..., lab="fit")
+  plot!(x->snl(x; p=pfr, norm_according_to=pdf_sum), lims(pdf_sum)..., lab="signal")
+  plot!(x->bkg(x; p=pfr, norm_according_to=pdf_sum), lims(pdf_sum)..., lab="background")
   stephist!(data, norm=true, c=:black, bins=50, lab="data")
 end
 ```

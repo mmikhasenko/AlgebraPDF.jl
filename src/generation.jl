@@ -24,6 +24,6 @@ function rand(bD::binned1dDensity)
 end
 
 function generate(Nev::Int, d::pdf; p=d.p, Nbins=100)
-    bD = getbinned1dDensity(x->d.f(x; p=p), d.lims, Nbins)
+    bD = getbinned1dDensity(x->d.f(x; p=p), lims(d), Nbins)
     return [rand(bD) for _ in 1:Nev]
 end
