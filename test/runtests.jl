@@ -3,6 +3,26 @@ using StaticArrays
 using Test
 using SpecialFunctions
 
+@testset "Operations with parameters" begin
+    p0 = (μ = 1.1, σ = 2.2, f = 2.2)
+
+    sp = subtractpars(p0, (:μ, :σ))
+    @test keys(sp) == (:f,)
+    @test sp == subtractpars(p0, [:μ, :σ])
+    #
+    sp = selectpars(p0, (:μ, :σ))
+    @test keys(sp) == (:μ, :σ)
+    @test sp == selectpars(p0, [:μ, :σ])
+    #
+    up = updatepars(  p0, (μ = 3.1, σ = 5.2))
+    @test length(up) == 3
+    @test up.μ == 3.1
+    @test up.σ == 5.2
+    @test up.f == 2.2
+end
+
+# end
+
 @testset "Basic operations" begin
     BW(s, m, Γ) = 1 / (m^2 - s - 1im*m*Γ)
     #
@@ -63,15 +83,15 @@ end
     d0 = pdf(@. (e;p)->e^2+p.a; p0=(a=1.0,), lims=(-1,2))
     @test d0.f(1.0; p=d0.p0) == 2.0
     # 
-    d1 = fix_parameters(d0, (:a,))
+    d1 = fixpars(d0, (:a,))
     @test d1.p0 === NamedTuple()
     @test d1.f(1.0; p=d0.p0) == 2.0
     # 
-    d1′ = fix_parameters(d0, [:a])
+    d1′ = fixpars(d0, [:a])
     @test d1′.p0 === NamedTuple()
     @test d1′.f(1.0; p=d0.p0) == 2.0
     # 
-    d2 = fix_parameters(d0, (a=2,))
+    d2 = fixpars(d0, (a=2,))
     @test d2.p0 === NamedTuple()
     @test d2.f(1.0; p=d2.p0) == 3.0
 end
@@ -130,8 +150,8 @@ end
 @testset "example with sum pdf" begin
     # let
     #     plot(sum1, 2)
-    #     plot!(fix_parameters(sum1, (f=1,)))
-    #     plot!(fix_parameters(sum1, (f=0,)))
+    #     plot!(fixpars(sum1, (f=1,)))
+    #     plot!(fixpars(sum1, (f=0,)))
     # end
     ds = generate(5000, sum1)
     # histogram(ds, bins=50, norm=true)
@@ -139,8 +159,8 @@ end
     # 
     ft = fit_llh(ds,sum1; init_pars=[0.3])
     pfr = ft.minimizer
-    sum1_fit = fix_parameters(sum1, v2p(pfr,sum1))
-    # plot!(fix_parameters(sum1, v2p(pfr,sum1)), 1)
+    sum1_fit = fixpars(sum1, v2p(pfr,sum1))
+    # plot!(fixpars(sum1, v2p(pfr,sum1)), 1)
     println("δf = ", (pfr[1] - sum1.p0[1]) / sum1.p0[1])
     @test (pfr[1] - sum1.p0[1]) / sum1.p0[1] < 0.05
 end
@@ -182,11 +202,20 @@ end
     @test length(s) == 50
 end
 
+g1 = pdf(@. (x;p)->1/p.σ1*exp(-(x-p.μ1)^2/(2*p.σ1^2)); p0=(μ1= 2.1, σ1=0.7 ), lims=(-3, 3))
+g2 = pdf(@. (x;p)->1/p.σ2*exp(-(x-p.μ2)^2/(2*p.σ2^2)); p0=(μ2=-0.7, σ2=0.7 ), lims=(-3, 3))
+mm0 = MixedModel(SVector(g1, g2), (f1=0.33,))
+mm0 = MixedModel([g1, g2], (f1=0.33,))
+
+@testset "parameters of the mixed model" begin
+    @test length(collectpars(fixpars(mm0, (σ1=1.1,)))) == 4
+    @test length(collectpars(fixpars(mm0, (:σ1,)))) == 4
+    @test length(collectpars(fixpar(mm0, :σ1))) == 4
+    @test length(collectpars(fixpar(mm0, :σ1, 1.1))) == 4
+    #
+end
+
 @testset "Mixed Model" begin
-   
-    g1 = pdf(@. (x;p)->1/p.σ1*exp(-(x-p.μ1)^2/(2*p.σ1^2)); p0=(μ1= 2.1, σ1=0.7 ), lims=(-3, 3))
-    g2 = pdf(@. (x;p)->1/p.σ2*exp(-(x-p.μ2)^2/(2*p.σ2^2)); p0=(μ2=-0.7, σ2=0.7 ), lims=(-3, 3))
-    mm0 = MixedModel(SVector(g1, g2), (f1=0.33,))
 
     @test typeof(collectpars(mm0)) <: NamedTuple
     @test npars(mm0) == 5
@@ -198,4 +227,5 @@ end
     fr = fit_llh(sample, mm0, init_pars=p2v(mm0))
     pfr = v2p(fr.minimizer, mm0)
     @test abs(pfr.μ2 + 1.0) < 0.1 && abs(pfr.μ1 - 2.0) < 0.5
+    #
 end

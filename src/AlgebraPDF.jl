@@ -9,28 +9,29 @@ using StaticArrays
 #
 import Base: +, *, /
 
+export AdvancedFunction
 export ∅
+export pdf, npars, p2v, v2p
+export integral
+export fixpars, fixpar
+export fixedshapepdf
+export noparsf, noparsnormf
+export collectpars
+export subtractpars, selectpars, updatepars
+include("pdf.jl")
 
 export fit_llh, llh
 include("fit.jl")
 
-export pdf, npars, p2v, v2p
-export integral
-export fix_parameters
-export fixedshapepdf
-export noparsf, noparsnormf
-export collectpars
-include("pdf.jl")
-
 export MixedModel
-export update_namedtuple
 export fractions
 include("mixedmodel.jl")
 
 export generate
 include("generation.jl")
 
-export conv_with_gauss, conv_with_gauss_sampling
+export conv_with_gauss
+export conv_with_gauss_sampling
 include("convolution.jl")
 
 export sumpdf

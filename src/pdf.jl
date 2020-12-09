@@ -1,6 +1,19 @@
-∅ = NamedTuple()
+abstract type AdvancedFunction end
 
-@with_kw struct pdf
+∅ = NamedTuple()
+collectpars(f::Function) = ∅
+# properties
+npars(d::T where T<:AdvancedFunction) = length(collectpars(d))
+v2p(v,d::T where T<:AdvancedFunction) = NamedTuple{keys(collectpars(d))}(v)
+p2v(p,d::T where T<:AdvancedFunction) = [getproperty(p, k) for k in keys(collectpars(d))]
+p2v(  d::T where T<:AdvancedFunction) = p2v(collectpars(d), d)
+
+fixpars(d::T where T<:AdvancedFunction, symb::T where T<:Union{Tuple,Array{Symbol}}) =
+        fixpars(d, selectpars(collectpars(d), symb))
+fixpar(d::T where T<:AdvancedFunction, symb::Symbol) =  fixpars(d, (symb,))
+fixpar(d::T where T<:AdvancedFunction, symb::Symbol, value::Float64) =
+        fixpars(d, NamedTuple{(symb,)}(value))
+@with_kw struct pdf <: AdvancedFunction
     f::Function
     lims::Tuple{Real,Real}
     xdim::Int = 1
@@ -10,52 +23,59 @@ end
 # consructors
 pdf(f,p0,lims) = pdf(;f=f,lims=lims,p0=p0)
 pdf(f;p0,lims) = pdf(;f=f,lims=lims,p0=p0)
+fixedshapepdf(f, lims) = pdf((x;p=∅)->f(x); lims=lims, p0=∅)
 #
-collectpars(f::Function) = ∅
-
+#
+lims(d::pdf) = d.lims
 collectpars(d::pdf) = d.p0
-
-integral(d::pdf; p=d.p0) = quadgk(x->d.f(x; p=p), d.lims...)[1]
+func(d,x; p=collectpars(d)) = d.f(x;p=p)
+# 
+normalizationintegral(d::pdf; p=collectpars(d)) = quadgk(x->func(d,x; p=p), lims(d)...)[1]
+integral(d::pdf, lims; p=collectpars(d)) =
+        quadgk(x->func(d,x; p=p), lims...)[1] / normalizationintegral(d; p=p)
+# 
 
 # calls
-function (d::pdf)(x; p=d.p0, norm_according_to=d)
-    normalization = integral(norm_according_to; p=p)
+function (d::pdf)(x; p=collectpars(d), norm_according_to=d)
+    normalization = normalizationintegral(norm_according_to; p=p)
     normalization ≈ 0.0 && error("norm = 0 with p = $(p)!")
-    return d.f(x; p=p) / normalization
+    return func(d,x; p=p) / normalization
 end
 (d::pdf)(x, v) = d(x; p=v2p(v,d))
 
-# properties
-npars(d) = length(collectpars(d))
-v2p(v,d) = NamedTuple{keys(collectpars(d))}(v)
-p2v(p,d) = [getproperty(p, k) for k in keys(collectpars(d))]
-p2v(  d) = p2v(collectpars(d), d)
-
-
 # operation
 *(c, d::pdf) = *(d::pdf, c) # commutation
-*(d::pdf, c::NamedTuple) = pdf((x;p=∅)->d.f(x;p=p) * getproperty(p, keys(c)[1]);
-        p0 = merge(c, d.p0), lims = d.lims)
-*(d::pdf, c::Number) = pdf((x;p=∅)->d.f(x;p=p) * c;
-        p0 = d.p0, lims = d.lims)
+*(d::pdf, c::NamedTuple) = pdf((x;p=∅)->func(d,x;p=p) * getproperty(p, keys(c)[1]);
+        p0 = merge(c, collectpars(d)), lims = lims(d))
+*(d::pdf, c::Number) = pdf((x;p=∅)->func(d,x;p=p) * c;
+        p0 = collectpars(d), lims = lims(d))
 *(d1::pdf, d2::pdf) = pdf((x;p=∅)->d1.f(x;p=p) .* d2.f(x;p=p);
         p0 = merge(d1.p0, d2.p0), lims = d1.lims)
 #
 /(d1::pdf, d2::pdf) = pdf((x;p=∅)->d1.f(x;p=p) ./ d2.f(x;p=p);
     p0 = merge(d1.p0, d2.p0), lims = d1.lims)
 # 
-+(c::NamedTuple, d::pdf) = pdf((x;p=∅)->d.f(x;p=p) + getproperty(p,keys(c)[1]);
-        p0 = merge(c, d.p0), lims = d.lims)
++(c::NamedTuple, d::pdf) = pdf((x;p=∅)->func(d,x;p=p) + getproperty(p,keys(c)[1]);
+        p0 = merge(c, collectpars(d)), lims = lims(d))
 # pdf + pdf
 +(d1::pdf, d2::pdf) = pdf((x;p=∅)->d1.f(x;p=p) + d2.f(x;p=p);
         p0 = merge(d1.p0, d2.p0), lims = d1.lims)
 #
 # fix parameters
-fix_parameters(d::pdf, values::NamedTuple) = pdf((e;p=∅)->d.f(e;p=merge(p,values)); p0=Base.structdiff(d.p0, values), lims=d.lims)
-fix_parameters(d::pdf, symb::T where T<:Union{Tuple,Array{Symbol}}) = fix_parameters(d, NamedTuple{Tuple(symb)}(getproperty.(Ref(d.p0),symb)))
-#
-fixedshapepdf(f, lims) = pdf((x;p=∅)->f(x); lims=lims, p0=∅)
 
+subtractpars(p, symb) = Base.structdiff(p, selectpars(p, symb))
+selectpars(  p, symb) = NamedTuple{Tuple(symb)}(getproperty.(Ref(p), symb))
+selectintersect(p, from_p) = selectpars(from_p, intersect(keys(p), keys(from_p)))
+updatepars(  p, from_p) = merge(p, selectintersect(p, from_p))
+# NamedTuple{Tuple(keys(p))}(
+#         [hasproperty(from_p, s) ? getproperty(from_p, s) : getproperty(p, s) for s in keys(p)])
+# 
+fixpars(d::pdf, pars::NamedTuple) =
+    (pars == ∅) ? d : pdf((e;p=∅)->func(d,e; p=merge(p,pars));
+        p0=subtractpars(collectpars(d), keys(pars)), lims=lims(d))
 #
-noparsf(d::pdf; p=d.p0) = (x;kw...)->d.f(x;p=p)
-noparsnormf(d::pdf; p=d.p0) = (ns=integral(d;p=p); (x;kw...)->d.f(x;p=p)/ns)
+noparsf(d::pdf; p=collectpars(d)) = (x;kw...)->func(d,x;p=p)
+noparsnormf(d::pdf; p=collectpars(d)) = (ns=normalizationintegral(d;p=p); (x;kw...)->func(d,x;p=p)/ns)
+
+
+intersect((:p1,:p2,:a), (:a,:b))

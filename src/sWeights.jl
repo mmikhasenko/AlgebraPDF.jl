@@ -6,7 +6,7 @@ function Wmatrix(dS, dB, f, lims)
 end
 
 function Wmatrix(pdfS::pdf, pdfB::pdf, f)
-    nS,nB = integral(pdfS),integral(pdfB)
+    nS,nB = normalizationintegral(pdfS),normalizationintegral(pdfB)
     dS = noparsnormf(pdfS)
     dB = noparsnormf(pdfB)
     #
@@ -21,7 +21,7 @@ Returns a pair of functions of the discriminating variable `(sWeights_snl(x), sW
 """
 function sWeights(pdfS::pdf, pdfB::pdf, fraction_of_signal::T where T<:Real)
     ds = sumpdf(pdfS, pdfB, :_f1_sW)
-    ds0 = fix_parameters(ds, (_f1_sW=fraction_of_signal,))
+    ds0 = fixpars(ds, (_f1_sW=fraction_of_signal,))
     # 
     Wm = Wmatrix(pdfS, pdfB, noparsf(ds0))
     αm = inv(Wm)
@@ -29,10 +29,10 @@ function sWeights(pdfS::pdf, pdfB::pdf, fraction_of_signal::T where T<:Real)
     αS = αm[:,1] ./ abs(sum(αm[:,1]))
     αB = αm[:,2] ./ abs(sum(αm[:,2]))
     # 
-    numerator_snl = fix_parameters(ds, (_f1_sW=αS[1],))
+    numerator_snl = fixpars(ds, (_f1_sW=αS[1],))
     sWeights_snl = numerator_snl / ds0 * fraction_of_signal
     # 
-    numerator_bgd = fix_parameters(ds, (_f1_sW=αB[1],))
+    numerator_bgd = fixpars(ds, (_f1_sW=αB[1],))
     sWeights_bgd = numerator_bgd / ds0 * (1-fraction_of_signal)
     # 
     return (sWeights_snl.f, sWeights_bgd.f)
