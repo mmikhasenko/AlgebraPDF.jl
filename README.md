@@ -12,17 +12,17 @@ pyplot()
 theme(:wong)
 
 # create a model
-snl = pdf(@. (x;p) -> exp(-(x-p.μ)^2/(2*p.σ^2)); p0 = (μ=1.4, σ=0.15), lims=(0, 3))
-bkg = pdf(@. (x;p) -> sqrt(x)*exp(-p.α*x); p0 = (α=1.3,), lims=(0, 3))
+snl = pdf(@. (x;p) -> exp(-(x-p.μ)^2/(2*p.σ^2)); p = (μ=1.4, σ=0.15), lims=(0, 3))
+bkg = pdf(@. (x;p) -> sqrt(x)*exp(-p.α*x); p = (α=1.3,), lims=(0, 3))
 bkg *= (fb=2.5,)
 pdf_sum = snl + bkg
 
 # generating
-const data = generate(1000, pdf_sum; p=pdf_sum.p0);
+const data = generate(1000, pdf_sum; p=pdf_sum.p);
 
 # fitting
 pfr = v2p(fit_llh(data, pdf_sum;
-  init_pars=p2v(pdf_sum.p0, pdf_sum)), pdf_sum)
+  init_pars=p2v(pdf_sum.p, pdf_sum)), pdf_sum)
 
 # plotting
 let

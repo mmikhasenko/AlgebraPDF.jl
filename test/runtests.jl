@@ -4,17 +4,17 @@ using Test
 using SpecialFunctions
 
 @testset "Operations with parameters" begin
-    p0 = (μ = 1.1, σ = 2.2, f = 2.2)
+    p = (μ = 1.1, σ = 2.2, f = 2.2)
 
-    sp = subtractpars(p0, (:μ, :σ))
+    sp = subtractpars(p, (:μ, :σ))
     @test keys(sp) == (:f,)
-    @test sp == subtractpars(p0, [:μ, :σ])
+    @test sp == subtractpars(p, [:μ, :σ])
     #
-    sp = selectpars(p0, (:μ, :σ))
+    sp = selectpars(p, (:μ, :σ))
     @test keys(sp) == (:μ, :σ)
-    @test sp == selectpars(p0, [:μ, :σ])
+    @test sp == selectpars(p, [:μ, :σ])
     #
-    up = updatepars(  p0, (μ = 3.1, σ = 5.2))
+    up = updatepars(  p, (μ = 3.1, σ = 5.2))
     @test length(up) == 3
     @test up.μ == 3.1
     @test up.σ == 5.2
@@ -27,19 +27,19 @@ end
     BW(s, m, Γ) = 1 / (m^2 - s - 1im*m*Γ)
     #
     pdf1 = pdf(@. (e;p)->abs2(BW(e^2, p.m1, p.Γ1));
-        p0 = (m1=0.25, Γ1=2e-3), lims = (0, 0.15))
+        p = (m1=0.25, Γ1=2e-3), lims = (0, 0.15))
     #
     @test pdf1(rand()) != 0.0
     @test length(pdf1(rand(10))) == 10
     #
     pdf2 = pdf(@. (e;p)->abs2(BW(e^2, p.m2, p.Γ2));
-        p0 = (m2=0.1, Γ2=14e-3), lims = (0, 0.15))
+        p = (m2=0.1, Γ2=14e-3), lims = (0, 0.15))
     #
     x0 = 1.1; v0 = rand(2)
     @test pdf2(x0, v0) == pdf2(x0; p=v2p(v0, pdf2))
     #
     pdf2 *= (f2=3.0,)
-    @test length(pdf2.p0) == 3
+    @test length(pdf2.p) == 3
     #
     pdf_sum = pdf1 + pdf2
     @test npars(pdf_sum) == 5
@@ -65,63 +65,63 @@ end
     nconv(e) = conv_with_gauss(e, x->x>0, σ0)
     @test df(nconv, aconv, (-1, 1); Ns=1000) < 0.01
     #
-    step = pdf(@. (e;p)->e>0; p0=NamedTuple(), lims=(-1,1))
+    step = pdf(@. (e;p)->e>0; p=NamedTuple(), lims=(-1,1))
     smeared_step = conv_with_gauss(step, σ0)
-    nconv(e) = smeared_step.f(e; p=smeared_step.p0)
+    nconv(e) = smeared_step.f(e; p=smeared_step.p)
     @test df(nconv, aconv, (-1, 1); Ns=1000) < 0.01
     # 
     smeared_step_sampling = conv_with_gauss_sampling(step, σ0; Ns=50)
-    nconv(e) = smeared_step_sampling.f(e; p=smeared_step_sampling.p0)
+    nconv(e) = smeared_step_sampling.f(e; p=smeared_step_sampling.p)
     @test df(nconv, aconv, (-1, 1); Ns=1000) < 0.01
     # 
     smeared_step_sampling = conv_with_gauss_sampling(step, σ0; Ns=10)
-    nconv(e) = smeared_step_sampling.f(e; p=smeared_step_sampling.p0)
+    nconv(e) = smeared_step_sampling.f(e; p=smeared_step_sampling.p)
     @test 0.01 < df(nconv, aconv, (-1, 1); Ns=1000) < 0.04
 end
 
 @testset "fix parameters example" begin
-    d0 = pdf(@. (e;p)->e^2+p.a; p0=(a=1.0,), lims=(-1,2))
-    @test d0.f(1.0; p=d0.p0) == 2.0
+    d0 = pdf(@. (e;p)->e^2+p.a; p=(a=1.0,), lims=(-1,2))
+    @test d0.f(1.0; p=d0.p) == 2.0
     # 
     d1 = fixpars(d0, (:a,))
-    @test d1.p0 === NamedTuple()
-    @test d1.f(1.0; p=d0.p0) == 2.0
+    @test d1.p === NamedTuple()
+    @test d1.f(1.0; p=d0.p) == 2.0
     # 
     d1′ = fixpars(d0, [:a])
-    @test d1′.p0 === NamedTuple()
-    @test d1′.f(1.0; p=d0.p0) == 2.0
+    @test d1′.p === NamedTuple()
+    @test d1′.f(1.0; p=d0.p) == 2.0
     # 
     d2 = fixpars(d0, (a=2,))
-    @test d2.p0 === NamedTuple()
-    @test d2.f(1.0; p=d2.p0) == 3.0
+    @test d2.p === NamedTuple()
+    @test d2.f(1.0; p=d2.p) == 3.0
 end
 
 @testset "example of usage" begin
     # tests
-    snl = pdf(@. (x;p) -> exp(-(x-p.μ)^2/(2*p.σ^2)); p0 = (μ=1.4, σ=0.15), lims=(0, 3))
-    bkg = pdf(@. (x;p) -> sqrt(x)*exp(-p.α*x); p0 = (α=1.3,), lims=(0, 3))
+    snl = pdf(@. (x;p) -> exp(-(x-p.μ)^2/(2*p.σ^2)); p = (μ=1.4, σ=0.15), lims=(0, 3))
+    bkg = pdf(@. (x;p) -> sqrt(x)*exp(-p.α*x); p = (α=1.3,), lims=(0, 3))
     bkg *= (fb=2.5,)
     pdf_sum = snl + bkg
     
     # generating
-    data = generate(10000, pdf_sum; p=pdf_sum.p0);
+    data = generate(10000, pdf_sum; p=pdf_sum.p);
     @test length(data) == 10000
     
     # fitting
-    fr = fit_llh(data, pdf_sum; init_pars=p2v(pdf_sum.p0, pdf_sum))
+    fr = fit_llh(data, pdf_sum; init_pars=p2v(pdf_sum.p, pdf_sum))
     pfr = v2p(fr.minimizer, pdf_sum)
     @test length(pfr) == 4
 end
 
 @testset "parameters to values" begin
-    d = pdf(@. (e;p)->e^2+p.a; p0=(a=1.0,), lims=(-1,2))
+    d = pdf(@. (e;p)->e^2+p.a; p=(a=1.0,), lims=(-1,2))
     @test p2v(d) == [1.0]
     @test p2v((a=3.0,), d) == [3.0]
 end
 
 @testset "fixed-shape pdf" begin
     d1 = fixedshapepdf(x->exp.(-(x .* 4).^2), (-1, 2))
-    @test length(d1.p0) == 0
+    @test length(d1.p) == 0
 end
 
 g(x) = exp.(-(x .* 4).^2)
@@ -140,11 +140,11 @@ xr = lims[1]+rand()*(lims[2]-lims[1])
 
 @testset "sum pdf" begin
     # 
-    @test length(sum0.p0) == 1
-    @test length(sum1.p0) == 1
+    @test length(sum0.p) == 1
+    @test length(sum1.p) == 1
     @test sum0(xr) ≈ sum1(xr)
-    @test keys(sum2.p0)[1] == :xf
-    @test length(sum3.p0) == 0
+    @test keys(sum2.p)[1] == :xf
+    @test length(sum3.p) == 0
 end
 
 @testset "example with sum pdf" begin
@@ -161,18 +161,18 @@ end
     pfr = ft.minimizer
     sum1_fit = fixpars(sum1, v2p(pfr,sum1))
     # plot!(fixpars(sum1, v2p(pfr,sum1)), 1)
-    println("δf = ", (pfr[1] - sum1.p0[1]) / sum1.p0[1])
-    @test (pfr[1] - sum1.p0[1]) / sum1.p0[1] < 0.05
+    println("δf = ", (pfr[1] - sum1.p[1]) / sum1.p[1])
+    @test (pfr[1] - sum1.p[1]) / sum1.p[1] < 0.05
 end
 
 @testset "no-parameters f and no-parameters normalized f" begin
-    d0 = pdf(@. (e;p)->e^2+p.a; p0=(a=1.0,), lims=(-1,2))
+    d0 = pdf(@. (e;p)->e^2+p.a; p=(a=1.0,), lims=(-1,2))
 
     f = noparsf(d0)
     xr = d0.lims[1]+rand()*(d0.lims[2]-d0.lims[1])
-    @test d0.f(xr;p=d0.p0) ≈ f(xr)
+    @test d0.f(xr;p=d0.p) ≈ f(xr)
     #
-    fn = noparsnormf(d::pdf; p=d.p0) = (ns=integral(d;p=p); x->d.f(x;p=p)/ns)
+    fn = noparsnormf(d::pdf; p=d.p) = (ns=integral(d;p=p); x->d.f(x;p=p)/ns)
     ananorm = ((8+1)/3+1.0*3)
     @test d0(xr) ≈ f(xr)/ananorm
 end
@@ -189,8 +189,8 @@ end
 
 @testset "cross-product PDF" begin
     # test
-    pdf1 = pdf((x;p)->x.^2; lims=(-1,2), p0=∅)
-    pdf2 = pdf((x;p)->x.^4; lims=(-1,2), p0=∅)
+    pdf1 = pdf((x;p)->x.^2; lims=(-1,2), p=∅)
+    pdf2 = pdf((x;p)->x.^4; lims=(-1,2), p=∅)
     X = xProductPDF(x=pdf1, y=pdf2)
     s = generate(100, X)
     # 
@@ -202,8 +202,8 @@ end
     @test length(s) == 50
 end
 
-g1 = pdf(@. (x;p)->1/p.σ1*exp(-(x-p.μ1)^2/(2*p.σ1^2)); p0=(μ1= 2.1, σ1=0.7 ), lims=(-3, 3))
-g2 = pdf(@. (x;p)->1/p.σ2*exp(-(x-p.μ2)^2/(2*p.σ2^2)); p0=(μ2=-0.7, σ2=0.7 ), lims=(-3, 3))
+g1 = pdf(@. (x;p)->1/p.σ1*exp(-(x-p.μ1)^2/(2*p.σ1^2)); p=(μ1= 2.1, σ1=0.7 ), lims=(-3, 3))
+g2 = pdf(@. (x;p)->1/p.σ2*exp(-(x-p.μ2)^2/(2*p.σ2^2)); p=(μ2=-0.7, σ2=0.7 ), lims=(-3, 3))
 mm0 = MixedModel(SVector(g1, g2), (f1=0.33,))
 mm0 = MixedModel([g1, g2], (f1=0.33,))
 

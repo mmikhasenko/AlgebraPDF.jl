@@ -7,7 +7,7 @@ function sumpdf(f1,f2,lims)
     n2 = quadgk(f2,lims...)[1]
     fracsym = randfractionsymbol()
     d = pdf((x;p)->getproperty(p,fracsym)*f1(x)/n1 + (1-getproperty(p,fracsym))*f2(x)/n2;
-        lims=lims, p0= NamedTuple{(fracsym,)}(0.5))
+        lims=lims, p= NamedTuple{(fracsym,)}(0.5))
     return d
 end
 
@@ -17,7 +17,7 @@ function sumpdf(d1::pdf, d2::pdf, sfS::Symbol=randfractionsymbol())
     n2 = normalizationintegral(d2)
     d = pdf(
         (x;p)->getproperty(p, sfS) .* d1.f(x;p=p) ./ n1 + (1-getproperty(p, sfS)) .* d2.f(x;p=p) ./ n2;
-        lims=d1.lims, p0=merge(d1.p0, d2.p0, NamedTuple{(sfS,)}(0.5)))
+        lims=d1.lims, p=merge(d1.p, d2.p, NamedTuple{(sfS,)}(0.5)))
     return d
 end
 
@@ -27,7 +27,7 @@ function sumpdf(d1::pdf, d2::pdf, f1::Float64)
     n2 = normalizationintegral(d2)
     d = pdf(
         (x;p)->f1 .* d1.f(x;p=p) ./ n1 + (1-f1) .* d2.f(x;p=p) ./ n2;
-        lims=d1.lims, p0=merge(d1.p0, d2.p0))
+        lims=d1.lims, p=merge(d1.p, d2.p))
     return d
 end
 

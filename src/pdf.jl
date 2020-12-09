@@ -17,17 +17,17 @@ fixpar(d::T where T<:AdvancedFunction, symb::Symbol, value::Float64) =
     f::Function
     lims::Tuple{Real,Real}
     xdim::Int = 1
-    p0::NamedTuple
+    p::NamedTuple
 end
 #
 # consructors
-pdf(f,p0,lims) = pdf(;f=f,lims=lims,p0=p0)
-pdf(f;p0,lims) = pdf(;f=f,lims=lims,p0=p0)
-fixedshapepdf(f, lims) = pdf((x;p=∅)->f(x); lims=lims, p0=∅)
+pdf(f,p,lims) = pdf(;f=f,lims=lims,p=p)
+pdf(f;p,lims) = pdf(;f=f,lims=lims,p=p)
+fixedshapepdf(f, lims) = pdf((x;p=∅)->f(x); lims=lims, p=∅)
 #
 #
 lims(d::pdf) = d.lims
-collectpars(d::pdf) = d.p0
+collectpars(d::pdf) = d.p
 func(d,x; p=collectpars(d)) = d.f(x;p=p)
 # 
 normalizationintegral(d::pdf; p=collectpars(d)) = quadgk(x->func(d,x; p=p), lims(d)...)[1]
@@ -46,20 +46,20 @@ end
 # operation
 *(c, d::pdf) = *(d::pdf, c) # commutation
 *(d::pdf, c::NamedTuple) = pdf((x;p=∅)->func(d,x;p=p) * getproperty(p, keys(c)[1]);
-        p0 = merge(c, collectpars(d)), lims = lims(d))
+        p = merge(c, collectpars(d)), lims = lims(d))
 *(d::pdf, c::Number) = pdf((x;p=∅)->func(d,x;p=p) * c;
-        p0 = collectpars(d), lims = lims(d))
+        p = collectpars(d), lims = lims(d))
 *(d1::pdf, d2::pdf) = pdf((x;p=∅)->d1.f(x;p=p) .* d2.f(x;p=p);
-        p0 = merge(d1.p0, d2.p0), lims = d1.lims)
+        p = merge(d1.p, d2.p), lims = d1.lims)
 #
 /(d1::pdf, d2::pdf) = pdf((x;p=∅)->d1.f(x;p=p) ./ d2.f(x;p=p);
-    p0 = merge(d1.p0, d2.p0), lims = d1.lims)
+    p = merge(d1.p, d2.p), lims = d1.lims)
 # 
 +(c::NamedTuple, d::pdf) = pdf((x;p=∅)->func(d,x;p=p) + getproperty(p,keys(c)[1]);
-        p0 = merge(c, collectpars(d)), lims = lims(d))
+        p = merge(c, collectpars(d)), lims = lims(d))
 # pdf + pdf
 +(d1::pdf, d2::pdf) = pdf((x;p=∅)->d1.f(x;p=p) + d2.f(x;p=p);
-        p0 = merge(d1.p0, d2.p0), lims = d1.lims)
+        p = merge(d1.p, d2.p), lims = d1.lims)
 #
 # fix parameters
 
@@ -72,7 +72,7 @@ updatepars(  p, from_p) = merge(p, selectintersect(p, from_p))
 # 
 fixpars(d::pdf, pars::NamedTuple) =
     (pars == ∅) ? d : pdf((e;p=∅)->func(d,e; p=merge(p,pars));
-        p0=subtractpars(collectpars(d), keys(pars)), lims=lims(d))
+        p=subtractpars(collectpars(d), keys(pars)), lims=lims(d))
 #
 noparsf(d::pdf; p=collectpars(d)) = (x;kw...)->func(d,x;p=p)
 noparsnormf(d::pdf; p=collectpars(d)) = (ns=normalizationintegral(d;p=p); (x;kw...)->func(d,x;p=p)/ns)
