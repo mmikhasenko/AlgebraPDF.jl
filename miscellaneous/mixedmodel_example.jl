@@ -1,12 +1,12 @@
 using AlgebraPDF
 using Plots
-using TypedTables
+# using TypedTables
 using StaticArrays
 theme(:wong2)
-#                  
-g1 = pdf(@. (x;p)->1/p.σ1*exp(-(x-p.μ1)^2/(2*p.σ1^2)); p=(μ1= 2.1, σ1=0.7 ), lims=(-3, 3))
-g2 = pdf(@. (x;p)->1/p.σ2*exp(-(x-p.μ2)^2/(2*p.σ2^2)); p=(μ2=-0.7, σ2=0.7 ), lims=(-3, 3))
-g3 = pdf(@. (x;p)->1/p.σ3*exp(-(x-p.μ3)^2/(2*p.σ3^2)); p=(μ3= 0.3, σ3=0.1), lims=(-3, 3))
+#
+g1 = aGauss((μ1= 2.1, σ1=0.7), (-3, 3))
+g2 = aGauss((μ2=-0.7, σ2=0.7), (-3, 3))
+g3 = aGauss((μ3= 0.3, σ3=0.1), (-3, 3))
 # 
 mm0 = MixedModel(SVector(g1, g2, g3), (f1=0.33,f2=0.6))
 
