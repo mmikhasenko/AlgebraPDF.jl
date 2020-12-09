@@ -12,7 +12,7 @@ import Base: +, *, /
 export AdvancedFunction
 export ∅
 export pdf, npars, p2v, v2p
-export integral
+export integral, integrals
 export fixpars, fixpar
 export fixedshapepdf
 export noparsf, noparsnormf

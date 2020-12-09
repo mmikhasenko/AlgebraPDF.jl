@@ -16,7 +16,7 @@ function func(mm::MixedModel,x;p)
     ! prod(iszero, isnan.(v)) &&  @show p#, v
     return v
 end
-function integrals(mm::MixedModel, lims; p=collectpars(d))
+function integrals(mm::MixedModel, lims; p=collectpars(mm))
     fracs = fractions(mm; p=p)
     ints = integral.(mm.components, Ref(lims); p=p)
     return ints .* fracs
