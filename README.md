@@ -12,7 +12,7 @@ pyplot()
 theme(:wong)
 
 # create a model
-snl = pdf(@. (x;p) -> exp(-(x-p.μ)^2/(2*p.σ^2)); p = (μ=1.4, σ=0.15), lims=(0, 3))
+snl = aGauss((μ=1.4, σ=0.15), (0, 3))
 bkg = pdf(@. (x;p) -> sqrt(x)*exp(-p.α*x); p = (α=1.3,), lims=(0, 3))
 bkg *= (fb=2.5,)
 pdf_sum = snl + bkg
@@ -34,9 +34,3 @@ end
 ```
 ![example](plots/gaus.background.png)
 
-
-# Todo:
- - fixing parameters
- - convolution
- - perhaps, add basic function: `gaus`, `BW`, `polN`
- - add documentation
