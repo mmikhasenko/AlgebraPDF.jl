@@ -1,0 +1,1 @@
+inrange(x,r) = r[1]<x<r[2]

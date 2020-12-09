@@ -21,8 +21,6 @@ using SpecialFunctions
     @test up.f == 2.2
 end
 
-# end
-
 @testset "Basic operations" begin
     BW(s, m, Γ) = 1 / (m^2 - s - 1im*m*Γ)
     #
@@ -108,7 +106,7 @@ end
     @test length(data) == 10000
     
     # fitting
-    fr = fit_llh(data, pdf_sum; init_pars=p2v(collectpars(pdf_sum), pdf_sum))
+    fr = fit_llh(data, pdf_sum)
     pfr = v2p(fr.minimizer, pdf_sum)
     @test length(pfr) == 4
 end
@@ -148,19 +146,10 @@ xr = mylims[1]+rand()*(mylims[2]-mylims[1])
 end
 
 @testset "example with sum pdf" begin
-    # let
-    #     plot(sum1, 2)
-    #     plot!(fixpars(sum1, (f=1,)))
-    #     plot!(fixpars(sum1, (f=0,)))
-    # end
     ds = generate(5000, sum1)
-    # histogram(ds, bins=50, norm=true)
-    # plot!(sum1)
-    # 
     ft = fit_llh(ds,sum1; init_pars=[0.3])
     pfr = ft.minimizer
     sum1_fit = fixpars(sum1, v2p(pfr,sum1))
-    # plot!(fixpars(sum1, v2p(pfr,sum1)), 1)
     println("δf = ", (pfr[1] - sum1.p[1]) / sum1.p[1])
     @test (pfr[1] - sum1.p[1]) / sum1.p[1] < 0.05
 end
@@ -228,11 +217,22 @@ end
     #
 end
 
-@testset "Densities" begin
+@testset "ensities" begin
     pdf1 = aGauss((mΩb = 6030, σ=17.0), (5600, 6400))
     @test collectpars(pdf1) === (mΩb = 6030, σ=17.0)
     pdf2 = aBreitWigner((mΩb = 6030, Γ=17.0), (5600, 6400))
     @test collectpars(pdf2) === (mΩb = 6030, Γ=17.0)
     pdf3 = aExp((τ = -1.1,), (-2, 2))
     @test collectpars(pdf3) === (τ = -1.1,)
+    # 
+    pdf4 = aDoubleGaussFixedRatio((m = 0.77, Γ=0.15), (0, 1.0); fixpars=(r=0.8,n=3))
+    @test pdf4(0.77) != 0.0
+    pdf5 = aBreitWignerConvGauss((m = 0.77, Γ=0.15), (0, 1.0); fixpars=(σ=0.03,))
+    @test pdf5(0.77) != 0.0
+    # 
+    xv = range(-π, 2π, length=40)
+    yv = map(x->x*cos(3x) - 3*sin(x), xv)
+    pdf6 = aTabulated(xv,yv,(-π,π))
+    @test length(collectpars(pdf6)) == 0
+    @test pdf6(1.1) != 0.0
 end

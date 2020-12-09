@@ -6,6 +6,7 @@ using Optim
 using Random
 using RecipesBase
 using StaticArrays
+using Interpolations
 #
 import Base: +, *, /
 
@@ -46,7 +47,12 @@ export xProductPDF
 include("multidim.jl")
 
 export aGauss, aBreitWigner, aExp
+export aDoubleGaussFixedRatio
+export aBreitWignerConvGauss
+export aTabulated
 include("densities.jl")
 
+export inrange
+include("utils.jl")
 
 end # module
