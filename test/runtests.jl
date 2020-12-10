@@ -235,4 +235,5 @@ end
     pdf6 = aTabulated(xv,yv,(-π,π))
     @test length(collectpars(pdf6)) == 0
     @test pdf6(1.1) != 0.0
+    @test pdf6(3π) == 0.0
 end

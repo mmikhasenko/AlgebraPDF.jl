@@ -36,5 +36,7 @@ end
 
 function aTabulated(xv,yv,lims)
     itr = interpolate((xv,), yv, Gridded(Linear()))
-    fixedshapepdf(x->itr.(x), lims)
+    tlims = (xv[1],xv[end])
+    f(x) = inrange(x,tlims) ? itr(x) : 0.0
+    fixedshapepdf(x->f.(x), lims)
 end
