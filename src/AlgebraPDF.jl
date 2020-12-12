@@ -7,8 +7,13 @@ using Random
 using RecipesBase
 using StaticArrays
 using Interpolations
+using ForwardDiff
+using LinearAlgebra
 #
 import Base: +, *, /
+
+import Optim: minimizer, minimum
+import ForwardDiff: hessian
 
 export AdvancedFunction
 export ∅
@@ -22,6 +27,8 @@ export subtractpars, selectpars, updatepars
 include("pdf.jl")
 
 export fit_llh, llh
+export hessian, errors, cov, invH, errors, invexacthessian
+export minimizer, minimum
 include("fit.jl")
 
 export MixedModel

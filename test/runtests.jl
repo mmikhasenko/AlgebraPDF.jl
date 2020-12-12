@@ -107,8 +107,19 @@ end
     
     # fitting
     fr = fit_llh(data, pdf_sum)
-    pfr = v2p(fr.minimizer, pdf_sum)
+    pfr = v2p(minimizer(fr), pdf_sum)
     @test length(pfr) == 4
+    # 
+    @test minimum(fr) ≤ llh(data, pdf_sum)
+    # 
+    invH_bfgs = invH(fr)
+    @test size(invH_bfgs) == (4,4)
+    @test cov(fr) == invH_bfgs
+    @test length(errors(fr)) == 4
+    # 
+    invH_fd = invexacthessian(fr)
+    rel_error_max = max((abs.(invH_bfgs .- invH_fd) ./ abs.(invH_fd))...)
+    @test rel_error_max < 5e-2 # 5%
 end
 
 @testset "parameters to values" begin
@@ -237,3 +248,5 @@ end
     @test pdf6(1.1) != 0.0
     @test pdf6(3π) == 0.0
 end
+
+
