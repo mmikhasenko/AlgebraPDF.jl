@@ -159,7 +159,7 @@ end
 @testset "example with sum pdf" begin
     ds = generate(5000, sum1)
     ft = fit_llh(ds,sum1; init_pars=[0.3])
-    pfr = ft.minimizer
+    pfr = minimizer(ft)
     sum1_fit = fixpars(sum1, v2p(pfr,sum1))
     println("δf = ", (pfr[1] - sum1.p[1]) / sum1.p[1])
     @test (pfr[1] - sum1.p[1]) / sum1.p[1] < 0.05
@@ -223,7 +223,7 @@ end
     sample = filter(x->-3<x<3, sample)
     # 
     fr = fit_llh(sample, mm0, init_pars=p2v(mm0))
-    pfr = v2p(fr.minimizer, mm0)
+    pfr = v2p(minimizer(fr), mm0)
     @test abs(pfr.μ2 + 1.0) < 0.1 && abs(pfr.μ1 - 2.0) < 0.5
     #
 end
