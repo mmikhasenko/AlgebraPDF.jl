@@ -249,4 +249,7 @@ end
     @test pdf6(3π) == 0.0
 end
 
-
+@testset "plotting" begin
+    scaletobinneddata(10,(0,1),10) ≈ 1.0
+    scaletobinneddata(10, range(0,1,length=11)) ≈ 1.0
+end

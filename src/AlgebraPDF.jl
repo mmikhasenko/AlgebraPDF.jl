@@ -45,6 +45,7 @@ include("convolution.jl")
 export sumpdf
 include("sumpdf.jl")
 
+export scaletobinneddata
 include("plottingrecipe.jl")
 
 export sWeights

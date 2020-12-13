@@ -4,3 +4,5 @@
     return (xv, norm .* d(xv))
 end
 
+scaletobinneddata(Nd,lims,Nbins) = Nd * (lims[2]-lims[1]) / Nbins
+scaletobinneddata(Nd, bins) = Nd * (bins[end]-bins[1]) / (length(bins)-1)
