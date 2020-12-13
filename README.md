@@ -43,17 +43,19 @@ let
 end
 
 # Alternatively one can use a mixed model
-pdf_sum = MixedModel([snl, bkg], (fS = 0.5,))
-fr = fit_llh(data, pdf_sum)
+model = MixedModel([snl, bkg], (fS = 0.5,))
+fr = fit_llh(data, model)
+pfr = v2p(minimizer(fr), pdf_sum)
+fixed_model = fixpars(model, pfr)
 # 
 let
   Nd = length(data)
-  bins = range(lims(pdf_sum)..., length = 40)
+  bins = range(lims(fixed_model)..., length = 40)
   Ns = scaletobinneddata(Nd, bins)
   #
   plot(pdf_sum, Ns, lab="fit")
-  plot!(pdf_sum.components[1], fractions(pdf_sum)[1]*Ns, lab="signal")
-  plot!(pdf_sum.components[2], fractions(pdf_sum)[2]*Ns, lab="background")
+  plot!(pdf_sum.components[1], fractions(fixed_model)[1]*Ns, lab="signal")
+  plot!(pdf_sum.components[2], fractions(fixed_model)[2]*Ns, lab="background")
   stephist!(data, c=:black, bins=bins, lab="data")
 end
 ```
