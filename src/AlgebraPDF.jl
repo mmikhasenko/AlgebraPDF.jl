@@ -9,6 +9,8 @@ using StaticArrays
 using Interpolations
 using ForwardDiff
 using LinearAlgebra
+using Measurements
+
 #
 import Base: +, *, /
 
@@ -27,7 +29,8 @@ export subtractpars, selectpars, updatepars
 include("pdf.jl")
 
 export fit_llh, llh
-export hessian, errors, cov, invH, errors, invexacthessian
+export hessian, cov, invH, invexacthessian
+export errors, measurements
 export minimizer, minimum
 include("fit.jl")
 

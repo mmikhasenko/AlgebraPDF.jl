@@ -15,6 +15,12 @@ errors(fr::FitResults) = sqrt.(diag(fr.state.invH))
 # 
 invexacthessian(fr::FitResults, p = minimizer(fr)) = inv(fr.forwarddiff_hessian_callback(p))
 
+function measurements(fr, exacthessian::Bool=false)
+    mv = minimizer(fr)
+    δv = !(exacthessian) ? errors(fr) : sqrt.(diag(invexacthessian(fr)))
+    return [±(m,δ) for (m,δ) in zip(mv, δv)]
+end
+
 function fit_llh(data, f; init_pars = error("init_pars!!"), weights = fill(1.0, length(data)))
     llh(p) = -sum((v>0) ? w*log(v) : -1e4 for (w,v) in zip(weights, f(data, p)))
     llh(init_pars) # test

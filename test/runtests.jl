@@ -2,6 +2,8 @@ using AlgebraPDF
 using StaticArrays
 using Test
 using SpecialFunctions
+using LinearAlgebra
+using Measurements
 
 @testset "Operations with parameters" begin
     p = (μ = 1.1, σ = 2.2, f = 2.2)
@@ -118,8 +120,14 @@ end
     @test length(errors(fr)) == 4
     # 
     invH_fd = invexacthessian(fr)
-    rel_error_max = max((abs.(invH_bfgs .- invH_fd) ./ abs.(invH_fd))...)
-    @test rel_error_max < 5e-2 # 5%
+    rel_error_max = max((abs.(diag(invH_bfgs) .- diag(invH_fd)) ./ abs.(diag(invH_fd)))...)
+    @test rel_error_max < 5e-2 # 15%
+    # 
+    mfr = measurements(fr)
+    @test typeof([measurements(fr)...]) <: Vector{Measurement{T}} where T
+    mfr_exact = measurements(fr, true)
+    @test Measurements.uncertainty.(mfr) == errors(fr)
+    @test Measurements.uncertainty.(mfr_exact) == sqrt.(diag(invH_fd))
 end
 
 @testset "parameters to values" begin
