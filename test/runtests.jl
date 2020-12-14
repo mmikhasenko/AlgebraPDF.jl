@@ -116,7 +116,7 @@ end
     # 
     invH_bfgs = invH(fr)
     @test size(invH_bfgs) == (4,4)
-    @test cov(fr) == invH_bfgs
+    @test covmat(fr) == invH_bfgs
     @test length(errors(fr)) == 4
     # 
     invH_fd = invexacthessian(fr)

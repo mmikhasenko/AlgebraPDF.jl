@@ -10,7 +10,7 @@ minimizer(fr::FitResults) = minimizer(fr.optres)
 minimum(fr::FitResults) = minimum(fr.optres)
 # 
 invH(fr::FitResults) = fr.state.invH
-cov(fr::FitResults) = invH(fr)
+covmat(fr::FitResults) = invH(fr)
 errors(fr::FitResults) = sqrt.(diag(fr.state.invH))
 # 
 invexacthessian(fr::FitResults, p = minimizer(fr)) = inv(fr.forwarddiff_hessian_callback(p))
