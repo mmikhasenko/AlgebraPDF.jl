@@ -21,24 +21,50 @@ function measurements(fr, exacthessian::Bool=false)
     return [±(m,δ) for (m,δ) in zip(mv, δv)]
 end
 
-function fit_llh(data, f; init_pars = error("init_pars!!"), weights = fill(1.0, length(data)))
-    llh(p) = -sum((v>0) ? w*log(v) : -1e4 for (w,v) in zip(weights, f(data, p)))
-    llh(init_pars) # test
-    #
-    obj = OnceDifferentiable(llh, init_pars, autodiff = :forwarddiff)
+#      _|_|  _|    _|      
+#    _|          _|_|_|_|  
+#  _|_|_|_|  _|    _|      
+#    _|      _|    _|      
+#    _|      _|      _|_|  
+
+
+function optimize_get_state_hessian(func, init_pars, m = BFGS(); show_trace::Bool = true)
+    obj = OnceDifferentiable(func, init_pars, autodiff = :forwarddiff)
     # 
-    m = BFGS()
-    options = Optim.Options(show_trace = true)
+    options = Optim.Options(show_trace = show_trace)
     lbfgsstate = Optim.initial_state(m, options, obj, init_pars)
     #
     optres = optimize(obj, init_pars, m, options, lbfgsstate)
     #
-    hessian_callback(p) = ForwardDiff.hessian(llh, p)
+    hessian_callback(p) = ForwardDiff.hessian(func, p)
     #
     return FitResults(optres, lbfgsstate, hessian_callback)
 end
 
+function fit_llh(data, f; init_pars = error("init_pars!!"), weights = fill(1.0, length(data)))
+    llh(p) = -sum((v>0) ? w*log(v) : -1e4 for (w,v) in zip(weights, f(data, p)))
+    return optimize_get_state_hessian(llh, init_pars, BFGS())
+end
+
+function fit_llh_with_constraints(data, f, fc; init_pars = error("init_pars!!"))
+    llh(p) = -sum((v>0) ? log(v) : -1e4 for v in f(data, p))
+    llh_constr(p) = llh(p) + fc(p)
+    return optimize_get_state_hessian(llh_constr, init_pars, BFGS())
+end
+
+
+
+# AdvancedFunction
 function fit_llh(data, d::T where T<:AdvancedFunction)
     filtered_data = filter(x->inrange(x, lims(d)), data)
     return fit_llh(filtered_data, d; init_pars=p2v(d))
+end
+
+chi2(specification; p) = sum(((getproperty(p, k)-v) / e)^2
+    for (k,(v,e)) in zip(keys(specification),specification))
+
+function fit_llh_with_constraints(data, d::T where T<:AdvancedFunction, specification)
+    filtered_data = filter(x->inrange(x, lims(d)), data)
+    fc(v) = chi2(specification; p=v2p(v, d))
+    return fit_llh_with_constraints(filtered_data, d, fc; init_pars=p2v(d))
 end

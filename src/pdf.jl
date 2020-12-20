@@ -38,7 +38,11 @@ integral(d::pdf, lims; p=collectpars(d)) =
 # calls
 function (d::pdf)(x; p=collectpars(d), norm_according_to=d)
     normalization = normalizationintegral(norm_according_to; p=p)
-    normalization ≈ 0.0 && error("norm = 0 with p = $(p)!")
+    if normalization ≈ 0.0
+        println("Error: normalization ≈ 0!")
+        normalization = 1.0
+    end
+#     normalization ≈ 0.0 && error("norm = 0 with p = $(p)!")
     return func(d,x; p=p) / normalization
 end
 (d::pdf)(x, v) = d(x; p=v2p(v,d))

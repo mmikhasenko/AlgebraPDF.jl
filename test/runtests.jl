@@ -257,7 +257,30 @@ end
     @test pdf6(3π) == 0.0
 end
 
-@testset "plotting" begin
+@testset "plotting utils" begin
     scaletobinneddata(10,(0,1),10) ≈ 1.0
     scaletobinneddata(10, range(0,1,length=11)) ≈ 1.0
 end
+
+@testset "constrained fit" begin
+    @test AlgebraPDF.chi2((a=(1,0.2), b=(3,0.2)); p = (a=1.1, b=2.2)) ≈
+        (0.1/0.2)^2+(0.8/0.2)^2
+    #
+    d = aGauss((a=0.01,b = 1.1), (-3,3))
+    data = randn(1000)
+    my_fr = fit_llh(data, d)
+    my_pfr = v2p(minimizer(my_fr), d)
+    # 
+    constraints = (a = (0.2,0.01),)
+    my_fr2 = fit_llh_with_constraints(data, d, constraints)
+    my_pfr2 = v2p(minimizer(my_fr2), d)
+    #
+    @test abs(my_pfr2.a - constraints.a[1]) < abs(my_pfr.a - constraints.a[1])
+end
+
+# here is MWE of the normalization problem
+# let 
+#     d = aGauss((a=0.01,b = 1.1), (-3,3))
+#     d(1.1, [36.1,0.1])
+# end
+

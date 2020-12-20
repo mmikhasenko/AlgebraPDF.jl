@@ -29,6 +29,7 @@ export subtractpars, selectpars, updatepars
 include("pdf.jl")
 
 export fit_llh, llh
+export fit_llh_with_constraints
 export hessian, covmat, invH, invexacthessian
 export errors, measurements
 export minimizer, minimum
