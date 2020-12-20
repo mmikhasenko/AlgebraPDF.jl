@@ -6,3 +6,31 @@ end
 
 scaletobinneddata(Nd,lims,Nbins) = Nd * (lims[2]-lims[1]) / Nbins
 scaletobinneddata(Nd, bins) = Nd * (bins[end]-bins[1]) / (length(bins)-1)
+
+
+# plotting curve on top of the data
+bincenters(bins) = (bins[1:end-1]+bins[2:end]) ./ 2
+yerror(y) = sqrt.(y)
+bindiffs(x) = x[2:end]- x[1:end-1]
+
+
+@recipe function f(data::Array, d::T where T<:AdvancedFunction, Nbins::Integer=60; datalabel="data")
+    bins = range(lims(d)..., length=Nbins)
+    @series begin
+        centers = bincenters(bins)
+        bincontent = [sum(x->l<x<r, data) for (l,r) in zip(bins[1:end-1], bins[2:end])]
+        # 
+        x := centers
+        y := bincontent
+        xerror := bindiffs(centers) / 2
+        yerror := yerror(bincontent)
+        seriestype := :scatter
+        color --> :black
+        markersize --> 5
+        lab --> datalabel
+        ()
+    end
+    @series begin
+        (d, scaletobinneddata(length(data), bins))
+    end
+end
