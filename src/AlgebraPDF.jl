@@ -24,14 +24,14 @@ export integral, integrals
 export fixpars, fixpar
 export fixedshapepdf
 export noparsf, noparsnormf
-export collectpars, func, lims
-export subtractpars, selectpars, updatepars
+export freepars, func, lims
+export pars
 include("pdf.jl")
 
 export Parameters
 export free, fixed, constrained
 export fixpar, releasepar, constrainpar, unconstrainpar
-export updatepars
+export updatepars, selectpars
 export nt
 include("parameters.jl")
 

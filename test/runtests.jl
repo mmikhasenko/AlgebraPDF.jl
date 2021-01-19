@@ -5,12 +5,13 @@ using SpecialFunctions
 using LinearAlgebra
 using Measurements
 
-@testset "Operations with parameters" begin
+
+@testset "Operations NamedTuple" begin
     p = (μ = 1.1, σ = 2.2, f = 2.2)
 
-    sp = subtractpars(p, (:μ, :σ))
+    sp = p - (:μ, :σ)
     @test keys(sp) == (:f,)
-    @test sp == subtractpars(p, [:μ, :σ])
+    @test sp == -(p, [:μ, :σ])
     #
     sp = selectpars(p, (:μ, :σ))
     @test keys(sp) == (:μ, :σ)
@@ -21,6 +22,38 @@ using Measurements
     @test up.μ == 3.1
     @test up.σ == 5.2
     @test up.f == 2.2
+    # 
+    @test (a=1,b=2) + (d=1,c=2) == (a=1,b=2,d=1,c=2)
+    @test (a=1,b=2,d=1,c=2) - (d=1,) == (a=1,b=2,c=2)
+    @test (a=1,b=2,d=1,c=2) - :d == (a=1,b=2,c=2)
+    @test (a=1,b=2,d=1,c=2) - [:d, :a] == (b=2,c=2)
+    @test (a=1,b=2,d=1,c=2) - (:d, :a) == (b=2,c=2)
+end
+
+@testset "parameter logic" begin
+    # 
+    @test nt(:d) == (d=0.0, )
+    @test nt(:d, 3) == (d=3, )
+    @test nt(:d, (1.1,0.1)) == (d = (1.1,0.1), )
+    #
+    ps0 = Parameters((a=1.1,b=2.2,c=3.3))
+    #
+    ps1 = fixpar(ps0, :a)
+    @test length(fixed(ps1)) == 1 && length(free(ps1)) == 2
+    ps2 = fixpars(ps0, (a=3.3, b=6.6))
+    @test ps2.a == 3.3 && ps2.b == 6.6
+    # 
+    @test releasepar(fixpar(ps0, :c), :c) == ps0
+    # 
+    ps3 = constrainpar(ps0, :a, 1.1, 0.1)
+    @test length(constrained(ps3)) == 1 && length(free(ps3)) == 3
+    @test unconstrainpar(ps3, :a) == ps0
+    #
+    @test length(freepars(ps0)) == 3
+    @test length(freepars(ps1)) == 2
+    @test length(freepars(ps3)) == 3
+    #
+    @test updatepars(ps0, (a=5.5,)).a == 5.5
 end
 
 @testset "Basic operations" begin
@@ -39,7 +72,7 @@ end
     @test pdf2(x0, v0) == pdf2(x0; p=v2p(v0, pdf2))
     #
     pdf2 *= (f2=3.0,)
-    @test length(collectpars(pdf2)) == 3
+    @test length(freepars(pdf2)) == 3
     #
     pdf_sum = pdf1 + pdf2
     @test npars(pdf_sum) == 5
@@ -48,6 +81,25 @@ end
     @test npars(pdf_ratio) == 5
 end
 
+
+@testset "fix parameters example" begin
+    d0 = pdf(@. (e;p)->e^2+p.a; p=(a=1.0,), lims=(-1,2))
+    @test func(d0, 1.0) == 2.0
+    # 
+    d1 = fixpar(d0, :a, 2.9)
+    @test func(d1, 1.0) == 3.9
+    # 
+    d1 = fixpars(d0, (:a,))
+    @test func(d1, 1.0) == 2.0
+    # 
+    d1′ = fixpars(d0, [:a])
+    @test func(d1′, 1.0) == 2.0
+    # 
+    d2 = fixpars(d0, (a=2,))
+    @test func(d2, 1.0) == 3.0
+end
+
+
 function df(f1,f2,lims; Ns = 10)
     xv = range(lims..., length=Ns)
     dyv = f1.(xv) .- f2.(xv)
@@ -55,7 +107,6 @@ function df(f1,f2,lims; Ns = 10)
 end
 
 @testset "convolution with gauss" begin
-
     @test AlgebraPDF.standardgauss(0,1) ≈ 1/sqrt(2π)
     @test AlgebraPDF.standardgauss(2,2) ≈ exp(-1/2)/sqrt(2π*4)
     # tests
@@ -79,53 +130,6 @@ end
     @test 0.01 < df(nconv, aconv, (-1, 1); Ns=1000) < 0.04
 end
 
-@testset "fix parameters example" begin
-    d0 = pdf(@. (e;p)->e^2+p.a; p=(a=1.0,), lims=(-1,2))
-    @test func(d0, 1.0) == 2.0
-    # 
-    d1 = fixpars(d0, (:a,))
-    @test collectpars(d1) === ∅
-    @test func(d1, 1.0) == 2.0
-    # 
-    d1′ = fixpars(d0, [:a])
-    @test collectpars(d1′) === ∅
-    @test func(d1′, 1.0) == 2.0
-    # 
-    d2 = fixpars(d0, (a=2,))
-    @test collectpars(d2) === ∅
-    @test func(d2, 1.0) == 3.0
-end
-
-@testset "parameter logic" begin
-    # 
-    @test (a=1,b=2) + (d=1,c=2) == (a=1,b=2,d=1,c=2)
-    @test (a=1,b=2,d=1,c=2) - (d=1,) == (a=1,b=2,c=2)
-    @test (a=1,b=2,d=1,c=2) - :d == (a=1,b=2,c=2)
-    @test (a=1,b=2,d=1,c=2) - [:d, :a] == (b=2,c=2)
-    @test (a=1,b=2,d=1,c=2) - (:d, :a) == (b=2,c=2)
-
-    # 
-    @test nt(:d) == (d=0.0, )
-    @test nt(:d, 3) == (d=3, )
-    @test nt(:d, (1.1,0.1)) == (d = (1.1,0.1), )
-    #
-    ps0 = Parameters((a=1.1,b=2.2,c=3.3))
-    #
-    ps1 = fixpar(ps0, :a)
-    @test length(fixed(ps1)) == 1 && length(free(ps1)) == 2
-    # 
-    @test releasepar(fixpar(ps0, :c), :c) == ps0
-    # 
-    ps2 = constrainpar(ps0, :a, 1.1, 0.1)
-    @test length(constrained(ps2)) == 1 && length(free(ps2)) == 3
-    @test unconstrainpar(ps2, :a) == ps0
-    #
-    @test length(collectpars(ps0)) == length(free(ps0))
-    @test length(collectpars(ps1)) == length(free(ps0))
-    @test length(collectpars(ps2)) == length(free(ps0))
-    #
-    @test updatepars(ps0, (a=5.5,)).free.a == 5.5
-end
 
 @testset "example of usage" begin
     # tests
@@ -135,7 +139,7 @@ end
     pdf_sum = snl + bkg
     
     # generating
-    data = generate(10000, pdf_sum; p=collectpars(pdf_sum));
+    data = generate(10000, pdf_sum; p=freepars(pdf_sum));
     @test length(data) == 10000
     
     # fitting
@@ -169,7 +173,7 @@ end
 
 @testset "fixed-shape pdf" begin
     d1 = fixedshapepdf(x->exp.(-(x .* 4).^2), (-1, 2))
-    @test length(collectpars(d1)) == 0
+    @test length(freepars(d1)) == 0
 end
 
 g(x) = exp.(-(x .* 4).^2)
@@ -187,12 +191,11 @@ sum3 = sumpdf(pdf1, pdf2, 0.3)
 xr = mylims[1]+rand()*(mylims[2]-mylims[1])
 
 @testset "sum pdf" begin
-    # 
-    @test length(collectpars(sum0)) == 1
-    @test length(collectpars(sum1)) == 1
+    @test length(freepars(sum0)) == 1
+    @test length(freepars(sum1)) == 1
     @test sum0(xr) ≈ sum1(xr)
-    @test keys(collectpars(sum2))[1] == :xf
-    @test length(collectpars(sum3)) == 0
+    @test keys(freepars(sum2))[1] == :xf
+    @test length(freepars(sum3)) == 0
 end
 
 @testset "example with sum pdf" begin
@@ -200,8 +203,8 @@ end
     ft = fit_llh(ds,sum1; init_pars=[0.3])
     pfr = minimizer(ft)
     sum1_fit = fixpars(sum1, v2p(pfr,sum1))
-    println("δf = ", (pfr[1] - sum1.p[1]) / sum1.p[1])
-    @test (pfr[1] - sum1.p[1]) / sum1.p[1] < 0.05
+    println("δf = ", (pfr[1] - freepars(sum1)[1]) / freepars(sum1)[1])
+    @test (pfr[1] - freepars(sum1)[1]) / freepars(sum1)[1] < 0.05
 end
 
 @testset "no-parameters f and no-parameters normalized f" begin
@@ -244,19 +247,19 @@ g1 = pdf(@. (x;p)->1/p.σ1*exp(-(x-p.μ1)^2/(2*p.σ1^2)); p=(μ1= 2.1, σ1=0.7 )
 g2 = pdf(@. (x;p)->1/p.σ2*exp(-(x-p.μ2)^2/(2*p.σ2^2)); p=(μ2=-0.7, σ2=0.7 ), lims=(-3, 3))
 mm0 = MixedModel([g1, g2], (f1=0.33,))
 
+
 @testset "parameters of the mixed model" begin
-    @test length(collectpars(fixpars(mm0, (σ1=1.1,)))) == 4
-    @test length(collectpars(fixpars(mm0, (:σ1,)))) == 4
-    @test length(collectpars(fixpar(mm0, :σ1))) == 4
-    @test length(collectpars(fixpar(mm0, :σ1, 1.1))) == 4
+    @test length(freepars(fixpars(mm0, (σ1=1.1,)))) == 4
+    @test length(freepars(fixpars(mm0, (:σ1,)))) == 4
+    @test length(freepars(fixpar(mm0, :σ1))) == 4
+    @test length(freepars(fixpar(mm0, :σ1, 1.1))) == 4
     #
 end
 
 @testset "Mixed Model" begin
-
-    @test typeof(collectpars(mm0)) <: NamedTuple
+    @test typeof(freepars(mm0)) <: NamedTuple
     @test npars(mm0) == 5
-    @test v2p(p2v(mm0),mm0) == collectpars(mm0)
+    @test v2p(p2v(mm0),mm0) == freepars(mm0)
     #
     sample = vcat((0.5 .* randn(1000) .- 1.0), (0.7.*randn(100) .+ 2.0))
     sample = filter(x->-3<x<3, sample)
@@ -265,7 +268,6 @@ end
     pfr = v2p(minimizer(fr), mm0)
     @test abs(pfr.μ2 + 1.0) < 0.5
     @test abs(pfr.μ1 - 2.0) < 1.0
-    #
 end
 
 @testset "Generate mixed model" begin
@@ -279,11 +281,11 @@ end
 
 @testset "ensities" begin
     pdf1 = aGauss((mΩb = 6030, σ=17.0), (5600, 6400))
-    @test collectpars(pdf1) === (mΩb = 6030, σ=17.0)
+    @test freepars(pdf1) === (mΩb = 6030, σ=17.0)
     pdf2 = aBreitWigner((mΩb = 6030, Γ=17.0), (5600, 6400))
-    @test collectpars(pdf2) === (mΩb = 6030, Γ=17.0)
+    @test freepars(pdf2) === (mΩb = 6030, Γ=17.0)
     pdf3 = aExp((τ = -1.1,), (-2, 2))
-    @test collectpars(pdf3) === (τ = -1.1,)
+    @test freepars(pdf3) === (τ = -1.1,)
     # 
     pdf4 = aDoubleGaussFixedRatio((m = 0.77, Γ=0.15), (0, 1.0); fixpars=(r=0.8,n=3))
     @test pdf4(0.77) != 0.0
@@ -293,7 +295,7 @@ end
     xv = range(-π, 2π, length=40)
     yv = map(x->x*cos(3x) - 3*sin(x), xv)
     pdf6 = aTabulated(xv,yv,(-π,π))
-    @test length(collectpars(pdf6)) == 0
+    @test length(freepars(pdf6)) == 0
     @test pdf6(1.1) != 0.0
     @test pdf6(3π) == 0.0
     @test pdf6(-π) != 0.0

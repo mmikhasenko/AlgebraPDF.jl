@@ -35,5 +35,5 @@ function sWeights(pdfS::pdf, pdfB::pdf, fraction_of_signal::T where T<:Real)
     numerator_bgd = fixpars(ds, (_f1_sW=αB[1],))
     sWeights_bgd = numerator_bgd / ds0 * (1-fraction_of_signal)
     # 
-    return (sWeights_snl.f, sWeights_bgd.f)
+    return (x->func(sWeights_snl,x), x->func(sWeights_bgd,x))
 end

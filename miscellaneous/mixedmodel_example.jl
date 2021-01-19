@@ -22,7 +22,7 @@ end
 histogram(sample, bins=80)
 p = (μ1=-1.0, σ1=0.5, μ2=2.1, σ2=0.7, μ3=0.3, σ3=0.2, f1=10/14, f2=1/14)
 
-collectpars(mm0)
+freepars(mm0)
 fr = fit_llh(sample, mm0, init_pars=p2v(p, mm0))
 pfr = v2p(minimizer(fr), mm0)
 
