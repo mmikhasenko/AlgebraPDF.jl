@@ -6,7 +6,7 @@ using LinearAlgebra
 using Measurements
 
 
-@testset "Operations NamedTuple" begin
+@testset "Operations on NamedTuple" begin
     p = (μ = 1.1, σ = 2.2, f = 2.2)
 
     sp = p - (:μ, :σ)
@@ -56,31 +56,6 @@ end
     @test updatepars(ps0, (a=5.5,)).a == 5.5
 end
 
-@testset "Basic operations" begin
-    BW(s, m, Γ) = 1 / (m^2 - s - 1im*m*Γ)
-    #
-    pdf1 = pdf(@. (e;p)->abs2(BW(e^2, p.m1, p.Γ1));
-        p = (m1=0.25, Γ1=2e-3), lims = (0, 0.15))
-    #
-    @test pdf1(rand()) != 0.0
-    @test length(pdf1(rand(10))) == 10
-    #
-    pdf2 = pdf(@. (e;p)->abs2(BW(e^2, p.m2, p.Γ2));
-        p = (m2=0.1, Γ2=14e-3), lims = (0, 0.15))
-    #
-    x0 = 1.1; v0 = rand(2)
-    @test pdf2(x0, v0) == pdf2(x0; p=v2p(v0, pdf2))
-    #
-    pdf2 *= (f2=3.0,)
-    @test length(freepars(pdf2)) == 3
-    #
-    pdf_sum = pdf1 + pdf2
-    @test npars(pdf_sum) == 5
-
-    pdf_ratio = pdf1 / pdf2
-    @test npars(pdf_ratio) == 5
-end
-
 
 @testset "fix parameters example" begin
     d0 = pdf(@. (e;p)->e^2+p.a; p=(a=1.0,), lims=(-1,2))
@@ -99,35 +74,26 @@ end
     @test func(d2, 1.0) == 3.0
 end
 
-
-function df(f1,f2,lims; Ns = 10)
-    xv = range(lims..., length=Ns)
-    dyv = f1.(xv) .- f2.(xv)
-    return sqrt(sum(abs2, dyv) / Ns)
+@testset "parameters to values" begin
+    d = pdf(@. (e;p)->e^2+p.a; p=(a=1.0,), lims=(-1,2))
+    @test p2v(d) == [1.0]
+    @test p2v((a=3.0,), d) == [3.0]
 end
 
-@testset "convolution with gauss" begin
-    @test AlgebraPDF.standardgauss(0,1) ≈ 1/sqrt(2π)
-    @test AlgebraPDF.standardgauss(2,2) ≈ exp(-1/2)/sqrt(2π*4)
-    # tests
-    σ0 = 0.3
-    aconv(e) = (erf(e/sqrt(2*σ0^2))+1)/2
+@testset "fixed-shape pdf" begin
+    d1 = fixedshapepdf(x->exp.(-(x .* 4).^2), (-1, 2))
+    @test length(freepars(d1)) == 0
+end
+
+@testset "no-parameters f and no-parameters normalized f" begin
+    d0 = pdf(@. (e;p)->e^2+p.a; p=(a=1.0,), lims=(-1,2))
+
+    f = noparsf(d0)
+    xr = lims(d0)[1]+rand()*(lims(d0)[2]-lims(d0)[1])
+    @test func(d0,xr) ≈ f(xr)
     #
-    nconv(e) = conv_with_gauss(e, x->x>0, σ0)
-    @test df(nconv, aconv, (-1, 1); Ns=1000) < 0.01
-    #
-    step = pdf(@. (e;p)->e>0; p=∅, lims=(-1,1))
-    smeared_step = conv_with_gauss(step, σ0)
-    nconv(e) = func(smeared_step, e)
-    @test df(nconv, aconv, (-1, 1); Ns=1000) < 0.01
-    # 
-    smeared_step_sampling = conv_with_gauss_sampling(step, σ0; Ns=50)
-    nconv(e) = func(smeared_step_sampling, e)
-    @test df(nconv, aconv, (-1, 1); Ns=1000) < 0.01
-    # 
-    smeared_step_sampling = conv_with_gauss_sampling(step, σ0; Ns=10)
-    nconv(e) = func(smeared_step_sampling, e)
-    @test 0.01 < df(nconv, aconv, (-1, 1); Ns=1000) < 0.04
+    ananorm = ((8+1)/3+1.0*3)
+    @test d0(xr) ≈ f(xr)/ananorm
 end
 
 
@@ -165,68 +131,86 @@ end
     @test Measurements.uncertainty.(mfr_exact) == sqrt.(diag(invH_fd))
 end
 
-@testset "parameters to values" begin
-    d = pdf(@. (e;p)->e^2+p.a; p=(a=1.0,), lims=(-1,2))
-    @test p2v(d) == [1.0]
-    @test p2v((a=3.0,), d) == [3.0]
+
+#              _|_|_|                                
+#    _|_|_|  _|          _|_|_|  _|    _|    _|_|_|  
+#  _|    _|  _|  _|_|  _|    _|  _|    _|  _|_|      
+#  _|    _|  _|    _|  _|    _|  _|    _|      _|_|  
+#    _|_|_|    _|_|_|    _|_|_|    _|_|_|  _|_|_|    
+
+
+@testset "Precodded pdfs" begin
+    pdf1 = aGauss((mΩb = 6030, σ=17.0), (5600, 6400))
+    @test freepars(pdf1) === (mΩb = 6030, σ=17.0)
+    pdf2 = aBreitWigner((mΩb = 6030, Γ=17.0), (5600, 6400))
+    @test freepars(pdf2) === (mΩb = 6030, Γ=17.0)
+    pdf3 = aExp((τ = -1.1,), (-2, 2))
+    @test freepars(pdf3) === (τ = -1.1,)
+    # 
+    pdf4 = aDoubleGaussFixedRatio((m = 0.77, Γ=0.15), (0, 1.0); fixpars=(r=0.8,n=3))
+    @test pdf4(0.77) != 0.0
+    pdf5 = aBreitWignerConvGauss((m = 0.77, Γ=0.15), (0, 1.0); fixpars=(σ=0.03,))
+    @test pdf5(0.77) != 0.0
+    # 
+    xv = range(-π, 2π, length=40)
+    yv = map(x->x*cos(3x) - 3*sin(x), xv)
+    pdf6 = aTabulated(xv,yv,(-π,π))
+    @test length(freepars(pdf6)) == 0
+    @test pdf6(1.1) != 0.0
+    @test pdf6(3π) == 0.0
+    @test pdf6(-π) != 0.0
+    @test pdf6(2π) != 0.0
 end
 
-@testset "fixed-shape pdf" begin
-    d1 = fixedshapepdf(x->exp.(-(x .* 4).^2), (-1, 2))
-    @test length(freepars(d1)) == 0
+# here is MWE of the normalization problem
+# let 
+#     d = aGauss((a=0.01,b = 1.1), (-3,3))
+#     d(1.1, [36.1,0.1])
+# end
+
+
+#    _|_|_|    _|_|    _|_|_|    _|      _|  
+#  _|        _|    _|  _|    _|  _|      _|  
+#  _|        _|    _|  _|    _|    _|  _|    
+#    _|_|_|    _|_|    _|    _|      _|      
+
+
+function df(f1,f2,lims; Ns = 10)
+    xv = range(lims..., length=Ns)
+    dyv = f1.(xv) .- f2.(xv)
+    return sqrt(sum(abs2, dyv) / Ns)
 end
 
-g(x) = exp.(-(x .* 4).^2)
-e(x) = exp.(-x)
-mylims = (-1, 2)
-# 
-sum0 = sumpdf(g,e,mylims)
-pdf1 = fixedshapepdf(g, mylims)
-pdf2 = fixedshapepdf(e, mylims)
-# 
-sum1 = sumpdf(pdf1, pdf2)
-sum2 = sumpdf(pdf1, pdf2, :xf)
-sum3 = sumpdf(pdf1, pdf2, 0.3)
-# 
-xr = mylims[1]+rand()*(mylims[2]-mylims[1])
-
-@testset "sum pdf" begin
-    @test length(freepars(sum0)) == 1
-    @test length(freepars(sum1)) == 1
-    @test sum0(xr) ≈ sum1(xr)
-    @test keys(freepars(sum2))[1] == :xf
-    @test length(freepars(sum3)) == 0
-end
-
-@testset "example with sum pdf" begin
-    ds = generate(5000, sum1)
-    ft = fit_llh(ds,sum1; init_pars=[0.3])
-    pfr = minimizer(ft)
-    sum1_fit = fixpars(sum1, v2p(pfr,sum1))
-    println("δf = ", (pfr[1] - freepars(sum1)[1]) / freepars(sum1)[1])
-    @test (pfr[1] - freepars(sum1)[1]) / freepars(sum1)[1] < 0.05
-end
-
-@testset "no-parameters f and no-parameters normalized f" begin
-    d0 = pdf(@. (e;p)->e^2+p.a; p=(a=1.0,), lims=(-1,2))
-
-    f = noparsf(d0)
-    xr = lims(d0)[1]+rand()*(lims(d0)[2]-lims(d0)[1])
-    @test func(d0,xr) ≈ f(xr)
+@testset "convolution with gauss" begin
+    @test AlgebraPDF.standardgauss(0,1) ≈ 1/sqrt(2π)
+    @test AlgebraPDF.standardgauss(2,2) ≈ exp(-1/2)/sqrt(2π*4)
+    # tests
+    σ0 = 0.3
+    aconv(e) = (erf(e/sqrt(2*σ0^2))+1)/2
     #
-    ananorm = ((8+1)/3+1.0*3)
-    @test d0(xr) ≈ f(xr)/ananorm
+    nconv(e) = conv_with_gauss(e, x->x>0, σ0)
+    @test df(nconv, aconv, (-1, 1); Ns=1000) < 0.01
+    #
+    step = pdf(@. (e;p)->e>0; p=∅, lims=(-1,1))
+    smeared_step = conv_with_gauss(step, σ0)
+    nconv(e) = func(smeared_step, e)
+    @test df(nconv, aconv, (-1, 1); Ns=1000) < 0.01
+    # 
+    smeared_step_sampling = conv_with_gauss_sampling(step, σ0; Ns=50)
+    nconv(e) = func(smeared_step_sampling, e)
+    @test df(nconv, aconv, (-1, 1); Ns=1000) < 0.01
+    # 
+    smeared_step_sampling = conv_with_gauss_sampling(step, σ0; Ns=10)
+    nconv(e) = func(smeared_step_sampling, e)
+    @test 0.01 < df(nconv, aconv, (-1, 1); Ns=1000) < 0.04
 end
 
-sWeights_signal, sWeights_backgr = sWeights(pdf1, pdf2, 0.9)
-xv = range(lims(pdf1)...,length=100)
-sum_of_w = sWeights_signal(xv) + sWeights_backgr(xv)
+#                            _|    _|      _|                    _|  
+#  _|_|_|  _|_|    _|    _|  _|  _|_|_|_|                    _|_|_|  
+#  _|    _|    _|  _|    _|  _|    _|      _|  _|_|_|_|_|  _|    _|  
+#  _|    _|    _|  _|    _|  _|    _|      _|              _|    _|  
+#  _|    _|    _|    _|_|_|  _|      _|_|  _|                _|_|_|  
 
-@testset "sWeights" begin
-    xv = range(lims(pdf1)...,length=100)
-    sum_of_w = sWeights_signal(xv) + sWeights_backgr(xv)
-    @test prod(sum_of_w .- sum_of_w[30] .< 1e-10)
-end
 
 @testset "cross-product PDF" begin
     # test
@@ -242,6 +226,14 @@ end
     s = generate(50, X; Nbins=300)
     @test length(s) == 50
 end
+
+
+#                  _|                            _|                                  _|  
+#  _|_|_|  _|_|        _|    _|    _|_|      _|_|_|  _|_|_|  _|_|      _|_|      _|_|_|  
+#  _|    _|    _|  _|    _|_|    _|_|_|_|  _|    _|  _|    _|    _|  _|    _|  _|    _|  
+#  _|    _|    _|  _|  _|    _|  _|        _|    _|  _|    _|    _|  _|    _|  _|    _|  
+#  _|    _|    _|  _|  _|    _|    _|_|_|    _|_|_|  _|    _|    _|    _|_|      _|_|_|  
+
 
 g1 = pdf(@. (x;p)->1/p.σ1*exp(-(x-p.μ1)^2/(2*p.σ1^2)); p=(μ1= 2.1, σ1=0.7 ), lims=(-3, 3))
 g2 = pdf(@. (x;p)->1/p.σ2*exp(-(x-p.μ2)^2/(2*p.σ2^2)); p=(μ2=-0.7, σ2=0.7 ), lims=(-3, 3))
@@ -279,33 +271,27 @@ end
     @test sum(x->x>0, data) < 100
 end
 
-@testset "ensities" begin
-    pdf1 = aGauss((mΩb = 6030, σ=17.0), (5600, 6400))
-    @test freepars(pdf1) === (mΩb = 6030, σ=17.0)
-    pdf2 = aBreitWigner((mΩb = 6030, Γ=17.0), (5600, 6400))
-    @test freepars(pdf2) === (mΩb = 6030, Γ=17.0)
-    pdf3 = aExp((τ = -1.1,), (-2, 2))
-    @test freepars(pdf3) === (τ = -1.1,)
-    # 
-    pdf4 = aDoubleGaussFixedRatio((m = 0.77, Γ=0.15), (0, 1.0); fixpars=(r=0.8,n=3))
-    @test pdf4(0.77) != 0.0
-    pdf5 = aBreitWignerConvGauss((m = 0.77, Γ=0.15), (0, 1.0); fixpars=(σ=0.03,))
-    @test pdf5(0.77) != 0.0
-    # 
-    xv = range(-π, 2π, length=40)
-    yv = map(x->x*cos(3x) - 3*sin(x), xv)
-    pdf6 = aTabulated(xv,yv,(-π,π))
-    @test length(freepars(pdf6)) == 0
-    @test pdf6(1.1) != 0.0
-    @test pdf6(3π) == 0.0
-    @test pdf6(-π) != 0.0
-    @test pdf6(2π) != 0.0
-end
+
+#            _|              _|      _|      _|                      
+#  _|_|_|    _|    _|_|    _|_|_|_|_|_|_|_|      _|_|_|      _|_|_|  
+#  _|    _|  _|  _|    _|    _|      _|      _|  _|    _|  _|    _|  
+#  _|    _|  _|  _|    _|    _|      _|      _|  _|    _|  _|    _|  
+#  _|_|_|    _|    _|_|        _|_|    _|_|  _|  _|    _|    _|_|_|  
+#  _|                                                            _|  
+#  _|                                                        _|_|    
+
 
 @testset "plotting utils" begin
     scaletobinneddata(10,(0,1),10) ≈ 1.0
     scaletobinneddata(10, range(0,1,length=11)) ≈ 1.0
 end
+
+#                                            _|                
+#    _|_|_|    _|_|    _|_|_|      _|_|_|  _|_|_|_|  _|  _|_|  
+#  _|        _|    _|  _|    _|  _|_|        _|      _|_|      
+#  _|        _|    _|  _|    _|      _|_|    _|      _|        
+#    _|_|_|    _|_|    _|    _|  _|_|_|        _|_|  _|        
+
 
 @testset "constrained fit" begin
     @test AlgebraPDF.chi2((a=(1,0.2), b=(3,0.2)); p = (a=1.1, b=2.2)) ≈
@@ -323,10 +309,94 @@ end
     @test abs(my_pfr2.a - constraints.a[1]) < abs(my_pfr.a - constraints.a[1])
 end
 
+#            _|                      
+#  _|_|_|    _|  _|    _|    _|_|_|  
+#  _|    _|  _|  _|    _|  _|_|      
+#  _|    _|  _|  _|    _|      _|_|  
+#  _|_|_|    _|    _|_|_|  _|_|_|    
+#  _|                                
+#  _|                                
 
-# here is MWE of the normalization problem
-# let 
-#     d = aGauss((a=0.01,b = 1.1), (-3,3))
-#     d(1.1, [36.1,0.1])
-# end
 
+@testset "Arithmetic operations" begin
+    BW(s, m, Γ) = 1 / (m^2 - s - 1im*m*Γ)
+    #
+    pdf1 = pdf(@. (e;p)->abs2(BW(e^2, p.m1, p.Γ1));
+        p = (m1=0.25, Γ1=2e-3), lims = (0, 0.15))
+    #
+    @test pdf1(rand()) != 0.0
+    @test length(pdf1(rand(10))) == 10
+    #
+    pdf2 = pdf(@. (e;p)->abs2(BW(e^2, p.m2, p.Γ2));
+        p = (m2=0.1, Γ2=14e-3), lims = (0, 0.15))
+    #
+    x0 = 1.1; v0 = rand(2)
+    @test pdf2(x0, v0) == pdf2(x0; p=v2p(v0, pdf2))
+    #
+    pdf2 *= (f2=3.0,)
+    @test length(freepars(pdf2)) == 3
+    #
+    pdf_sum = pdf1 + pdf2
+    @test npars(pdf_sum) == 5
+
+    pdf_ratio = pdf1 / pdf2
+    @test npars(pdf_ratio) == 5
+end
+
+                                                                                   
+#                                                      _|      _|_|  
+#    _|_|_|  _|    _|  _|_|_|  _|_|    _|_|_|      _|_|_|    _|      
+#  _|_|      _|    _|  _|    _|    _|  _|    _|  _|    _|  _|_|_|_|  
+#      _|_|  _|    _|  _|    _|    _|  _|    _|  _|    _|    _|      
+#  _|_|_|      _|_|_|  _|    _|    _|  _|_|_|      _|_|_|    _|      
+#                                      _|                            
+#                                      _|                            
+
+g(x) = exp.(-(x .* 4).^2)
+e(x) = exp.(-x)
+mylims = (-1, 2)
+# 
+sum0 = sumpdf(g,e,mylims)
+pdf1 = fixedshapepdf(g, mylims)
+pdf2 = fixedshapepdf(e, mylims)
+# 
+sum1 = sumpdf(pdf1, pdf2)
+sum2 = sumpdf(pdf1, pdf2, :xf)
+sum3 = sumpdf(pdf1, pdf2, 0.3)
+# 
+xr = mylims[1]+rand()*(mylims[2]-mylims[1])
+
+@testset "sum pdf" begin
+    @test length(freepars(sum0)) == 1
+    @test length(freepars(sum1)) == 1
+    @test sum0(xr) ≈ sum1(xr)
+    @test keys(freepars(sum2))[1] == :xf
+    @test length(freepars(sum3)) == 0
+end
+
+@testset "example with sum pdf" begin
+    ds = generate(5000, sum1)
+    ft = fit_llh(ds,sum1; init_pars=[0.3])
+    pfr = minimizer(ft)
+    sum1_fit = fixpars(sum1, v2p(pfr,sum1))
+    println("δf = ", (pfr[1] - freepars(sum1)[1]) / freepars(sum1)[1])
+    @test (pfr[1] - freepars(sum1)[1]) / freepars(sum1)[1] < 0.05
+end
+
+
+#            _|_|_|    _|              _|      
+#    _|_|_|  _|    _|  _|    _|_|    _|_|_|_|  
+#  _|_|      _|_|_|    _|  _|    _|    _|      
+#      _|_|  _|        _|  _|    _|    _|      
+#  _|_|_|    _|        _|    _|_|        _|_|  
+
+
+sWeights_signal, sWeights_backgr = sWeights(pdf1, pdf2, 0.9)
+xv = range(lims(pdf1)...,length=100)
+sum_of_w = sWeights_signal(xv) + sWeights_backgr(xv)
+
+@testset "sWeights" begin
+    xv = range(lims(pdf1)...,length=100)
+    sum_of_w = sWeights_signal(xv) + sWeights_backgr(xv)
+    @test prod(sum_of_w .- sum_of_w[30] .< 1e-10)
+end

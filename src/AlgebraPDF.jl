@@ -12,7 +12,6 @@ using LinearAlgebra
 using Measurements
 
 #
-import Base: +, *, /
 
 import Optim: minimizer, minimum
 import ForwardDiff: hessian
@@ -53,14 +52,8 @@ export conv_with_gauss
 export conv_with_gauss_sampling
 include("convolution.jl")
 
-export sumpdf
-include("sumpdf.jl")
-
 export scaletobinneddata
 include("plottingrecipe.jl")
-
-export sWeights
-include("sWeights.jl")
 
 export xProductPDF
 include("multidim.jl")
@@ -73,5 +66,17 @@ include("densities.jl")
 
 export inrange
 include("utils.jl")
+
+
+# requires further work
+import Base: +, *, /
+include("arithmetics.jl")
+
+export sumpdf
+include("sumpdf.jl")
+
+export sWeights
+include("sWeights.jl")
+
 
 end # module
