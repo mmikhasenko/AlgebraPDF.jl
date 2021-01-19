@@ -13,11 +13,11 @@ fixpars(d::T where T<:AdvancedFunction, symb::T where T<:Union{Tuple,Array{Symbo
 fixpar(d::T where T<:AdvancedFunction, symb::Symbol) =  fixpars(d, (symb,))
 fixpar(d::T where T<:AdvancedFunction, symb::Symbol, value::Float64) =
         fixpars(d, NamedTuple{(symb,)}(value))
-@with_kw struct pdf <: AdvancedFunction
+@with_kw struct pdf{T} <: AdvancedFunction
     f::Function
     lims::Tuple{Real,Real}
     xdim::Int = 1
-    p::NamedTuple
+    p::T
 end
 #
 # consructors
@@ -27,7 +27,8 @@ fixedshapepdf(f, lims) = pdf((x;p=∅)->f(x); lims=lims, p=∅)
 #
 #
 lims(d::pdf) = d.lims
-collectpars(d::pdf) = d.p
+collectpars(t::NamedTuple) = t
+collectpars(d::pdf) = collectpars(d.p)
 func(d,x; p=collectpars(d)) = d.f(x;p=p)
 # 
 normalizationintegral(d::pdf; p=collectpars(d)) = quadgk(x->func(d,x; p=p), lims(d)...)[1]

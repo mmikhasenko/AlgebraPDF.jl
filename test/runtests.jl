@@ -96,6 +96,37 @@ end
     @test func(d2, 1.0) == 3.0
 end
 
+@testset "parameter logic" begin
+    # 
+    @test (a=1,b=2) + (d=1,c=2) == (a=1,b=2,d=1,c=2)
+    @test (a=1,b=2,d=1,c=2) - (d=1,) == (a=1,b=2,c=2)
+    @test (a=1,b=2,d=1,c=2) - :d == (a=1,b=2,c=2)
+    @test (a=1,b=2,d=1,c=2) - [:d, :a] == (b=2,c=2)
+    @test (a=1,b=2,d=1,c=2) - (:d, :a) == (b=2,c=2)
+
+    # 
+    @test nt(:d) == (d=0.0, )
+    @test nt(:d, 3) == (d=3, )
+    @test nt(:d, (1.1,0.1)) == (d = (1.1,0.1), )
+    #
+    ps0 = Parameters((a=1.1,b=2.2,c=3.3))
+    #
+    ps1 = fixpar(ps0, :a)
+    @test length(fixed(ps1)) == 1 && length(free(ps1)) == 2
+    # 
+    @test releasepar(fixpar(ps0, :c), :c) == ps0
+    # 
+    ps2 = constrainpar(ps0, :a, 1.1, 0.1)
+    @test length(constrained(ps2)) == 1 && length(free(ps2)) == 3
+    @test unconstrainpar(ps2, :a) == ps0
+    #
+    @test length(collectpars(ps0)) == length(free(ps0))
+    @test length(collectpars(ps1)) == length(free(ps0))
+    @test length(collectpars(ps2)) == length(free(ps0))
+    #
+    @test updatepars(ps0, (a=5.5,)).free.a == 5.5
+end
+
 @testset "example of usage" begin
     # tests
     snl = pdf(@. (x;p) -> exp(-(x-p.μ)^2/(2*p.σ^2)); p = (μ=1.4, σ=0.15), lims=(0, 3))
@@ -198,7 +229,7 @@ end
     # test
     pdf1 = pdf((x;p)->x.^2; lims=(-1,2), p=∅)
     pdf2 = pdf((x;p)->x.^4; lims=(-1,2), p=∅)
-    X = xProductPDF(x=pdf1, y=pdf2)
+    X = xProductPDF(;x=pdf1, y=pdf2)
     s = generate(100, X)
     # 
     @test length(s) == 100
@@ -289,6 +320,7 @@ end
     #
     @test abs(my_pfr2.a - constraints.a[1]) < abs(my_pfr.a - constraints.a[1])
 end
+
 
 # here is MWE of the normalization problem
 # let 

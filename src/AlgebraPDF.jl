@@ -28,6 +28,13 @@ export collectpars, func, lims
 export subtractpars, selectpars, updatepars
 include("pdf.jl")
 
+export Parameters
+export free, fixed, constrained
+export fixpar, releasepar, constrainpar, unconstrainpar
+export updatepars
+export nt
+include("parameters.jl")
+
 export fit_llh, llh
 export fit_llh_with_constraints
 export hessian, covmat, invH, invexacthessian
