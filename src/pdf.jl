@@ -3,6 +3,10 @@ abstract type AdvancedFunction end
 const uTAS = Union{Tuple,Array{Symbol}}
 ∅ = NamedTuple()
 freepars(f::Function) = ∅
+#
+freepars(d::T where T<:AdvancedFunction) = freepars(pars(d))
+fixedpars(d::T where T<:AdvancedFunction) = fixedpars(pars(d))
+# 
 # properties
 npars(d::T where T<:AdvancedFunction) = length(freepars(d))
 v2p(v,d::T where T<:AdvancedFunction) = NamedTuple{keys(freepars(d))}(v)
@@ -41,9 +45,6 @@ pars(d::pdf) = d.p
 func(d) = d.f
 func(d,x; p) = d.f(x;p=p)
 #
-freepars(d::pdf) = freepars(pars(d))
-fixedpars(d::pdf) = fixedpars(pars(d))
-# 
 # 
 normalizationintegral(d::pdf; p=freepars(d)) = quadgk(x->func(d,x; p=p), lims(d)...)[1]
 function integral(d::pdf, lims; p=freepars(d))

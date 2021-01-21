@@ -11,7 +11,8 @@ Ncomp(mm::MixedModel{N}) where N = N
 fractions(mm::MixedModel) = mm.fractions
 #
 lims(mm::MixedModel) = lims(mm.components[1])
-freepars(mm::MixedModel) = sum(freepars.(mm.components)) + freepars(mm.fractions)
+
+pars(mm::MixedModel) = sum(pars.(mm.components)) + fractions(mm)
 function func(mm::MixedModel,x;p)
     fracs = fractionvalues(mm; p=p)
     v = sum(func(d,x;p=p)*f for (d,f) in zip(mm.components, fracs))
@@ -43,7 +44,7 @@ noparsnormf(mm::MixedModel; p=freepars(mm)) = MixedModel(
 # fix parameters
 fixpars(mm::MixedModel, pars::NamedTuple) = MixedModel(
     SVector([fixpars(c, selectintersect(freepars(c), pars)) for c in mm.components]),
-    fixpars(mm.fractions, selectintersect(freepars(mm.fractions),pars)), mm.keys)
+    fixpars(mm.fractions, selectintersect(freepars(mm.fractions), pars)), mm.keys)
 #
 updatepars(mm::MixedModel, newpars::NamedTuple) = MixedModel(
     SVector([updatepars(c, selectintersect(freepars(c), newpars)) for c in mm.components]),

@@ -56,6 +56,13 @@ end
     @test updatepars(ps0, (a=5.5,)).a == 5.5
 end
 
+@testset "Parameters of pdf" begin
+    d = pdf(@. (e;p)->e^2+p.a; p=(a=1.0,), lims=(-1,2))
+    @test typeof(pars(d)) <: AlgebraPDF.Parameters
+    @test length(freepars(d)) == 1
+    @test length(fixedpars(d)) == 0
+end
+
 
 @testset "fix parameters example" begin
     d0 = pdf(@. (e;p)->e^2+p.a; p=(a=1.0,), lims=(-1,2))
@@ -238,12 +245,15 @@ g1 = pdf(@. (x;p)->1/p.σ1*exp(-(x-p.μ1)^2/(2*p.σ1^2)); p=(μ1= 2.1, σ1=0.7 )
 g2 = pdf(@. (x;p)->1/p.σ2*exp(-(x-p.μ2)^2/(2*p.σ2^2)); p=(μ2=-0.7, σ2=0.7 ), lims=(-3, 3))
 mm0 = MixedModel([g1, g2], (f1=0.33,))
 
-
 @testset "Parameters of the mixed model" begin
-    @test length(freepars(fixpars(mm0, (σ1=1.1,)))) == 4
-    @test length(freepars(fixpars(mm0, (:σ1,)))) == 4
-    @test length(freepars(fixpar(mm0, :σ1))) == 4
-    @test length(freepars(fixpar(mm0, :σ1, 1.1))) == 4
+    @test typeof(pars(mm0)) <: AlgebraPDF.Parameters
+    @test length(freepars(mm0)) == 5
+    @test length(fixedpars(mm0)) == 0
+    # 
+    @test fixpar(mm0, :σ1, 1.1) == fixpars(mm0, (σ1=1.1,))
+    @test fixpars(mm0, (:σ1,)) == fixpar(mm0, :σ1) 
+    mm_fixed = fixpar(mm0, :σ1, 1.1)
+    @test length(freepars(mm_fixed)) == 4
     #
     mm′ = fixpar(mm0, :μ1, 2.2)
     @test length(fixedpars(fractions(mm′))) == 0
