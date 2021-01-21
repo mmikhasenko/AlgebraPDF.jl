@@ -25,9 +25,9 @@ bindiffs(x) = x[2:end]- x[1:end-1]
         xerror := bindiffs(centers) / 2
         yerror := yerror(bincontent)
         seriestype := :scatter
-        color --> :black
+        seriescolor --> :black
         markersize --> 5
-        lab --> datalabel
+        label --> datalabel
         ()
     end
     @series begin
