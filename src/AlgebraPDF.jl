@@ -16,6 +16,12 @@ using Measurements
 import Optim: minimizer, minimum
 import ForwardDiff: hessian
 
+export Parameters
+export fixpar, releasepar, constrainpar, unconstrainpar
+export updatepars, selectpars
+export nt
+include("parameters.jl")
+
 export AdvancedFunction
 export ∅
 export pdf, npars, p2v, v2p
@@ -23,16 +29,10 @@ export integral, integrals
 export fixpars, fixpar
 export fixedshapepdf
 export noparsf, noparsnormf
-export freepars, func, lims
+export func, lims
+export freepars, fixedpars, constrainedpars
 export pars
 include("pdf.jl")
-
-export Parameters
-export free, fixed, constrained
-export fixpar, releasepar, constrainpar, unconstrainpar
-export updatepars, selectpars
-export nt
-include("parameters.jl")
 
 export fit_llh, llh
 export fit_llh_with_constraints
@@ -42,7 +42,7 @@ export minimizer, minimum
 include("fit.jl")
 
 export MixedModel
-export fractions
+export fractions, fractionvalues
 include("mixedmodel.jl")
 
 export generate

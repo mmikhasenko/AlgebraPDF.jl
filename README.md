@@ -54,8 +54,8 @@ let
   Ns = scaletobinneddata(Nd, bins)
   #
   plot(pdf_sum, Ns, lab="fit")
-  plot!(pdf_sum.components[1], fractions(fixed_model)[1]*Ns, lab="signal")
-  plot!(pdf_sum.components[2], fractions(fixed_model)[2]*Ns, lab="background")
+  plot!(pdf_sum.components[1], fractionvalues(fixed_model)[1]*Ns, lab="signal")
+  plot!(pdf_sum.components[2], fractionvalues(fixed_model)[2]*Ns, lab="background")
   stephist!(data, c=:black, bins=bins, lab="data")
 end
 ```

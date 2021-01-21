@@ -8,34 +8,28 @@ end
 MixedModel(c::Vector, f::NamedTuple) = MixedModel(SVector{length(c)}(c...), Parameters(f), SVector{length(c)-1}(keys(f)...))
 # 
 Ncomp(mm::MixedModel{N}) where N = N
+fractions(mm::MixedModel) = mm.fractions
 #
 lims(mm::MixedModel) = lims(mm.components[1])
 freepars(mm::MixedModel) = sum(freepars.(mm.components)) + freepars(mm.fractions)
 function func(mm::MixedModel,x;p)
-    fracs = fractions(mm; p=p)
+    fracs = fractionvalues(mm; p=p)
     v = sum(func(d,x;p=p)*f for (d,f) in zip(mm.components, fracs))
     ! prod(iszero, isnan.(v)) &&  @show p#, v
     return v
 end
-function integrals(mm::MixedModel, lims; p=freepars(mm))
-    fracs = fractions(mm; p=p)
-    ints = integral.(mm.components, Ref(lims); p=p)
-    return ints .* fracs
-end
-integral(mm::MixedModel, lims; p=freepars(d)) = sum(integrals(mm, lims; p=p))
-
 
 # inner working
-orderedfractions(fs::Parameters, keys) = [getproperty(fs, k) for k in keys]
+orderedfractionvalues(fs::Parameters, keys) = [getproperty(fs, k) for k in keys]
 # 
-function fractions(mm::MixedModel; p=free(mm.fractions)+fixed(mm.fractions))
+function fractionvalues(mm::MixedModel; p=∅)
     updated_fractions = updatepars(mm.fractions, p)
-    ordered_fractions= orderedfractions(updated_fractions, mm.keys)
+    ordered_fractions= orderedfractionvalues(updated_fractions, mm.keys)
     return vcat(ordered_fractions..., (1-sum(ordered_fractions)))
 end
 # calls
 function (mm::MixedModel)(x; p=freepars(mm))
-    fracs = fractions(mm; p=p)
+    fracs = fractionvalues(mm; p=p)
     v = sum(d(x;p=p)*f for (d,f) in zip(mm.components, fracs))
     ! prod(iszero, isnan.(v)) &&  @show p#, v
     return v
@@ -51,3 +45,14 @@ fixpars(mm::MixedModel, pars::NamedTuple) = MixedModel(
     SVector([fixpars(c, selectintersect(freepars(c), pars)) for c in mm.components]),
     fixpars(mm.fractions, pars), mm.keys)
 #
+updatepars(mm::MixedModel, newpars::NamedTuple) = MixedModel(
+    SVector([updatepars(c, selectintersect(freepars(c), newpars)) for c in mm.components]),
+    updatepars(mm.fractions, newpars), mm.keys)
+
+# # additional functions (not used)
+# function integrals(mm::MixedModel, lims; p=freepars(mm))
+#     fracs = fractionvalues(mm; p=p)
+#     ints = integral.(mm.components, Ref(lims); p=p)
+#     return ints .* fracs
+# end
+# integral(mm::MixedModel, lims; p=freepars(d)) = sum(integrals(mm, lims; p=p))

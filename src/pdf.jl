@@ -38,9 +38,12 @@ fixedshapepdf(f, lims) = pdf((x;p)->f(x); lims=lims, p=∅)
 #
 lims(d::pdf) = d.lims
 pars(d::pdf) = d.p
-freepars(d::pdf) = freepars(d.p)
 func(d) = d.f
 func(d,x; p) = d.f(x;p=p)
+#
+freepars(d::pdf) = freepars(pars(d))
+fixedpars(d::pdf) = fixedpars(pars(d))
+# 
 # 
 normalizationintegral(d::pdf; p=freepars(d)) = quadgk(x->func(d,x; p=p), lims(d)...)[1]
 integral(d::pdf, lims; p=freepars(d)) =
@@ -48,7 +51,7 @@ integral(d::pdf, lims; p=freepars(d)) =
 #
 # calls
 function (d::pdf)(x; p=freepars(d), norm_according_to=d)
-    allp = pars(d) + p
+    allp = p+fixedpars(d)
     normalization = normalizationintegral(norm_according_to; p=allp)
     if normalization ≈ 0.0
         println("Error: normalization ≈ 0!")

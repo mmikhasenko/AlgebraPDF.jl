@@ -39,14 +39,14 @@ end
     ps0 = Parameters((a=1.1,b=2.2,c=3.3))
     #
     ps1 = fixpar(ps0, :a)
-    @test length(fixed(ps1)) == 1 && length(free(ps1)) == 2
+    @test length(fixedpars(ps1)) == 1 && length(freepars(ps1)) == 2
     ps2 = fixpars(ps0, (a=3.3, b=6.6))
     @test ps2.a == 3.3 && ps2.b == 6.6
     # 
     @test releasepar(fixpar(ps0, :c), :c) == ps0
     # 
     ps3 = constrainpar(ps0, :a, 1.1, 0.1)
-    @test length(constrained(ps3)) == 1 && length(free(ps3)) == 3
+    @test length(constrainedpars(ps3)) == 1 && length(freepars(ps3)) == 3
     @test unconstrainpar(ps3, :a) == ps0
     #
     @test length(freepars(ps0)) == 3
@@ -59,19 +59,14 @@ end
 
 @testset "fix parameters example" begin
     d0 = pdf(@. (e;p)->e^2+p.a; p=(a=1.0,), lims=(-1,2))
-    @test func(d0, 1.0) == 2.0
+    @test d0(1.0) ≈ 2.0/(9/3+3*pars(d0).a)
     # 
     d1 = fixpar(d0, :a, 2.9)
-    @test func(d1, 1.0) == 3.9
+    @test d1(1.0) ≈ 3.9/(9/3+3*pars(d1).a)
     # 
-    d1 = fixpars(d0, (:a,))
-    @test func(d1, 1.0) == 2.0
-    # 
-    d1′ = fixpars(d0, [:a])
-    @test func(d1′, 1.0) == 2.0
-    # 
-    d2 = fixpars(d0, (a=2,))
-    @test func(d2, 1.0) == 3.0
+    # d1 = fixpars(d0, (:a,))
+    # d1′ = fixpars(d0, [:a])
+    # d2 = fixpars(d0, (a=2,))
 end
 
 @testset "parameters to values" begin
@@ -90,7 +85,7 @@ end
 
     f = noparsf(d0)
     xr = lims(d0)[1]+rand()*(lims(d0)[2]-lims(d0)[1])
-    @test func(d0,xr) ≈ f(xr)
+    @test func(d0,xr;p=freepars(d0)) ≈ f(xr)
     #
     ananorm = ((8+1)/3+1.0*3)
     @test d0(xr) ≈ f(xr)/ananorm
@@ -181,6 +176,7 @@ function df(f1,f2,lims; Ns = 10)
     return sqrt(sum(abs2, dyv) / Ns)
 end
 
+
 @testset "convolution with gauss" begin
     @test AlgebraPDF.standardgauss(0,1) ≈ 1/sqrt(2π)
     @test AlgebraPDF.standardgauss(2,2) ≈ exp(-1/2)/sqrt(2π*4)
@@ -192,16 +188,19 @@ end
     @test df(nconv, aconv, (-1, 1); Ns=1000) < 0.01
     #
     step = pdf(@. (e;p)->e>0; p=∅, lims=(-1,1))
+    func(step, 1.1; p=∅)
     smeared_step = conv_with_gauss(step, σ0)
-    nconv(e) = func(smeared_step, e)
+    nconv(e) = func(smeared_step, e; p=∅)
+    # smeared_step(1.1)
+    func(smeared_step, 1.1; p=∅)
     @test df(nconv, aconv, (-1, 1); Ns=1000) < 0.01
     # 
     smeared_step_sampling = conv_with_gauss_sampling(step, σ0; Ns=50)
-    nconv(e) = func(smeared_step_sampling, e)
+    nconv(e) = func(smeared_step_sampling, e; p = freepars(smeared_step_sampling))
     @test df(nconv, aconv, (-1, 1); Ns=1000) < 0.01
     # 
     smeared_step_sampling = conv_with_gauss_sampling(step, σ0; Ns=10)
-    nconv(e) = func(smeared_step_sampling, e)
+    nconv(e) = func(smeared_step_sampling, e; p = freepars(smeared_step_sampling))
     @test 0.01 < df(nconv, aconv, (-1, 1); Ns=1000) < 0.04
 end
 
@@ -269,6 +268,16 @@ end
     Nd = 1000
     data = generate(Nd, mm)
     @test sum(x->x>0, data) < 100
+end
+
+@testset "Update parameters of the mixed model" begin
+    g1 = aGauss((μ1=1.1, σ=0.3), (-2, 7))
+    g2 = aGauss((μ2=2.1, σ=0.3), (-2, 7))
+    # 
+    mm = MixedModel([g1, g2], (f1=0.1,))
+    mm = fixpar(mm, :f1, 0.3)
+    mm = updatepars(mm, (f1=0.7,))
+    @test fractions(mm).f1 == 0.7
 end
 
 
