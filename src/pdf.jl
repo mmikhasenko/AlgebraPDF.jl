@@ -33,13 +33,14 @@ end
 # consructors
 pdf(f,p,lims) = pdf(;f=f,lims=lims,p=Parameters(p))
 pdf(f;p,lims) = pdf(;f=f,lims=lims,p=Parameters(p))
-fixedshapepdf(f, lims) = pdf((x;p=∅)->f(x); lims=lims, p=∅)
+fixedshapepdf(f, lims) = pdf((x;p)->f(x); lims=lims, p=∅)
 #
 #
 lims(d::pdf) = d.lims
 pars(d::pdf) = d.p
 freepars(d::pdf) = freepars(d.p)
-func(d,x; p=pars(d)) = d.f(x;p=p)
+func(d) = d.f
+func(d,x; p) = d.f(x;p=p)
 # 
 normalizationintegral(d::pdf; p=freepars(d)) = quadgk(x->func(d,x; p=p), lims(d)...)[1]
 integral(d::pdf, lims; p=freepars(d)) =
@@ -59,8 +60,10 @@ end
 (d::pdf)(x, v) = d(x; p=v2p(v,d))
 
 # fix parameters
-fixpars(d::pdf, s_or_from_p::NamedTuple) = pdf(;f=d.f, lims=d.lims, p=fixpars(pars(d), s_or_from_p))
+fixpars(d::pdf, s_or_from_p::NamedTuple) = pdf(;f=func(d), lims=d.lims, p=fixpars(pars(d), s_or_from_p))
 fixpars(d::pdf{T} where T <: NamedTuple, from_p) = error("fixing parameters on pdf{NamedTuple} is outdated! pdf{Parameters} should be constructed by default.")
 #
 noparsf(d::pdf; p=pars(d)) = (x;kw...)->func(d,x;p=p)
 noparsnormf(d::pdf; p=pars(d)) = (ns=normalizationintegral(d;p=p); (x;kw...)->func(d,x;p=p)/ns)
+#
+updatepars(d::pdf, from_p::NamedTuple) = pdf(;f=func(d), lims=d.lims, p=updatepars(pars(d), from_p))
