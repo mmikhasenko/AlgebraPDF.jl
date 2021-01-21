@@ -239,12 +239,24 @@ g2 = pdf(@. (x;p)->1/p.σ2*exp(-(x-p.μ2)^2/(2*p.σ2^2)); p=(μ2=-0.7, σ2=0.7 )
 mm0 = MixedModel([g1, g2], (f1=0.33,))
 
 
-@testset "parameters of the mixed model" begin
+@testset "Parameters of the mixed model" begin
     @test length(freepars(fixpars(mm0, (σ1=1.1,)))) == 4
     @test length(freepars(fixpars(mm0, (:σ1,)))) == 4
     @test length(freepars(fixpar(mm0, :σ1))) == 4
     @test length(freepars(fixpar(mm0, :σ1, 1.1))) == 4
     #
+    mm′ = fixpar(mm0, :μ1, 2.2)
+    @test length(fixedpars(fractions(mm′))) == 0
+    @test length(fixedpars(mm′.components[1])) == 1
+end
+
+@testset "Integrals of the MM" begin
+    @test integral(mm0, (-1,1)) < 1.0
+    @test prod(integrals(mm0, (-1,1)) .< 1.0)
+    #
+    mm′ = fixpar(mm0, :μ1, 2.2)
+    @test integral(mm′, (-1,1)) < 1.0
+    @test prod(integrals(mm′, (-1,1)) .< 1.0)
 end
 
 @testset "Mixed Model" begin
@@ -290,7 +302,7 @@ end
 #  _|                                                        _|_|    
 
 
-@testset "plotting utils" begin
+@testset "Plotting utils" begin
     scaletobinneddata(10,(0,1),10) ≈ 1.0
     scaletobinneddata(10, range(0,1,length=11)) ≈ 1.0
 end
@@ -302,7 +314,7 @@ end
 #    _|_|_|    _|_|    _|    _|  _|_|_|        _|_|  _|        
 
 
-@testset "constrained fit" begin
+@testset "Constrained fit" begin
     @test AlgebraPDF.chi2((a=(1,0.2), b=(3,0.2)); p = (a=1.1, b=2.2)) ≈
         (0.1/0.2)^2+(0.8/0.2)^2
     #
@@ -375,7 +387,7 @@ sum3 = sumpdf(pdf1, pdf2, 0.3)
 # 
 xr = mylims[1]+rand()*(mylims[2]-mylims[1])
 
-@testset "sum pdf" begin
+@testset "Sum pdf" begin
     @test length(freepars(sum0)) == 1
     @test length(freepars(sum1)) == 1
     @test sum0(xr) ≈ sum1(xr)
@@ -383,7 +395,7 @@ xr = mylims[1]+rand()*(mylims[2]-mylims[1])
     @test length(freepars(sum3)) == 0
 end
 
-@testset "example with sum pdf" begin
+@testset "Example with sum pdf" begin
     ds = generate(5000, sum1)
     ft = fit_llh(ds,sum1; init_pars=[0.3])
     pfr = minimizer(ft)

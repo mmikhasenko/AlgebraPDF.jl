@@ -43,11 +43,11 @@ noparsnormf(mm::MixedModel; p=freepars(mm)) = MixedModel(
 # fix parameters
 fixpars(mm::MixedModel, pars::NamedTuple) = MixedModel(
     SVector([fixpars(c, selectintersect(freepars(c), pars)) for c in mm.components]),
-    fixpars(mm.fractions, pars), mm.keys)
+    fixpars(mm.fractions, selectintersect(freepars(mm.fractions),pars)), mm.keys)
 #
 updatepars(mm::MixedModel, newpars::NamedTuple) = MixedModel(
     SVector([updatepars(c, selectintersect(freepars(c), newpars)) for c in mm.components]),
-    updatepars(mm.fractions, newpars), mm.keys)
+    updatepars(mm.fractions, selectintersect(freepars(mm.fractions),newpars)), mm.keys)
 
 # 
 """
@@ -60,4 +60,4 @@ function integrals(mm::MixedModel, lims; p=freepars(mm))
     ints = integral.(mm.components, Ref(lims); p=p)
     return ints .* fracs
 end
-integral(mm::MixedModel, lims; p=freepars(d)) = sum(integrals(mm, lims; p=p))
+integral(mm::MixedModel, lims; p=freepars(mm)) = sum(integrals(mm, lims; p=p))

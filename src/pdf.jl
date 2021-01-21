@@ -46,8 +46,10 @@ fixedpars(d::pdf) = fixedpars(pars(d))
 # 
 # 
 normalizationintegral(d::pdf; p=freepars(d)) = quadgk(x->func(d,x; p=p), lims(d)...)[1]
-integral(d::pdf, lims; p=freepars(d)) =
-        quadgk(x->func(d,x; p=p), lims...)[1] / normalizationintegral(d; p=p)
+function integral(d::pdf, lims; p=freepars(d))
+    allpars = p+fixedpars(d)
+    quadgk(x->func(d,x; p=allpars), lims...)[1] / normalizationintegral(d; p=allpars)
+end
 #
 # calls
 function (d::pdf)(x; p=freepars(d), norm_according_to=d)
