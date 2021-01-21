@@ -49,10 +49,15 @@ updatepars(mm::MixedModel, newpars::NamedTuple) = MixedModel(
     SVector([updatepars(c, selectintersect(freepars(c), newpars)) for c in mm.components]),
     updatepars(mm.fractions, newpars), mm.keys)
 
-# # additional functions (not used)
-# function integrals(mm::MixedModel, lims; p=freepars(mm))
-#     fracs = fractionvalues(mm; p=p)
-#     ints = integral.(mm.components, Ref(lims); p=p)
-#     return ints .* fracs
-# end
-# integral(mm::MixedModel, lims; p=freepars(d)) = sum(integrals(mm, lims; p=p))
+# 
+"""
+    integrals(mm::MixedModel, lims; p=freepars(mm))
+
+Computes integrals of the components in a given range.
+"""
+function integrals(mm::MixedModel, lims; p=freepars(mm))
+    fracs = fractionvalues(mm; p=p)
+    ints = integral.(mm.components, Ref(lims); p=p)
+    return ints .* fracs
+end
+integral(mm::MixedModel, lims; p=freepars(d)) = sum(integrals(mm, lims; p=p))
