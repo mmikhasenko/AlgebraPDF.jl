@@ -32,6 +32,7 @@ export noparsf, noparsnormf
 export func, lims
 export freepars, fixedpars, constrainedpars
 export pars
+export Ncomp
 include("pdf.jl")
 
 export fit_llh, llh
