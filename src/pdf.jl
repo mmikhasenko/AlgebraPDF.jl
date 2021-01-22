@@ -18,7 +18,6 @@ fixpars(d::T where T<:AdvancedFunction, s::T where T<:uTAS) =
 fixpar(d::T where T<:AdvancedFunction, s::Symbol) =  fixpars(d, (s,))
 fixpar(d::T where T<:AdvancedFunction, s::Symbol, v::T where T<:Real) =  fixpars(d, nt(s,v))
 
-                               
 #                  _|      _|_|  
 #  _|_|_|      _|_|_|    _|      
 #  _|    _|  _|    _|  _|_|_|_|  
@@ -34,6 +33,9 @@ fixpar(d::T where T<:AdvancedFunction, s::Symbol, v::T where T<:Real) =  fixpars
     p::T
 end
 #
+import Base:copy
+copy(d::pdf, p) = pdf(;f=func(d), lims=d.lims, p=p)
+# 
 # consructors
 pdf(f,p,lims) = pdf(;f=f,lims=lims,p=Parameters(p))
 pdf(f;p,lims) = pdf(;f=f,lims=lims,p=Parameters(p))
@@ -66,8 +68,8 @@ end
 (d::pdf)(x, v) = d(x; p=v2p(v,d))
 
 # fix parameters
-fixpars(d::pdf, s_or_from_p::NamedTuple) = pdf(;f=func(d), lims=d.lims, p=fixpars(pars(d), s_or_from_p))
-fixpars(d::pdf{T} where T <: NamedTuple, from_p) = error("fixing parameters on pdf{NamedTuple} is outdated! pdf{Parameters} should be constructed by default.")
+constrainpar(d::pdf, pars...) = copy(d, constrainpar(pars(d), pars...))
+fixpars(d::pdf, pars...) = copy(d, fixpars(pars(d), pars...))
 #
 noparsf(d::pdf; p=pars(d)) = (x;kw...)->func(d,x;p=p)
 noparsnormf(d::pdf; p=pars(d)) = (ns=normalizationintegral(d;p=p); (x;kw...)->func(d,x;p=p)/ns)
