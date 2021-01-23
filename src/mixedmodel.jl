@@ -47,8 +47,8 @@ fixpars(mm::MixedModel, pars::NamedTuple) = MixedModel(
     fixpars(mm.fractions, selectintersect(freepars(mm.fractions), pars)), mm.keys)
 #
 updatepars(mm::MixedModel, newpars::NamedTuple) = MixedModel(
-    SVector([updatepars(c, selectintersect(freepars(c), newpars)) for c in mm.components]),
-    updatepars(mm.fractions, selectintersect(freepars(mm.fractions),newpars)), mm.keys)
+    SVector([updatepars(c, newpars) for c in mm.components]),
+    updatepars(mm.fractions, newpars), mm.keys)
 
 # 
 """

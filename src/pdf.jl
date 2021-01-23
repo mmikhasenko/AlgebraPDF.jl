@@ -69,7 +69,7 @@ end
 
 # fix parameters
 constrainpar(d::pdf, pars...) = copy(d, constrainpar(pars(d), pars...))
-fixpars(d::pdf, pars...) = copy(d, fixpars(pars(d), pars...))
+fixpars(d::pdf, args::NamedTuple) = copy(d, fixpars(pars(d), args::NamedTuple))
 #
 noparsf(d::pdf; p=pars(d)) = (x;kw...)->func(d,x;p=p)
 noparsnormf(d::pdf; p=pars(d)) = (ns=normalizationintegral(d;p=p); (x;kw...)->func(d,x;p=p)/ns)

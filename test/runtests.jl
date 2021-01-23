@@ -36,7 +36,7 @@ end
     @test nt(:d, 3) == (d=3, )
     @test nt(:d, (1.1,0.1)) == (d = (1.1,0.1), )
     #
-    ps0 = Parameters((a=1.1,b=2.2,c=3.3))
+    ps0 = AlgebraPDF.Parameters((a=1.1,b=2.2,c=3.3))
     #
     ps1 = fixpar(ps0, :a)
     @test length(fixedpars(ps1)) == 1 && length(freepars(ps1)) == 2
@@ -63,17 +63,16 @@ end
     @test length(fixedpars(d)) == 0
 end
 
-
 @testset "fix parameters example" begin
     d0 = pdf(@. (e;p)->e^2+p.a; p=(a=1.0,), lims=(-1,2))
     @test d0(1.0) ≈ 2.0/(9/3+3*pars(d0).a)
-    # 
+    #
     d1 = fixpar(d0, :a, 2.9)
     @test d1(1.0) ≈ 3.9/(9/3+3*pars(d1).a)
     # 
-    # d1 = fixpars(d0, (:a,))
-    # d1′ = fixpars(d0, [:a])
-    # d2 = fixpars(d0, (a=2,))
+    d1′ = fixpars(d0, (:a,))
+    @test d1′ == fixpars(d0, [:a])
+    @test d1′ == fixpars(d0, (a=1.0,))
 end
 
 @testset "parameters to values" begin
@@ -124,7 +123,7 @@ end
     # 
     invH_fd = invexacthessian(fr)
     rel_error_max = max((abs.(diag(invH_bfgs) .- diag(invH_fd)) ./ abs.(diag(invH_fd)))...)
-    @test rel_error_max < 5e-2 # 15%
+    @test rel_error_max < 10e-2 # 10%
     # 
     mfr = measurements(fr)
     @test typeof([measurements(fr)...]) <: Vector{Measurement{T}} where T

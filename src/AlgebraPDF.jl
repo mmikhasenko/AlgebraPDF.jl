@@ -16,7 +16,6 @@ using Measurements
 import Optim: minimizer, minimum
 import ForwardDiff: hessian
 
-export Parameters
 export fixpar, releasepar, constrainpar, unconstrainpar
 export updatepars, selectpars
 export nt
@@ -60,6 +59,7 @@ export xProductPDF
 include("multidim.jl")
 
 export aGauss, aBreitWigner, aExp
+export aPowExp, aPol
 export aDoubleGaussFixedRatio
 export aBreitWignerConvGauss
 export aTabulated
