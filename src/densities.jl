@@ -14,7 +14,14 @@ function aExp(p, lims)
     α, = keys(p)
     return pdf((x;p)->exp.(x .*getproperty(p,α)), p, lims)
 end
-
+function aPowExp(p, lims)
+    α,β = keys(p)
+    return pdf((x;p)->x.^getproperty(p,α) .* exp.(x .*getproperty(p,β)), p, lims)
+end
+function aPol(p, lims)
+    cs = keys(p)
+    return pdf((x;p)->sum(x.^(i-1) .* getproperty(p,c) for (i,c) in enumerate(cs)), p, lims)
+end
 
 standarddoublegauss(x,σ,r,n) =
     r*AlgebraPDF.standardgauss(x,σ) + (1-r)*AlgebraPDF.standardgauss(x,n*σ)
