@@ -1,6 +1,7 @@
 
 standardgauss(x,σ) = exp(-x^2/(2*σ^2)) / sqrt(2π) / σ
-standardBW(x,m,Γ) = abs2(m*Γ/(m^2-x^2-1im*m*Γ))
+amplitudeBW(x,m,Γ) = m*Γ/(m^2-x^2-1im*m*Γ)
+amplitudeBWsq(x,m,Γ) = abs2(amplitudeBW(x,m,Γ))
 # 
 function aGauss(p, lims)
     μ, σ = keys(p)
@@ -8,7 +9,7 @@ function aGauss(p, lims)
 end
 function aBreitWigner(p, lims)
     m, Γ = keys(p)
-    return pdf((x;p)->standardBW.(x,getproperty(p,m), getproperty(p,Γ)), p, lims)
+    return pdf((x;p)->amplitudeBWsq.(x,getproperty(p,m), getproperty(p,Γ)), p, lims)
 end
 function aExp(p, lims)
     α, = keys(p)
@@ -37,7 +38,7 @@ function aBreitWignerConvGauss(pars, lims; fixpars)
     m,Γ = keys(pars)
     σ, = fixpars
     density = (x;p)->conv_with_gauss.(x,
-        y->abs2(AlgebraPDF.standardBW(y, getproperty(p,m), getproperty(p,Γ))), σ)
+        y->abs2(AlgebraPDF.amplitudeBWsq(y, getproperty(p,m), getproperty(p,Γ))), σ)
     return pdf(density, pars, lims)
 end
 
