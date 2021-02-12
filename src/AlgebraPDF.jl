@@ -22,7 +22,7 @@ export nt
 export Pars
 include("parameters.jl")
 
-export AdvancedFunction
+export FunctionWithParameters
 export ∅
 export pdf, npars, p2v, v2p
 export integral, integrals

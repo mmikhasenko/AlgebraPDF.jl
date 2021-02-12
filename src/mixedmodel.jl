@@ -1,5 +1,5 @@
 
-struct MixedModel{N1,N2,T} <: AdvancedFunction
+struct MixedModel{N1,N2,T} <: FunctionWithParameters
     components::SVector{N1}
     fractions::T
     keys::SVector{N2,Symbol}

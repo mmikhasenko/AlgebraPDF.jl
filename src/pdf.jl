@@ -1,22 +1,22 @@
-abstract type AdvancedFunction end
+abstract type FunctionWithParameters end
 
 const uTAS = Union{Tuple,Array{Symbol}}
 ∅ = NamedTuple()
 freepars(f::Function) = ∅
 #
-freepars(d::T where T<:AdvancedFunction) = freepars(pars(d))
-fixedpars(d::T where T<:AdvancedFunction) = fixedpars(pars(d))
+freepars(d::T where T<:FunctionWithParameters) = freepars(pars(d))
+fixedpars(d::T where T<:FunctionWithParameters) = fixedpars(pars(d))
 # 
 # properties
-npars(d::T where T<:AdvancedFunction) = length(freepars(d))
-v2p(v,d::T where T<:AdvancedFunction) = NamedTuple{keys(freepars(d))}(v)
-p2v(p,d::T where T<:AdvancedFunction) = [getproperty(p, k) for k in keys(freepars(d))]
-p2v(  d::T where T<:AdvancedFunction) = p2v(freepars(d), d)
+npars(d::T where T<:FunctionWithParameters) = length(freepars(d))
+v2p(v,d::T where T<:FunctionWithParameters) = NamedTuple{keys(freepars(d))}(v)
+p2v(p,d::T where T<:FunctionWithParameters) = [getproperty(p, k) for k in keys(freepars(d))]
+p2v(  d::T where T<:FunctionWithParameters) = p2v(freepars(d), d)
 
-fixpars(d::T where T<:AdvancedFunction, s::T where T<:uTAS) =
+fixpars(d::T where T<:FunctionWithParameters, s::T where T<:uTAS) =
         fixpars(d, selectpars(freepars(d), s))
-fixpar(d::T where T<:AdvancedFunction, s::Symbol) =  fixpars(d, (s,))
-fixpar(d::T where T<:AdvancedFunction, s::Symbol, v::T where T<:Real) =  fixpars(d, nt(s,v))
+fixpar(d::T where T<:FunctionWithParameters, s::Symbol) =  fixpars(d, (s,))
+fixpar(d::T where T<:FunctionWithParameters, s::Symbol, v::T where T<:Real) =  fixpars(d, nt(s,v))
 
 #                  _|      _|_|  
 #  _|_|_|      _|_|_|    _|      
@@ -26,7 +26,7 @@ fixpar(d::T where T<:AdvancedFunction, s::Symbol, v::T where T<:Real) =  fixpars
 #  _|                            
 #  _|                            
 
-@with_kw struct pdf{T} <: AdvancedFunction
+@with_kw struct pdf{T} <: FunctionWithParameters
     f::Function
     lims::Tuple{Real,Real}
     xdim::Int = 1

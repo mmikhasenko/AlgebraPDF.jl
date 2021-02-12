@@ -27,7 +27,7 @@ function rand(bD::binned1dDensity; checknonzero::Bool=false)
     return σ
 end
 
-function generate(Nev::Int, d::T where T <: AdvancedFunction; p=freepars(d), Nbins=100)
+function generate(Nev::Int, d::T where T <: FunctionWithParameters; p=freepars(d), Nbins=100)
     grid = collect(range(lims(d)..., length=Nbins))
     centers = (grid[2:end] .+ grid[1:end-1]) ./ 2
     #

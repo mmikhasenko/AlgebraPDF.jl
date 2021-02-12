@@ -1,5 +1,5 @@
 
-@recipe function f(d::T where T<:AdvancedFunction, norm::T where T<:Real=1.0, Nbins::Int=100)
+@recipe function f(d::T where T<:FunctionWithParameters, norm::T where T<:Real=1.0, Nbins::Int=100)
     xv = range(lims(d)..., length=Nbins+1)
     return (xv, norm .* d(xv))
 end
@@ -14,7 +14,7 @@ yerror(y) = sqrt.(y)
 bindiffs(x) = x[2:end]- x[1:end-1]
 
 
-@recipe function f(data::Array, d::T where T<:AdvancedFunction, Nbins::Integer=60; datalabel="data")
+@recipe function f(data::Array, d::T where T<:FunctionWithParameters, Nbins::Integer=60; datalabel="data")
     bins = range(lims(d)..., length=Nbins)
     @series begin
         centers = bincenters(bins)
