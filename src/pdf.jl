@@ -68,10 +68,14 @@ end
 (d::pdf)(x, v) = d(x; p=v2p(v,d))
 
 # fix parameters
-constrainpar(d::pdf, pars...) = copy(d, constrainpar(pars(d), pars...))
-fixpars(d::pdf, args::NamedTuple) = copy(d, fixpars(pars(d), args::NamedTuple))
+fixpars(d::pdf, args::NamedTuple) = copy(d, fixpars(pars(d), args))
+releasepar(d::pdf, args...) = copy(d, releasepar(pars(d), args...))
+constrainpar(d::pdf, args...) = copy(d, constrainpar(pars(d), args...))
+unconstrainpar(d::pdf, args...) = copy(d, unconstrainpar(pars(d), args...))
 #
 noparsf(d::pdf; p=pars(d)) = (x;kw...)->func(d,x;p=p)
 noparsnormf(d::pdf; p=pars(d)) = (ns=normalizationintegral(d;p=p); (x;kw...)->func(d,x;p=p)/ns)
 #
 updatepars(d::pdf, from_p::NamedTuple) = pdf(;f=func(d), lims=d.lims, p=updatepars(pars(d), from_p))
+#
+

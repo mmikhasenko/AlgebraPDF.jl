@@ -4,6 +4,7 @@ struct Parameters{R,S,T}
     constrained::T
 end
 
+Pars(; kw...) = Parameters((;kw...))
 Parameters(t::NamedTuple) = Parameters(t,∅,∅)
 Parameters(ps::Parameters) = Parameters(freepars(ps),fixedpars(ps),constrainedpars(ps))
 
@@ -24,8 +25,6 @@ freepars(ps::Parameters) = getfield(ps, :free)
 fixedpars(ps::Parameters) = getfield(ps, :fixed)
 constrainedpars(ps::Parameters) = getfield(ps, :constrained)
 # 
-freepars(t::NamedTuple) = t
-
 import Base: getproperty
 getproperty(ps::Parameters, s::Symbol) = hasproperty(freepars(ps), s) ? getproperty(freepars(ps), s) : getproperty(fixedpars(ps), s)
 
@@ -46,3 +45,16 @@ updatepars(ps::Parameters, from_p::NamedTuple) = Parameters(updatepars(freepars(
 
 selectpars(  p, symb) = NamedTuple{Tuple(symb)}(getproperty.(Ref(p), symb))
 subtractpars(p, symb) = Base.structdiff(p, selectpars(p, symb))
+
+# NamedTuple
+freepars(ps::NamedTuple) = ps
+fixedpars(ps::NamedTuple) = ∅
+constrainedpars(ps::NamedTuple) = ∅
+
+#
+complain_about_Pars() = throw(DomainError("To be able to fix, release and constrain parameters create pdf with the `Pars(a=1.1, b=2.2)` constructor"))
+fixpars(ps::NamedTuple, from_p) = complain_about_Pars()
+fixpar(ps::NamedTuple, s::Symbol, v::T where T <: Real = 0.0) = complain_about_Pars()
+releasepar(ps::NamedTuple, s::Symbol, v::T where T <: Real = 0.0) = complain_about_Pars()
+constrainpar(ps::NamedTuple, s::Symbol, v::T where T <: Real, e::T where T <: Real) = complain_about_Pars()
+unconstrainpar(ps::NamedTuple, s::Symbol) = complain_about_Pars()

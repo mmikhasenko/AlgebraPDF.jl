@@ -19,6 +19,7 @@ import ForwardDiff: hessian
 export fixpar, releasepar, constrainpar, unconstrainpar
 export updatepars, selectpars
 export nt
+export Pars
 include("parameters.jl")
 
 export AdvancedFunction
