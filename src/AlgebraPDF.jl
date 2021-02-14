@@ -12,20 +12,27 @@ using LinearAlgebra
 using Measurements
 
 #
-import Base: +, *, /
 
 import Optim: minimizer, minimum
 import ForwardDiff: hessian
 
-export AdvancedFunction
+export fixpar, releasepar, constrainpar, unconstrainpar
+export updatepars, selectpars
+export nt
+export Pars
+include("parameters.jl")
+
+export FunctionWithParameters
 export ∅
 export pdf, npars, p2v, v2p
 export integral, integrals
 export fixpars, fixpar
 export fixedshapepdf
 export noparsf, noparsnormf
-export collectpars, func, lims
-export subtractpars, selectpars, updatepars
+export func, lims
+export freepars, fixedpars, constrainedpars
+export pars
+export Ncomp
 include("pdf.jl")
 
 export fit_llh, llh
@@ -36,7 +43,7 @@ export minimizer, minimum
 include("fit.jl")
 
 export MixedModel
-export fractions
+export fractions, fractionvalues
 include("mixedmodel.jl")
 
 export generate
@@ -46,19 +53,14 @@ export conv_with_gauss
 export conv_with_gauss_sampling
 include("convolution.jl")
 
-export sumpdf
-include("sumpdf.jl")
-
 export scaletobinneddata
 include("plottingrecipe.jl")
-
-export sWeights
-include("sWeights.jl")
 
 export xProductPDF
 include("multidim.jl")
 
 export aGauss, aBreitWigner, aExp
+export aPowExp, aPol
 export aDoubleGaussFixedRatio
 export aBreitWignerConvGauss
 export aTabulated
@@ -66,5 +68,17 @@ include("densities.jl")
 
 export inrange
 include("utils.jl")
+
+
+# requires further work
+import Base: +, *, /
+include("arithmetics.jl")
+
+export sumpdf
+include("sumpdf.jl")
+
+export sWeights
+include("sWeights.jl")
+
 
 end # module

@@ -3,7 +3,7 @@ struct xProductPDF{N}
     keys::SVector{N,Symbol}
 end
 
-xProductPDF(; kwargs...) = xProductPDF(SVector(values(kwargs)...), SVector(keys(kwargs)...))
+xProductPDF(; kwargs...) = xProductPDF{length(kwargs)}(SVector(values(kwargs)...), SVector(keys(kwargs)...))
 
 function generate(N, X::xProductPDF; kwarg...)
     data_vectors = generate.(N, X.dims; kwarg...)
