@@ -49,6 +49,7 @@ include("mixedmodel.jl")
 export generate
 include("generation.jl")
 
+export conv_f_with_g
 export conv_with_gauss
 export conv_with_gauss_sampling
 include("convolution.jl")
