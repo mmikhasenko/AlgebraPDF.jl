@@ -57,14 +57,14 @@ end
 end
 
 @testset "Parameters of pdf" begin
-    d = pdf(@. (e;p)->e^2+p.a; p=(a=1.0,), lims=(-1,2))
+    d = pdf((e;p)->e^2+p.a; p=(a=1.0,), lims=(-1,2))
     @test typeof(pars(d)) <: AlgebraPDF.Parameters
     @test length(freepars(d)) == 1
     @test length(fixedpars(d)) == 0
 end
 
 @testset "fix parameters example" begin
-    d0 = pdf(@. (e;p)->e^2+p.a; p=(a=1.0,), lims=(-1,2))
+    d0 = pdf((e;p)->e^2+p.a; p=(a=1.0,), lims=(-1,2))
     @test d0(1.0) ≈ 2.0/(9/3+3*pars(d0).a)
     #
     d1 = fixpar(d0, :a, 2.9)
@@ -76,18 +76,18 @@ end
 end
 
 @testset "parameters to values" begin
-    d = pdf(@. (e;p)->e^2+p.a; p=(a=1.0,), lims=(-1,2))
+    d = pdf((e;p)->e^2+p.a; p=(a=1.0,), lims=(-1,2))
     @test p2v(d) == [1.0]
     @test p2v((a=3.0,), d) == [3.0]
 end
 
 @testset "fixed-shape pdf" begin
-    d1 = fixedshapepdf(x->exp.(-(x .* 4).^2), (-1, 2))
+    d1 = fixedshapepdf(x->exp(-(4x).^2), (-1, 2))
     @test length(freepars(d1)) == 0
 end
 
 @testset "no-parameters f and no-parameters normalized f" begin
-    d0 = pdf(@. (e;p)->e^2+p.a; p=(a=1.0,), lims=(-1,2))
+    d0 = pdf((e;p)->e^2+p.a; p=(a=1.0,), lims=(-1,2))
 
     f = noparsf(d0)
     xr = lims(d0)[1]+rand()*(lims(d0)[2]-lims(d0)[1])
@@ -100,8 +100,8 @@ end
 
 @testset "example of usage" begin
     # tests
-    snl = pdf(@. (x;p) -> exp(-(x-p.μ)^2/(2*p.σ^2)); p = (μ=1.4, σ=0.15), lims=(0, 3))
-    bkg = pdf(@. (x;p) -> sqrt(x)*exp(-p.α*x); p = (α=1.3,), lims=(0, 3))
+    snl = pdf((x;p) -> exp(-(x-p.μ)^2/(2*p.σ^2)); p = (μ=1.4, σ=0.15), lims=(0, 3))
+    bkg = pdf((x;p) -> sqrt(x)*exp(-p.α*x); p = (α=1.3,), lims=(0, 3))
     bkg *= (fb=2.5,)
     pdf_sum = snl + bkg
     
@@ -217,7 +217,7 @@ end
     nconv(e) = conv_with_gauss(e, x->x>0, σ0)
     @test df(nconv, aconv, (-1, 1); Ns=1000) < 0.01
     #
-    step = pdf(@. (e;p)->e>0; p=∅, lims=(-1,1))
+    step = pdf((e;p)->e>0; p=∅, lims=(-1,1))
     func(step, 1.1; p=∅)
     smeared_step = conv_with_gauss(step, σ0)
     nconv(e) = func(smeared_step, e; p=∅)
@@ -264,8 +264,8 @@ end
 #  _|    _|    _|  _|  _|    _|    _|_|_|    _|_|_|  _|    _|    _|    _|_|      _|_|_|  
 
 
-g1 = pdf(@. (x;p)->1/p.σ1*exp(-(x-p.μ1)^2/(2*p.σ1^2)); p=(μ1= 2.1, σ1=0.7 ), lims=(-3, 3))
-g2 = pdf(@. (x;p)->1/p.σ2*exp(-(x-p.μ2)^2/(2*p.σ2^2)); p=(μ2=-0.7, σ2=0.7 ), lims=(-3, 3))
+g1 = pdf((x;p)->1/p.σ1*exp(-(x-p.μ1)^2/(2*p.σ1^2)); p=(μ1= 2.1, σ1=0.7 ), lims=(-3, 3))
+g2 = pdf((x;p)->1/p.σ2*exp(-(x-p.μ2)^2/(2*p.σ2^2)); p=(μ2=-0.7, σ2=0.7 ), lims=(-3, 3))
 mm0 = MixedModel([g1, g2], (f1=0.33,))
 
 @testset "Parameters of the mixed model" begin
@@ -375,13 +375,13 @@ end
 @testset "Arithmetic operations" begin
     BW(s, m, Γ) = 1 / (m^2 - s - 1im*m*Γ)
     #
-    pdf1 = pdf(@. (e;p)->abs2(BW(e^2, p.m1, p.Γ1));
+    pdf1 = pdf((e;p)->abs2(BW(e^2, p.m1, p.Γ1));
         p = (m1=0.25, Γ1=2e-3), lims = (0, 0.15))
     #
     @test pdf1(rand()) != 0.0
     @test length(pdf1(rand(10))) == 10
     #
-    pdf2 = pdf(@. (e;p)->abs2(BW(e^2, p.m2, p.Γ2));
+    pdf2 = pdf((e;p)->abs2(BW(e^2, p.m2, p.Γ2));
         p = (m2=0.1, Γ2=14e-3), lims = (0, 0.15))
     #
     x0 = 1.1; v0 = rand(2)
@@ -406,8 +406,8 @@ end
 #                                      _|                            
 #                                      _|                            
 
-g(x) = exp.(-(x .* 4).^2)
-e(x) = exp.(-x)
+g(x) = exp(-(4x)^2)
+e(x) = exp(-x)
 mylims = (-1, 2)
 # 
 sum0 = sumpdf(g,e,mylims)

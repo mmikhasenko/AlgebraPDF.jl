@@ -66,6 +66,8 @@ function (d::pdf)(x; p=freepars(d), norm_according_to=d)
     return func(d,x; p=allp) / normalization
 end
 (d::pdf)(x, v) = d(x; p=v2p(v,d))
+func(d,x::Array{T,N} where {T,N}; p) = func.(Ref(d), x; p=p)
+func(d,x::AbstractRange{T} where T; p) = func.(Ref(d), x; p=p)
 
 # fix parameters
 fixpars(d::pdf, args::NamedTuple) = copy(d, fixpars(pars(d), args))
