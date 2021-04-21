@@ -82,6 +82,20 @@ macro typepdf(name)
     end
 end
 
+macro typepdf(name, f)
+    quote
+        struct $name{T,N} <: AbstractPDF
+            p::T
+            lims::N
+        end
+        $(esc(name))(;p,lims) = $(esc(name))(Pars(;p...), lims)
+
+        import AlgebraPDF: func
+        # 
+        $(esc(:func))(d::$(esc(name)), x::Number; p=pars(d)) = $f
+    end
+end
+
 #                  _|      _|_|  
 #  _|_|_|      _|_|_|    _|      
 #  _|    _|  _|    _|  _|_|_|_|  
