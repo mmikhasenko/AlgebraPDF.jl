@@ -54,8 +54,8 @@ end
 
 
 
-# FunctionWithParameters
-function fit_llh(data, d::T where T<:FunctionWithParameters)
+# AbstractFunctionWithParameters
+function fit_llh(data, d::AbstractPDF)
     filtered_data = filter(x->inrange(x, lims(d)), data)
     return fit_llh(filtered_data, d; init_pars=p2v(d))
 end
@@ -63,7 +63,7 @@ end
 chi2(specification; p) = sum(((getproperty(p, k)-v) / e)^2
     for (k,(v,e)) in zip(keys(specification),specification))
 
-function fit_llh_with_constraints(data, d::T where T<:FunctionWithParameters, specification)
+function fit_llh_with_constraints(data, d::AbstractPDF, specification)
     filtered_data = filter(x->inrange(x, lims(d)), data)
     fc(v) = chi2(specification; p=v2p(v, d))
     return fit_llh_with_constraints(filtered_data, d, fc; init_pars=p2v(d))

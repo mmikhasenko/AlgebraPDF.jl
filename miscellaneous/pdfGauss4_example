@@ -142,7 +142,7 @@ md"""
 """
 
 # ╔═╡ d81ae590-7845-11eb-08bc-37d3b269ec86
-function cdf(d::T where T<:FunctionWithParameters; p=pars(d))
+function cdf(d::AbstractFunctionWithParameters; p=pars(d))
 	c(y) = quadgk(x->func(s2)(x; p=p),lims(d)[1], y)[1]
 	y->c.(y) ./ AlgebraPDF.normalizationintegral(s2)
 end

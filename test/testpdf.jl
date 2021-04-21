@@ -78,9 +78,9 @@ end
 @testset "pdf with NamedTuple" begin
     # here I create the structure directly,
     #    p=(...) would call Parameters(p)
-    d = pdf((x;p)->x*5+p.a, (a=1.1,), (-2, 3))
+    d = FunctionWithParameters((x;p)->x*5+p.a, (a=1.1,))
     # 
-    @test d(1.1) != 0.0
+    @test func(d,1.1) != 0.0
     #
     # parameter manipulation are not supposed to work with NamedTuple
     @test_throws DomainError fixpar(d, :a, 1.2)

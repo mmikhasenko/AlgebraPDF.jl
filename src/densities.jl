@@ -31,7 +31,7 @@ function aDoubleGaussFixedRatio(pars, lims; fixpars)
     μ,σ = keys(pars)
     r,n = fixpars
     return pdf((x;p)->standarddoublegauss.(x .- getproperty(p, μ), getproperty(p, σ), r,n),
-        pars, lims)
+        p=pars, lims=lims)
 end
 
 function aBreitWignerConvGauss(pars, lims; fixpars)
@@ -39,7 +39,7 @@ function aBreitWignerConvGauss(pars, lims; fixpars)
     σ, = fixpars
     density = (x;p)->conv_with_gauss.(x,
         y->abs2(AlgebraPDF.amplitudeBWsq(y, getproperty(p,m), getproperty(p,Γ))), σ)
-    return pdf(density, pars, lims)
+    return pdf(density, p=pars, lims=lims)
 end
 
 function aTabulated(xv,yv,lims)

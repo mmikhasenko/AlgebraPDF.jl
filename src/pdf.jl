@@ -1,28 +1,30 @@
-abstract type FunctionWithParameters end
+abstract type AbstractFunctionWithParameters end
 
+# 
 ∅ = NamedTuple()
 freepars(f::Function) = ∅
 #
-freepars(d::FunctionWithParameters) = freepars(pars(d))
-fixedpars(d::FunctionWithParameters) = fixedpars(pars(d))
+pars(d::AbstractFunctionWithParameters) = d.p
+freepars(d::AbstractFunctionWithParameters) = freepars(pars(d))
+fixedpars(d::AbstractFunctionWithParameters) = fixedpars(pars(d))
 # 
 # properties
-npars(d::FunctionWithParameters) = length(freepars(d))
-v2p(v,d::FunctionWithParameters) = NamedTuple{keys(freepars(d))}(v)
-p2v(p,d::FunctionWithParameters) = [getproperty(p, k) for k in keys(freepars(d))]
-p2v(  d::FunctionWithParameters) = p2v(freepars(d), d)
+npars(d::AbstractFunctionWithParameters) = length(freepars(d))
+v2p(v,d::AbstractFunctionWithParameters) = NamedTuple{keys(freepars(d))}(v)
+p2v(p,d::AbstractFunctionWithParameters) = [getproperty(p, k) for k in keys(freepars(d))]
+p2v(  d::AbstractFunctionWithParameters) = p2v(freepars(d), d)
 
 # 
-fixpar(d::FunctionWithParameters, s::Symbol) =  fixpars(d, (s,))
-fixpar(d::FunctionWithParameters, s::Symbol, v::Real) =  fixpars(d, nt(s,v))
-fixpars(d::FunctionWithParameters, s::Union{Tuple,Array{Symbol}}) =
+fixpar(d::AbstractFunctionWithParameters, s::Symbol) =  fixpars(d, (s,))
+fixpar(d::AbstractFunctionWithParameters, s::Symbol, v::Real) =  fixpars(d, nt(s,v))
+fixpars(d::AbstractFunctionWithParameters, s::Union{Tuple,Array{Symbol}}) =
     fixpars(d, selectpars(freepars(d), s))
 #
-fixpars(       d::FunctionWithParameters, args...) = copy(d, fixpars(       pars(d), args...))
-releasepar(    d::FunctionWithParameters, args...) = copy(d, releasepar(    pars(d), args...))
-constrainpar(  d::FunctionWithParameters, args...) = copy(d, constrainpar(  pars(d), args...))
-unconstrainpar(d::FunctionWithParameters, args...) = copy(d, unconstrainpar(pars(d), args...))
-updatepars(    d::FunctionWithParameters, args...) = copy(d, updatepars(    pars(d), args...))
+fixpars(       d::AbstractFunctionWithParameters, args...) = copy(d, fixpars(       pars(d), args...))
+releasepar(    d::AbstractFunctionWithParameters, args...) = copy(d, releasepar(    pars(d), args...))
+constrainpar(  d::AbstractFunctionWithParameters, args...) = copy(d, constrainpar(  pars(d), args...))
+unconstrainpar(d::AbstractFunctionWithParameters, args...) = copy(d, unconstrainpar(pars(d), args...))
+updatepars(    d::AbstractFunctionWithParameters, args...) = copy(d, updatepars(    pars(d), args...))
 
 
 #    _|_|    _|                    _|                                      _|      _|_|_|    _|_|_|    _|_|_|_|  
@@ -32,7 +34,7 @@ updatepars(    d::FunctionWithParameters, args...) = copy(d, updatepars(    pars
 #  _|    _|  _|_|_|    _|_|_|        _|_|  _|          _|_|_|    _|_|_|      _|_|  _|        _|_|_|    _|        
                                                                                                                
 
-abstract type AbstractPDF <: FunctionWithParameters end
+abstract type AbstractPDF <: AbstractFunctionWithParameters end
 
 normalizationintegral(d::AbstractPDF; p=freepars(d)) = quadgk(x->func(d,x; p=p), lims(d)...)[1]
 function integral(d::AbstractPDF, lims; p=freepars(d))
@@ -52,14 +54,14 @@ function (d::AbstractPDF)(x; p=freepars(d), norm_according_to=d)
     return func(d,x; p=allp) / normalization
 end
 (d::AbstractPDF)(x, v) = d(x; p=v2p(v,d))
-func(d::AbstractPDF,x::AbstractArray{T,N} where {T,N}; p=pars(d)) = func.(Ref(d), x; p=p)
-func(d::AbstractPDF,x::AbstractRange{T} where T; p=pars(d)) = func.(Ref(d), x; p=p)
+func(d::AbstractPDF, x::AbstractArray; p=pars(d)) = func.(Ref(d), x; p=p)
+func(d::AbstractPDF, x::AbstractRange; p=pars(d)) = func.(Ref(d), x; p=p)
 
 # assumes that the fields "lims" and "p" are present
 lims(d::AbstractPDF) = d.lims
-pars(d::AbstractPDF) = d.p
 
-                                                                       
+
+
 #    _|                                                    _|      _|_|  
 #  _|_|_|_|  _|    _|  _|_|_|      _|_|    _|_|_|      _|_|_|    _|      
 #    _|      _|    _|  _|    _|  _|_|_|_|  _|    _|  _|    _|  _|_|_|_|  
@@ -93,6 +95,7 @@ macro typepdf(name, f)
         import AlgebraPDF: func
         # 
         $(esc(:func))(d::$(esc(name)), x::Number; p=pars(d)) = $f
+        $(esc(:copy))(d::$(esc(name)), p) = $(esc(name))(;p=p,lims=lims(d))
     end
 end
 
@@ -105,16 +108,32 @@ end
 #  _|                            
 
 
-@with_kw struct pdf{T} <: AbstractPDF
+@with_kw struct FunctionWithParameters{T} <: AbstractFunctionWithParameters
     f::Function
     p::T
-    lims::Tuple{Real,Real}
 end
-pdf(f;p,lims) = pdf(;f=f,lims=lims,p=Parameters(p))
-#
+FunctionWithParameters(f;p) = FunctionWithParameters(;f=f,p=Parameters(p))
+
 # two methods to be defined
-func(d::pdf,x::Number; p=pars(d)) = d.f(x;p=p)
-copy(d::pdf, p) = pdf(;f=d.f, lims=d.lims, p=p)
+func(d::FunctionWithParameters, x::Number; p=pars(d)) = d.f(x; p=p)
+copy(d::FunctionWithParameters, p) = FunctionWithParameters(;f=d.f, p=p)
+#
+
+#################################################################### 
+
+@with_kw struct pdf{T<:AbstractFunctionWithParameters,N} <: AbstractPDF
+    lineshape::T
+    lims::N
+end
+pdf(f;p,lims) = pdf(;
+    lineshape = FunctionWithParameters(f; p=Parameters(p)),
+        lims = lims)
+
+# two methods to be defined
+import Base:getproperty
+getproperty(d::pdf, sym::Symbol) = sym==:p ? pars(d.lineshape) : getfield(d, sym)
+func(d::pdf, x::Number; p=pars(d)) = func(d.lineshape, x; p=p)
+copy(d::pdf, p) = pdf(; lineshape=copy(d.lineshape,p), lims=lims(d))
 #
 
 # 
@@ -124,3 +143,10 @@ noparsnormf(d::pdf; p=pars(d)) = (ns=normalizationintegral(d;p=p); (x;kw...)->fu
 
 
 fixedshapepdf(f, lims) = pdf((x;p)->f(x); lims=lims, p=∅)
+
+
+# pdf((e;p)->e^2+p.a; lims=(-1,2), p=(a=1.0,))
+# # 
+# pdf(
+#     FunctionWithParameters((e;p)->e^2+p.a; p=(a=1.0,)),
+#     (-1,2))
