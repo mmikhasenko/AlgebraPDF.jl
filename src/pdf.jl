@@ -59,6 +59,28 @@ func(d::AbstractPDF,x::AbstractRange{T} where T; p=pars(d)) = func.(Ref(d), x; p
 lims(d::AbstractPDF) = d.lims
 pars(d::AbstractPDF) = d.p
 
+                                                                       
+#    _|                                                    _|      _|_|  
+#  _|_|_|_|  _|    _|  _|_|_|      _|_|    _|_|_|      _|_|_|    _|      
+#    _|      _|    _|  _|    _|  _|_|_|_|  _|    _|  _|    _|  _|_|_|_|  
+#    _|      _|    _|  _|    _|  _|        _|    _|  _|    _|    _|      
+#      _|_|    _|_|_|  _|_|_|      _|_|_|  _|_|_|      _|_|_|    _|      
+#                  _|  _|                  _|                            
+#              _|_|    _|                  _|                            
+
+
+macro typepdf(name)
+    quote
+        struct $name{T,N} <: AbstractPDF
+            p::T
+            lims::N
+        end
+        $(esc(name))(;p,lims) = $(esc(name))(Pars(;p...), lims)
+
+        import AlgebraPDF: func
+        # func(d::$name, x::Number; p=pars(d)) = $f
+    end
+end
 
 #                  _|      _|_|  
 #  _|_|_|      _|_|_|    _|      
@@ -74,29 +96,17 @@ pars(d::AbstractPDF) = d.p
     p::T
     lims::Tuple{Real,Real}
 end
-#
-# consructors
-# pdf(f,p,lims) = pdf(;f=f,lims=lims,p=Parameters(p))
 pdf(f;p,lims) = pdf(;f=f,lims=lims,p=Parameters(p))
 #
-#
-import Base:copy
-# 
-copy(d::pdf, p) = pdf(;f=func(d), lims=d.lims, p=p)
-func(d::pdf) = d.f
+# two methods to be defined
 func(d::pdf,x::Number; p=pars(d)) = d.f(x;p=p)
+copy(d::pdf, p) = pdf(;f=d.f, lims=d.lims, p=p)
 #
+
 # 
 #
 noparsf(d::pdf; p=pars(d)) = (x;kw...)->func(d,x;p=p)
 noparsnormf(d::pdf; p=pars(d)) = (ns=normalizationintegral(d;p=p); (x;kw...)->func(d,x;p=p)/ns)
-#
-
-# @with_kw struct FixedShapePDF <: AbstractPDF
-#     f::Function
-#     lims::Tuple{Real,Real}
-# end
-# pars(f::FixedShapePDF) = Parameters(∅)
 
 
 fixedshapepdf(f, lims) = pdf((x;p)->f(x); lims=lims, p=∅)

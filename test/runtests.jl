@@ -456,3 +456,15 @@ sum_of_w = sWeights_signal(xv) + sWeights_backgr(xv)
     sum_of_w = sWeights_signal(xv) + sWeights_backgr(xv)
     @test prod(sum_of_w .- sum_of_w[30] .< 1e-10)
 end
+
+@typepdf BW
+func(d::BW, x::Number; p=pars(d)) = p.m*p.Γ/(p.m^2-x^2-1im*p.m*p.Γ) |> abs2
+bw = BW(p=(m=3.1,Γ=0.1), lims=(1,5))
+
+@testset "User-def type" begin
+    @test pars(bw).m == 3.1
+    @test pars(bw).Γ == 0.1
+    @test lims(bw) == (1,5)
+    @test AlgebraPDF.normalizationintegral(bw) != 0.0
+    @test bw(1.1) != 0.0
+end

@@ -13,6 +13,7 @@ using Measurements
 
 #
 
+import Base:copy
 import Optim: minimizer, minimum
 import ForwardDiff: hessian
 
@@ -23,6 +24,8 @@ export Pars
 include("parameters.jl")
 
 export FunctionWithParameters
+export AbstractPDF
+export @typepdf
 export ∅
 export pdf, npars, p2v, v2p
 export integral, integrals
