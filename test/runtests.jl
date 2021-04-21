@@ -57,7 +57,7 @@ end
 end
 
 @testset "Parameters of pdf" begin
-    d = pdf((e;p)->e^2+p.a; p=(a=1.0,), lims=(-1,2))
+    d = pdf((e;p)->e^2+p.a; lims=(-1,2), p=(a=1.0,))
     @test typeof(pars(d)) <: AlgebraPDF.Parameters
     @test length(freepars(d)) == 1
     @test length(fixedpars(d)) == 0
@@ -132,12 +132,14 @@ end
     @test Measurements.uncertainty.(mfr_exact) == sqrt.(diag(invH_fd))
 end
 
-
 @testset "pdf with NamedTuple" begin
-    d = pdf((x; p)->x.*5 .+ p.a, (-2, 3), 1, (a=1.1, ))
+    # here I create the structure directly,
+    #    p=(...) would call Parameters(p)
+    d = pdf((x;p)->x*5+p.a, (a=1.1,), (-2, 3))
     # 
     @test d(1.1) != 0.0
-    # 
+    #
+    # parameter manipulation are not supposed to work with NamedTuple
     @test_throws DomainError fixpar(d, :a, 1.2)
     @test_throws DomainError fixpars(d, (a=1.2,))
     @test_throws DomainError releasepar(d, :a)
@@ -307,8 +309,8 @@ end
 end
 
 @testset "Generate mixed model" begin
-    p1 = fixedshapepdf(x->(x .> 0), (-1,1))
-    p2 = fixedshapepdf(x->0.01.*(x .< 0), (-1,1))
+    p1 = fixedshapepdf(x->(x>0), (-1,1))
+    p2 = fixedshapepdf(x->0.01*(x<0), (-1,1))
     mm = MixedModel([p1,p2],(f1 = 0.01,))
     Nd = 1000
     data = generate(Nd, mm)

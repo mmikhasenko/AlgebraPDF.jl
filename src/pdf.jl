@@ -1,6 +1,5 @@
 abstract type FunctionWithParameters end
 
-const uTAS = Union{Tuple,Array{Symbol}}
 ∅ = NamedTuple()
 freepars(f::Function) = ∅
 #
@@ -13,10 +12,17 @@ v2p(v,d::FunctionWithParameters) = NamedTuple{keys(freepars(d))}(v)
 p2v(p,d::FunctionWithParameters) = [getproperty(p, k) for k in keys(freepars(d))]
 p2v(  d::FunctionWithParameters) = p2v(freepars(d), d)
 
-fixpars(d::FunctionWithParameters, s::uTAS) =
-        fixpars(d, selectpars(freepars(d), s))
+# 
 fixpar(d::FunctionWithParameters, s::Symbol) =  fixpars(d, (s,))
 fixpar(d::FunctionWithParameters, s::Symbol, v::Real) =  fixpars(d, nt(s,v))
+fixpars(d::FunctionWithParameters, s::Union{Tuple,Array{Symbol}}) =
+    fixpars(d, selectpars(freepars(d), s))
+#
+fixpars(       d::FunctionWithParameters, args...) = copy(d, fixpars(       pars(d), args...))
+releasepar(    d::FunctionWithParameters, args...) = copy(d, releasepar(    pars(d), args...))
+constrainpar(  d::FunctionWithParameters, args...) = copy(d, constrainpar(  pars(d), args...))
+unconstrainpar(d::FunctionWithParameters, args...) = copy(d, unconstrainpar(pars(d), args...))
+updatepars(    d::FunctionWithParameters, args...) = copy(d, updatepars(    pars(d), args...))
 
 
 #    _|_|    _|                    _|                                      _|      _|_|_|    _|_|_|    _|_|_|_|  
@@ -49,6 +55,9 @@ end
 func(d::AbstractPDF,x::AbstractArray{T,N} where {T,N}; p=pars(d)) = func.(Ref(d), x; p=p)
 func(d::AbstractPDF,x::AbstractRange{T} where T; p=pars(d)) = func.(Ref(d), x; p=p)
 
+# assumes that the fields "lims" and "p" are present
+lims(d::AbstractPDF) = d.lims
+pars(d::AbstractPDF) = d.p
 
 
 #                  _|      _|_|  
@@ -62,35 +71,32 @@ func(d::AbstractPDF,x::AbstractRange{T} where T; p=pars(d)) = func.(Ref(d), x; p
 
 @with_kw struct pdf{T} <: AbstractPDF
     f::Function
-    lims::Tuple{Real,Real}
-    xdim::Int = 1
     p::T
+    lims::Tuple{Real,Real}
 end
 #
-import Base:copy
-copy(d::pdf, p) = pdf(;f=func(d), lims=d.lims, p=p)
-# 
 # consructors
-pdf(f,p,lims) = pdf(;f=f,lims=lims,p=Parameters(p))
+# pdf(f,p,lims) = pdf(;f=f,lims=lims,p=Parameters(p))
 pdf(f;p,lims) = pdf(;f=f,lims=lims,p=Parameters(p))
-fixedshapepdf(f, lims) = pdf((x;p)->f(x); lims=lims, p=∅)
 #
 #
-lims(d::pdf) = d.lims
-pars(d::pdf) = d.p
+import Base:copy
+# 
+copy(d::pdf, p) = pdf(;f=func(d), lims=d.lims, p=p)
 func(d::pdf) = d.f
 func(d::pdf,x::Number; p=pars(d)) = d.f(x;p=p)
 #
 # 
-# fix parameters
-fixpars(d::pdf, args::NamedTuple) = copy(d, fixpars(pars(d), args))
-releasepar(d::pdf, args...) = copy(d, releasepar(pars(d), args...))
-constrainpar(d::pdf, args...) = copy(d, constrainpar(pars(d), args...))
-unconstrainpar(d::pdf, args...) = copy(d, unconstrainpar(pars(d), args...))
 #
 noparsf(d::pdf; p=pars(d)) = (x;kw...)->func(d,x;p=p)
 noparsnormf(d::pdf; p=pars(d)) = (ns=normalizationintegral(d;p=p); (x;kw...)->func(d,x;p=p)/ns)
 #
-updatepars(d::pdf, from_p::NamedTuple) = pdf(;f=func(d), lims=d.lims, p=updatepars(pars(d), from_p))
-#
 
+# @with_kw struct FixedShapePDF <: AbstractPDF
+#     f::Function
+#     lims::Tuple{Real,Real}
+# end
+# pars(f::FixedShapePDF) = Parameters(∅)
+
+
+fixedshapepdf(f, lims) = pdf((x;p)->f(x); lims=lims, p=∅)
