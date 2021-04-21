@@ -35,7 +35,7 @@ export noparsf, noparsnormf
 export func, lims
 export freepars, fixedpars, constrainedpars
 export pars
-export Ncomp
+export normalizationintegral
 include("pdf.jl")
 
 export fit_llh, llh
@@ -47,6 +47,7 @@ include("fit.jl")
 
 export MixedModel
 export fractions, fractionvalues
+export Ncomp
 include("mixedmodel.jl")
 
 export generate
