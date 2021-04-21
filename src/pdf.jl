@@ -18,6 +18,39 @@ fixpars(d::FunctionWithParameters, s::uTAS) =
 fixpar(d::FunctionWithParameters, s::Symbol) =  fixpars(d, (s,))
 fixpar(d::FunctionWithParameters, s::Symbol, v::Real) =  fixpars(d, nt(s,v))
 
+
+#    _|_|    _|                    _|                                      _|      _|_|_|    _|_|_|    _|_|_|_|  
+#  _|    _|  _|_|_|      _|_|_|  _|_|_|_|  _|  _|_|    _|_|_|    _|_|_|  _|_|_|_|  _|    _|  _|    _|  _|        
+#  _|_|_|_|  _|    _|  _|_|        _|      _|_|      _|    _|  _|          _|      _|_|_|    _|    _|  _|_|_|    
+#  _|    _|  _|    _|      _|_|    _|      _|        _|    _|  _|          _|      _|        _|    _|  _|        
+#  _|    _|  _|_|_|    _|_|_|        _|_|  _|          _|_|_|    _|_|_|      _|_|  _|        _|_|_|    _|        
+                                                                                                               
+
+abstract type AbstractPDF <: FunctionWithParameters end
+
+normalizationintegral(d::AbstractPDF; p=freepars(d)) = quadgk(x->func(d,x; p=p), lims(d)...)[1]
+function integral(d::AbstractPDF, lims; p=freepars(d))
+    allpars = p+fixedpars(d)
+    quadgk(x->func(d,x; p=allpars), lims...)[1] / normalizationintegral(d; p=allpars)
+end
+#
+# calls
+function (d::AbstractPDF)(x; p=freepars(d), norm_according_to=d)
+    allp = p+fixedpars(d)
+    normalization = normalizationintegral(norm_according_to; p=allp)
+    if normalization ≈ 0.0
+        println("Error: normalization ≈ 0!")
+        normalization = 1.0
+    end
+#     normalization ≈ 0.0 && error("norm = 0 with p = $(p)!")
+    return func(d,x; p=allp) / normalization
+end
+(d::AbstractPDF)(x, v) = d(x; p=v2p(v,d))
+func(d::AbstractPDF,x::AbstractArray{T,N} where {T,N}; p=pars(d)) = func.(Ref(d), x; p=p)
+func(d::AbstractPDF,x::AbstractRange{T} where T; p=pars(d)) = func.(Ref(d), x; p=p)
+
+
+
 #                  _|      _|_|  
 #  _|_|_|      _|_|_|    _|      
 #  _|    _|  _|    _|  _|_|_|_|  
@@ -26,7 +59,8 @@ fixpar(d::FunctionWithParameters, s::Symbol, v::Real) =  fixpars(d, nt(s,v))
 #  _|                            
 #  _|                            
 
-@with_kw struct pdf{T} <: FunctionWithParameters
+
+@with_kw struct pdf{T} <: AbstractPDF
     f::Function
     lims::Tuple{Real,Real}
     xdim::Int = 1
@@ -44,31 +78,10 @@ fixedshapepdf(f, lims) = pdf((x;p)->f(x); lims=lims, p=∅)
 #
 lims(d::pdf) = d.lims
 pars(d::pdf) = d.p
-func(d) = d.f
-func(d,x; p=pars(d)) = d.f(x;p=p)
+func(d::pdf) = d.f
+func(d::pdf,x::Number; p=pars(d)) = d.f(x;p=p)
 #
 # 
-normalizationintegral(d::pdf; p=freepars(d)) = quadgk(x->func(d,x; p=p), lims(d)...)[1]
-function integral(d::pdf, lims; p=freepars(d))
-    allpars = p+fixedpars(d)
-    quadgk(x->func(d,x; p=allpars), lims...)[1] / normalizationintegral(d; p=allpars)
-end
-#
-# calls
-function (d::pdf)(x; p=freepars(d), norm_according_to=d)
-    allp = p+fixedpars(d)
-    normalization = normalizationintegral(norm_according_to; p=allp)
-    if normalization ≈ 0.0
-        println("Error: normalization ≈ 0!")
-        normalization = 1.0
-    end
-#     normalization ≈ 0.0 && error("norm = 0 with p = $(p)!")
-    return func(d,x; p=allp) / normalization
-end
-(d::pdf)(x, v) = d(x; p=v2p(v,d))
-func(d,x::AbstractArray{T,N} where {T,N}; p=pars(d)) = func.(Ref(d), x; p=p)
-func(d,x::AbstractRange{T} where T; p=pars(d)) = func.(Ref(d), x; p=p)
-
 # fix parameters
 fixpars(d::pdf, args::NamedTuple) = copy(d, fixpars(pars(d), args))
 releasepar(d::pdf, args...) = copy(d, releasepar(pars(d), args...))
