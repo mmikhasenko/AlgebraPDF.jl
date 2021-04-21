@@ -14,7 +14,7 @@ yerror(y) = sqrt.(y)
 bindiffs(x) = x[2:end]- x[1:end-1]
 
 
-@recipe function f(data::Array, d::T where T<:FunctionWithParameters, Nbins::Integer=60; datalabel="data")
+@recipe function f(data::AbstractArray, d::T where T<:FunctionWithParameters, Nbins::Integer=60; datalabel="data")
     bins = range(lims(d)..., length=Nbins)
     @series begin
         centers = bincenters(bins)
@@ -26,7 +26,7 @@ bindiffs(x) = x[2:end]- x[1:end-1]
         yerror := yerror(bincontent)
         seriestype := :scatter
         seriescolor --> :black
-        markersize --> 5
+        markersize --> 3
         label --> datalabel
         ()
     end
