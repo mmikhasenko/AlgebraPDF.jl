@@ -93,6 +93,7 @@ macro typepdf(ex)
         $(esc(name))(;p,lims) = $(esc(name))(Pars(;p...), lims)
 
         import AlgebraPDF: func
+        import Base: copy
         # 
         $(esc(:func))(d::$(esc(name)), $(esc(x))::Number; p=$(esc(:pars))(d)) = $(esc(body))
         $(esc(:copy))(d::$(esc(name)), p) = $(esc(name))(;p=p,lims=$(esc(:lims))(d))

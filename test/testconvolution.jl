@@ -37,3 +37,12 @@ end
     nconv(e) = func(smeared_step_sampling, e; p = freepars(smeared_step_sampling))
     @test 0.01 < df(nconv, aconv, (-1, 1); Ns=1000) < 0.04
 end
+
+
+@typepdf myBW(x;p) = AlgebraPDF.amplitudeBWsq(x+2.961477, p.m, p.Γ)
+mybw = myBW((m=3.0, Γ=3e-3), (0,0.22))
+mybw_conv = convGauss(mybw, 5e-3)
+
+@testset "convGauss: update pars works" begin
+    @test pars(updatepars(mybw_conv,(m=3.1,))).m == 3.1
+end

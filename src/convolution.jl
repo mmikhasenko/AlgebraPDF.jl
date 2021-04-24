@@ -11,3 +11,21 @@ function conv_with_gauss_sampling(e,f,σ; Ns=10)
 end
 conv_with_gauss_sampling(d::pdf,σ; Ns=10) =
     pdf((e;p)->conv_with_gauss_sampling(e, x->func(d,x; p=p), σ; Ns=Ns); p=d.p, lims=lims(d))
+
+
+#
+
+struct convGauss{T,S} <: AbstractPDF
+    pdf::T
+    σ::S
+end
+
+pars(d::convGauss) = pars(d.pdf)
+lims(d::convGauss) = lims(d.pdf)
+copy(d::convGauss,p) = convGauss(copy(d.pdf,p), d.σ)
+
+function func(d::convGauss, x::Number; p=pars(d))
+    g(z) = AlgebraPDF.standardgauss(z, d.σ)
+    f(z) = func(d.pdf, z; p=p)
+    return quadgk(y->f(x-y) * g(y), -5*d.σ, +5*d.σ)[1]
+end
