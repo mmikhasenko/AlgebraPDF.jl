@@ -43,9 +43,9 @@ function integral(d::AbstractPDF, lims; p=freepars(d))
 end
 #
 # calls
-function (d::AbstractPDF)(x; p=freepars(d), norm_according_to=d)
+function (d::AbstractPDF)(x; p=freepars(d))
     allp = p+fixedpars(d)
-    normalization = normalizationintegral(norm_according_to; p=allp)
+    normalization = normalizationintegral(d; p=allp)
     if normalization ≈ 0.0
         println("Error: normalization ≈ 0!")
         normalization = 1.0
@@ -53,13 +53,24 @@ function (d::AbstractPDF)(x; p=freepars(d), norm_according_to=d)
 #     normalization ≈ 0.0 && error("norm = 0 with p = $(p)!")
     return func(d,x; p=allp) / normalization
 end
+
+function haha(d::T, x; p=freepars(d)) where T<:AbstractPDF
+    allp = p+fixedpars(d)
+    normalization = normalizationintegral(d; p=allp)
+    if normalization ≈ 0.0
+        println("Error: normalization ≈ 0!")
+        normalization = 1.0
+    end
+#     normalization ≈ 0.0 && error("norm = 0 with p = $(p)!")
+    return func(d,x; p=allp) / normalization
+end
+
 (d::AbstractPDF)(x, v) = d(x; p=v2p(v,d))
 func(d::AbstractPDF, x::AbstractArray; p=pars(d)) = func.(Ref(d), x; p=p)
 func(d::AbstractPDF, x::AbstractRange; p=pars(d)) = func.(Ref(d), x; p=p)
 
 # assumes that the fields "lims" and "p" are present
 lims(d::AbstractPDF) = d.lims
-
 
 
 #    _|                                                    _|      _|_|  
@@ -70,21 +81,20 @@ lims(d::AbstractPDF) = d.lims
 #                  _|  _|                  _|                            
 #              _|_|    _|                  _|                            
 
+"""
+    @typepdf MyPDF(x;p) = unnormdensity(x, p.a, p.b)
 
-macro typepdf(name)
-    quote
-        struct $name{T,N} <: AbstractPDF
-            p::T
-            lims::N
-        end
-        $(esc(name))(;p,lims) = $(esc(name))(Pars(;p...), lims)
-
-        import AlgebraPDF: func
-        # func(d::$name, x::Number; p=pars(d)) = $f
-    end
-end
-
-macro typepdf(name, f)
+    Expected form of the expression is `f(x;p)` on the left
+"""
+macro typepdf(ex)
+    # 
+    fpx = ex.args[1].args
+    name = fpx[1]
+    p = fpx[2].args[1]
+    (p != :p) && error("expected format f(x;p) = ... " )
+    x = fpx[3]
+    body = ex.args[2]
+    # 
     quote
         struct $name{T,N} <: AbstractPDF
             p::T
@@ -94,10 +104,11 @@ macro typepdf(name, f)
 
         import AlgebraPDF: func
         # 
-        $(esc(:func))(d::$(esc(name)), x::Number; p=pars(d)) = $f
-        $(esc(:copy))(d::$(esc(name)), p) = $(esc(name))(;p=p,lims=lims(d))
+        $(esc(:func))(d::$(esc(name)), $(x)::Number; p=$(esc(:pars))(d)) = $(body)
+        $(esc(:copy))(d::$(esc(name)), p) = $(esc(name))(;p=p,lims=$(esc(:lims))(d))
     end
 end
+
 
 #                  _|      _|_|  
 #  _|_|_|      _|_|_|    _|      

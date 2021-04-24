@@ -99,8 +99,7 @@ end
 #  _|    _|    _|    _|_|_|    _|_|_|  _|          _|_|    _|_|_|    
 
 
-@typepdf BW
-func(d::BW, x::Number; p=pars(d)) = p.m*p.Γ/(p.m^2-x^2-1im*p.m*p.Γ) |> abs2
+@typepdf BW(x; p) = p.m*p.Γ/(p.m^2-x^2-1im*p.m*p.Γ) |> abs2
 bw = BW(p=(m=3.1,Γ=0.1), lims=(1,5))
 
 @testset "User-def type" begin
@@ -109,15 +108,4 @@ bw = BW(p=(m=3.1,Γ=0.1), lims=(1,5))
     @test lims(bw) == (1,5)
     @test normalizationintegral(bw) != 0.0
     @test bw(1.1) != 0.0
-end
-
-@typepdf BW2 p.m*p.Γ/(p.m^2-x^2-1im*p.m*p.Γ) |> abs2
-bw2 = BW2(p=(m=3.1,Γ=0.1), lims=(1,5))
-
-@testset "User-def type" begin
-    @test pars(bw2).m == 3.1
-    @test pars(bw2).Γ == 0.1
-    @test lims(bw2) == (1,5)
-    @test normalizationintegral(bw2) != 0.0
-    @test bw2(1.1) != 0.0
 end
