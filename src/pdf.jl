@@ -1,7 +1,7 @@
 abstract type AbstractFunctionWithParameters end
 
 # 
-∅ = NamedTuple()
+const ∅ = NamedTuple()
 freepars(f::Function) = ∅
 #
 pars(d::AbstractFunctionWithParameters) = d.p
