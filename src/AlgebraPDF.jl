@@ -23,8 +23,9 @@ export nt
 export Pars
 include("parameters.jl")
 
-export FunctionWithParameters
+export AbstractFunctionWithParameters
 export AbstractPDF
+export FunctionWithParameters
 export @typepdf
 export ∅
 export pdf, npars, p2v, v2p

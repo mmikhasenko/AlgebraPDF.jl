@@ -90,7 +90,7 @@ macro typepdf(ex)
             p::T
             lims::N
         end
-        $(esc(name))(;p,lims) = $(esc(name))(Pars(;p...), lims)
+        $(esc(name))(;p,lims) = $(esc(name))(Parameters(p), lims)
 
         import AlgebraPDF: func
         import Base: copy
