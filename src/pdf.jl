@@ -36,7 +36,8 @@ updatepars(    d::AbstractFunctionWithParameters, args...) = copy(d, updatepars(
 
 abstract type AbstractPDF <: AbstractFunctionWithParameters end
 
-normalizationintegral(d::AbstractPDF; p=freepars(d)) = quadgk(x->func(d,x; p=p), lims(d)...)[1]
+normalizationintegral(d::AbstractPDF; p=freepars(d)) =
+    quadgk(x->func(d, x; p=p), lims(d)...)[1]
 function integral(d::AbstractPDF, lims; p=freepars(d))
     allpars = p+fixedpars(d)
     quadgk(x->func(d,x; p=allpars), lims...)[1] / normalizationintegral(d; p=allpars)
@@ -44,17 +45,6 @@ end
 #
 # calls
 function (d::AbstractPDF)(x; p=freepars(d))
-    allp = p+fixedpars(d)
-    normalization = normalizationintegral(d; p=allp)
-    if normalization ≈ 0.0
-        println("Error: normalization ≈ 0!")
-        normalization = 1.0
-    end
-#     normalization ≈ 0.0 && error("norm = 0 with p = $(p)!")
-    return func(d,x; p=allp) / normalization
-end
-
-function haha(d::T, x; p=freepars(d)) where T<:AbstractPDF
     allp = p+fixedpars(d)
     normalization = normalizationintegral(d; p=allp)
     if normalization ≈ 0.0
@@ -104,7 +94,7 @@ macro typepdf(ex)
 
         import AlgebraPDF: func
         # 
-        $(esc(:func))(d::$(esc(name)), $(x)::Number; p=$(esc(:pars))(d)) = $(body)
+        $(esc(:func))(d::$(esc(name)), $(esc(x))::Number; p=$(esc(:pars))(d)) = $(esc(body))
         $(esc(:copy))(d::$(esc(name)), p) = $(esc(name))(;p=p,lims=$(esc(:lims))(d))
     end
 end
