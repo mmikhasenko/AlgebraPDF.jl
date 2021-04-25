@@ -96,7 +96,34 @@ macro typepdf(ex)
         import Base: copy
         # 
         $(esc(:func))(d::$(esc(name)), $(esc(x))::Number; p=$(esc(:pars))(d)) = $(esc(body))
-        $(esc(:copy))(d::$(esc(name)), p) = $(esc(name))(;p=p,lims=$(esc(:lims))(d))
+end
+
+"""
+    @newfunc MyPDF(x;p) = unnormdensity(x, p.a, p.b)
+
+    Expected form of the expression is `f(x;p)` on the left
+"""
+macro newfunc(ex)
+    # 
+    fpx = ex.args[1].args
+    name = fpx[1]
+    p = fpx[2].args[1]
+    (p != :p) && error("expected format f(x;p) = ... " )
+    x = fpx[3]
+    body = ex.args[2]
+    # 
+    quote
+        struct $name{T} <: AbstractFunctionWithParameters
+            p::T
+        end
+        $(esc(name))(;p) = $(esc(name))(Parameters(p))
+
+        import AlgebraPDF: func
+        import Base: copy
+        # 
+        $(esc(:func))(d::$(esc(name)), $(esc(x))::Number; p=$(esc(:pars))(d)) = $(esc(body))
+        $(esc(:copy))(d::$(esc(name)), p) = $(esc(name))(;p=copy(d.p, p))
+    end
     end
 end
 

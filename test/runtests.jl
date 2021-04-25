@@ -141,3 +141,9 @@ sum_of_w = sWeights_signal(xv) + sWeights_backgr(xv)
     sum_of_w = sWeights_signal(xv) + sWeights_backgr(xv)
     @test prod(sum_of_w .- sum_of_w[30] .< 1e-10)
 end
+
+@newfunc GG1(x;p) = x^2+p.a*x^3
+@newfunc GG2(x;p) = x^1+p.b*x^2
+h1 = GG1((a=0.5,))
+h2 = GG2((b=0.5,))
+
