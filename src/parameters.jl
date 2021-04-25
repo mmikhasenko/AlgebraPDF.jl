@@ -24,6 +24,7 @@ import Base:+,-
 freepars(ps::Parameters) = getfield(ps, :free)
 fixedpars(ps::Parameters) = getfield(ps, :fixed)
 constrainedpars(ps::Parameters) = getfield(ps, :constrained)
+allpars(ps::Parameters) = freepars(ps) + fixedpars(ps) + constrainedpars(ps)
 # 
 import Base: getproperty
 getproperty(ps::Parameters, s::Symbol) = hasproperty(freepars(ps), s) ? getproperty(freepars(ps), s) : getproperty(fixedpars(ps), s)
@@ -58,3 +59,11 @@ fixpar(ps::NamedTuple, s::Symbol, v::T where T <: Real = 0.0) = complain_about_P
 releasepar(ps::NamedTuple, s::Symbol, v::T where T <: Real = 0.0) = complain_about_Pars()
 constrainpar(ps::NamedTuple, s::Symbol, v::T where T <: Real, e::T where T <: Real) = complain_about_Pars()
 unconstrainpar(ps::NamedTuple, s::Symbol) = complain_about_Pars()
+
+
+copy(pars::Union{NamedTuple,Parameters}, p::Parameters) = copy(pars, allpars(p))
+copy(pars::NamedTuple, p::NamedTuple) = selectintersect(pars, p)
+copy(pars::Parameters, p::NamedTuple) = Parameters(
+    selectintersect(freepars(pars), p),
+    selectintersect(fixedpars(pars), p),
+    selectintersect(constrainedpars(pars), p))

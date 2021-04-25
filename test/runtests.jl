@@ -147,3 +147,15 @@ end
 h1 = GG1((a=0.5,))
 h2 = GG2((b=0.5,))
 
+h12 = h1+h2
+@testset "sum of functions" begin
+    @test func(h12,1.1) == func(h1,1.1) + func(h2,1.1)
+    @test keys(pars(h12)) == (:a,:b,:α)
+end
+
+h1sq = abs2(h1)
+@testset "abs2 of functions" begin
+    @test pars(h1sq) == pars(h1)
+    @test func(h1sq, 1.1) == func(h1, 1.1)^2
+end
+

@@ -23,6 +23,8 @@ export nt
 export Pars
 include("parameters.jl")
 
+export SumFunc, Abs2Func
+# 
 export @typepdf, @newfunc
 export AbstractFunctionWithParameters
 export FunctionWithParameters

@@ -71,6 +71,7 @@ lims(d::AbstractPDF) = d.lims
 #                  _|  _|                  _|                            
 #              _|_|    _|                  _|                            
 
+
 """
     @typepdf MyPDF(x;p) = unnormdensity(x, p.a, p.b)
 
@@ -96,6 +97,8 @@ macro typepdf(ex)
         import Base: copy
         # 
         $(esc(:func))(d::$(esc(name)), $(esc(x))::Number; p=$(esc(:pars))(d)) = $(esc(body))
+        $(esc(:copy))(d::$(esc(name)), p) = $(esc(name))(;p=copy(d.p, p),lims=$(esc(:lims))(d))
+    end
 end
 
 """
@@ -124,8 +127,30 @@ macro newfunc(ex)
         $(esc(:func))(d::$(esc(name)), $(esc(x))::Number; p=$(esc(:pars))(d)) = $(esc(body))
         $(esc(:copy))(d::$(esc(name)), p) = $(esc(name))(;p=copy(d.p, p))
     end
-    end
 end
+
+
+struct Abs2Func{T<:AbstractFunctionWithParameters}
+    f::T
+end
+func(d::Abs2Func, x::Number; p=pars(d)) = abs2(func(d.f,x;p=p))
+copy(d::Abs2Func, p) = Abs2Func(copy(d.f,p))
+pars(d::Abs2Func) = pars(d.f)
+# 
+import Base: abs2
+abs2(f::AbstractFunctionWithParameters) = Abs2Func(f)
+
+struct SumFunc{T1<:AbstractFunctionWithParameters,T2<:AbstractFunctionWithParameters,V}
+    f1::T1
+    f2::T2
+    α::V
+end
+func(d::SumFunc, x::Number; p=pars(d)) = func(d.f1,x;p=p) + d.α[1]*func(d.f2,x;p=p)
+copy(d::SumFunc, p) = SumFunc(copy(d.f1, p), copy(d.f1, p), copy(d.α, p))
+pars(d::SumFunc) = pars(d.f1) + pars(d.f2) + d.α
+# 
++(f1::AbstractFunctionWithParameters,
+  f2::AbstractFunctionWithParameters, α = (α=1.0,)) = SumFunc(f1,f2, α)
 
 
 #                  _|      _|_|  
