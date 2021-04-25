@@ -6,6 +6,20 @@ struct MixedModel{N1,N2,T} <: AbstractFunctionWithParameters
 end
 # additional constructor
 MixedModel(c::Vector, f::NamedTuple) = MixedModel(SVector{length(c)}(c...), Parameters(f), SVector{length(c)-1}(keys(f)...))
+
+function nt_fractions(N)
+    f = 1/N
+    fs = [Symbol("f",i) for i in 0:N-2]
+    NamedTuple{Tuple(fs)}(Iterators.repeat([f], N-1))
+end
+function MixedModel(c::Vector)
+    fractions = nt_fractions(length(c))
+    println("
+    List of fraction parameters is created automatically
+       $(fractions)
+       Make sure that it does not overlar with parameters of the component")
+    MixedModel(c, nt_fractions(length(c)))
+end
 # 
 Ncomp(mm::MixedModel{N}) where N = N
 fractions(mm::MixedModel) = mm.fractions
