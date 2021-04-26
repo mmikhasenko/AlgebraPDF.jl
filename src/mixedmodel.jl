@@ -56,13 +56,9 @@ noparsnormf(mm::MixedModel; p=freepars(mm)) = MixedModel(
     updatepars(mm.fractions,p))
 
 # fix parameters
-fixpars(mm::MixedModel, pars::NamedTuple) = MixedModel(
-    SVector([fixpars(c, selectintersect(freepars(c), pars)) for c in mm.components]),
-    fixpars(mm.fractions, selectintersect(freepars(mm.fractions), pars)), mm.keys)
-#
-updatepars(mm::MixedModel, newpars::NamedTuple) = MixedModel(
-    SVector([updatepars(c, newpars) for c in mm.components]),
-    updatepars(mm.fractions, newpars), mm.keys)
+copy(mm::MixedModel, p) = MixedModel(
+    SVector([copy(c, p) for c in mm.components]),
+    copy(mm.fractions, p), mm.keys)
 
 # 
 """
