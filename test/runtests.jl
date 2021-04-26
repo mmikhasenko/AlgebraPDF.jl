@@ -131,7 +131,6 @@ end
 #      _|_|  _|        _|  _|    _|    _|      
 #  _|_|_|    _|        _|    _|_|        _|_|  
 
-
 sWeights_signal, sWeights_backgr = sWeights(pdf1, pdf2, 0.9)
 xv = range(lims(pdf1)...,length=100)
 sum_of_w = sWeights_signal(xv) + sWeights_backgr(xv)
@@ -157,5 +156,11 @@ h1sq = abs2(h1)
 @testset "abs2 of functions" begin
     @test pars(h1sq) == pars(h1)
     @test func(h1sq, 1.1) == func(h1, 1.1)^2
+end
+
+@testset "implementation of copy" begin
+    @test func(h1, 1.1) ≈ func(copy(h1, pars(h1)), 1.1)
+    @test func(h12, 1.1) ≈ func(copy(h12, pars(h12)), 1.1)
+    @test func(h1sq, 1.1) ≈ func(copy(h1sq, pars(h1sq)), 1.1)
 end
 

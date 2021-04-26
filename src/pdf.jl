@@ -149,7 +149,7 @@ struct SumFunc{
     α::V
 end
 func(d::SumFunc, x::Number; p=pars(d)) = func(d.f1,x;p=p) + d.α[1]*func(d.f2,x;p=p)
-copy(d::SumFunc, p) = SumFunc(copy(d.f1, p), copy(d.f1, p), copy(d.α, p))
+copy(d::SumFunc, p) = SumFunc(copy(d.f1, p), copy(d.f2, p), copy(d.α, p))
 pars(d::SumFunc) = pars(d.f1) + pars(d.f2) + d.α
 # 
 +(f1::AbstractFunctionWithParameters,
