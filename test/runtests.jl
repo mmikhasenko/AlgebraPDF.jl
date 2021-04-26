@@ -143,13 +143,13 @@ end
 
 @newfunc GG1(x;p) = x^2+p.a*x^3
 @newfunc GG2(x;p) = x^1+p.b*x^2
-h1 = GG1((a=0.5,))
-h2 = GG2((b=0.5,))
+h1 = GG1(p=(a=0.5,))
+h2 = GG2(p=(b=0.5,))
 
 h12 = h1+h2
 @testset "sum of functions" begin
     @test func(h12,1.1) == func(h1,1.1) + func(h2,1.1)
-    @test keys(pars(h12)) == (:a,:b,:α)
+    @test keys(freepars(h12)) == (:a,:b,:α)
 end
 
 h1sq = abs2(h1)
@@ -164,3 +164,10 @@ end
     @test func(h1sq, 1.1) ≈ func(copy(h1sq, pars(h1sq)), 1.1)
 end
 
+
+# updatepars(::AlgebraPDF.Parameters{NamedTuple{(:a,),Tuple{Float64}},NamedTuple{(),Tuple{}},NamedTuple{(),Tuple{}}},
+#     ::AlgebraPDF.Parameters{NamedTuple{(),Tuple{}},NamedTuple{(:a,),Tuple{Float64}},NamedTuple{(),Tuple{}}})
+# Closest candidates are:
+#   updatepars(::AlgebraPDF.Parameters, !Matched::NamedTuple) at C:\Users\mikha\.julia\dev\AlgebraPDF\src\parameters.jl:45
+#   updatepars(!Matched::AbstractFunctionWithParameters, ::Any...) at C:\Users\mikha\.julia\dev\AlgebraPDF\src\pdf.jl:27
+# Stacktrace:

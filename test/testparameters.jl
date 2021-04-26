@@ -48,3 +48,17 @@ end
     #
     @test updatepars(ps0, (a=5.5,)).a == 5.5
 end
+
+@testset "copy parameters" begin
+    ps0 = AlgebraPDF.Parameters((a=1.1,b=2.2,c=3.3))
+    ps1 = fixpars(ps0, (a=4.4,b=5.5))
+    ps2 = copy(ps0, ps1)
+    @test ps2 == ps1
+    # 
+    ps_bigger = AlgebraPDF.Parameters((a=12.1,c=3.3,d=-40), (b=7.7,g=33), ∅)
+    ps4 = copy(ps2, ps_bigger)
+    @test Set(keys(AlgebraPDF.allpars(ps4))) == Set(keys(AlgebraPDF.allpars(ps0)))
+    @test ps4.a == ps_bigger.a
+    @test ps4.b == ps_bigger.b
+    @test ps4.c == ps_bigger.c    
+end
