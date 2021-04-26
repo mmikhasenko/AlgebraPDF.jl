@@ -130,7 +130,7 @@ macro newfunc(ex)
 end
 
 
-struct Abs2Func{T<:AbstractFunctionWithParameters}
+struct Abs2Func{T<:AbstractFunctionWithParameters} <: AbstractFunctionWithParameters
     f::T
 end
 func(d::Abs2Func, x::Number; p=pars(d)) = abs2(func(d.f,x;p=p))
@@ -140,7 +140,10 @@ pars(d::Abs2Func) = pars(d.f)
 import Base: abs2
 abs2(f::AbstractFunctionWithParameters) = Abs2Func(f)
 
-struct SumFunc{T1<:AbstractFunctionWithParameters,T2<:AbstractFunctionWithParameters,V}
+struct SumFunc{
+        T1<:AbstractFunctionWithParameters,
+        T2<:AbstractFunctionWithParameters,
+        V}  <: AbstractFunctionWithParameters
     f1::T1
     f2::T2
     α::V
