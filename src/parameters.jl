@@ -51,6 +51,7 @@ import Base:+,-
 -(t1::NamedTuple, ss::Tuple) = Base.structdiff(t1, sum(nt.(ss)))
 
 +(ps::Parameters, t2::NamedTuple) = Parameters(freepars(ps)+t2, fixedpars(ps), constrainedpars(ps))
++(t2::NamedTuple, ps::Parameters) = +(ps, t2)
 +(ps1::Parameters, ps2::Parameters) = Parameters(freepars(ps1)+freepars(ps2), fixedpars(ps1)+fixedpars(ps2), constrainedpars(ps1)+constrainedpars(ps2))
 
 # 
