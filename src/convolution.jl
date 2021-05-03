@@ -20,12 +20,13 @@ struct convGauss{T,S} <: AbstractPDF
     σ::S
 end
 
-pars(d::convGauss) = pars(d.pdf)
+pars(d::convGauss) = pars(d.pdf) + pars(d.σ)
 lims(d::convGauss) = lims(d.pdf)
 copy(d::convGauss,p) = convGauss(copy(d.pdf,p), d.σ)
 
 function func(d::convGauss, x::Number; p=pars(d))
-    g(z) = AlgebraPDF.standardgauss(z, d.σ)
+    σ = func(d.σ, x; p=p)
+    g(z) = AlgebraPDF.standardgauss(z, σ)
     f(z) = func(d.pdf, z; p=p)
-    return quadgk(y->f(x-y) * g(y), -5*d.σ, +5*d.σ)[1]
+    return quadgk(y->f(x-y) * g(y), -5*σ, +5*σ)[1]
 end

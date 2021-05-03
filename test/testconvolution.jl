@@ -39,10 +39,23 @@ end
 end
 
 
-@typepdf myBW(x;p) = AlgebraPDF.amplitudeBWsq(x+2.961477, p.m, p.Γ)
-mybw = myBW((m=3.0, Γ=3e-3), (0,0.22))
+@typepdf myBW(x;p) = AlgebraPDF.amplitudeBWsq(x+2.961477, p.Δm+2.961477, p.Γ)
+mybw = myBW((Δm=0.1, Γ=3e-3), (0,0.22))
 mybw_conv = convGauss(mybw, 5e-3)
 
 @testset "convGauss: update pars works" begin
-    @test pars(updatepars(mybw_conv,(m=3.1,))).m == 3.1
+    @test pars(updatepars(mybw_conv,(Δm=0.15,))).Δm == 0.15
+end
+
+
+function maxdensity(d, Δm)
+    xv = range(0,0.22,length=100)
+    maximum(updatepars(d,(Δm=Δm,))(xv))
+end
+
+resolution_model = FunctionWithParameters((x;p)->5e-3+(x-0.1)*3e-2; p=∅)
+mybw_conv_dep = convGauss(mybw, resolution_model)
+@testset "convGauss energy dep. gets wider" begin
+    @test maxdensity(mybw_conv_dep, 0.05) > maxdensity(mybw_conv, 0.05)
+    @test maxdensity(mybw_conv_dep, 0.15) < maxdensity(mybw_conv, 0.15)
 end
