@@ -6,6 +6,10 @@ using LinearAlgebra
 using Measurements
 
 
+@testset "func on scalars" begin
+    @test func(1.1, 3.3) == 1.1
+end
+
 include("testparameters.jl")
 include("testpdf.jl")
 include("testdensities.jl")

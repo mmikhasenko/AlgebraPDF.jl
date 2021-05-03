@@ -26,6 +26,10 @@ constrainpar(  d::AbstractFunctionWithParameters, args...) = copy(d, constrainpa
 unconstrainpar(d::AbstractFunctionWithParameters, args...) = copy(d, unconstrainpar(pars(d), args...))
 updatepars(    d::AbstractFunctionWithParameters, args...) = copy(d, updatepars(    pars(d), args...))
 
+# scalar
+
+pars(d::Number) = ∅
+func(d::Number, x::Number; p=∅) = d
 
 #    _|_|    _|                    _|                                      _|      _|_|_|    _|_|_|    _|_|_|_|  
 #  _|    _|  _|_|_|      _|_|_|  _|_|_|_|  _|  _|_|    _|_|_|    _|_|_|  _|_|_|_|  _|    _|  _|    _|  _|        
