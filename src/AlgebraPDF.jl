@@ -20,7 +20,6 @@ import ForwardDiff: hessian
 export fixpar, releasepar
 export updatepars, selectpars
 export nt
-export Pars
 include("parameters.jl")
 
 export SumFunc, Abs2Func

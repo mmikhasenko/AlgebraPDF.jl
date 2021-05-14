@@ -39,7 +39,6 @@ struct TwoNamedTuples{R,S}
     fixed::NamedTuple{S}
 end
 
-Pars(; kw...) = TwoNamedTuples((;kw...))
 TwoNamedTuples(t::NamedTuple) = TwoNamedTuples(t,∅)
 TwoNamedTuples(ps::TwoNamedTuples) = TwoNamedTuples(freepars(ps),fixedpars(ps))
 
