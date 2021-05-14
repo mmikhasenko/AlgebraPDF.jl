@@ -24,6 +24,7 @@ include("parameters.jl")
 
 export SumFunc, Abs2Func
 # 
+export TwoNamedTuples
 export @typepdf, @newfunc
 export AbstractFunctionWithParameters
 export FunctionWithParameters

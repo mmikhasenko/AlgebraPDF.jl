@@ -40,11 +40,11 @@ end
 
 
 @typepdf myBW(x;p) = AlgebraPDF.amplitudeBWsq(x+2.961477, p.Δm+2.961477, p.Γ)
-mybw = myBW((Δm=0.1, Γ=3e-3), (0,0.22))
+mybw = myBW(TwoNamedTuples(Δm=0.1, Γ=3e-3), (0,0.22))
 mybw_conv = convGauss(mybw, 5e-3)
 
 @testset "convGauss: update pars works" begin
-    @test pars(updatepars(mybw_conv,(Δm=0.15,))).Δm == 0.15
+    @test pars(updatepars(mybw_conv, (Δm=0.15,))).Δm == 0.15
 end
 
 

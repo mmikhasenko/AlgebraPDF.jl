@@ -1,13 +1,13 @@
 
 @testset "Parameters of pdf" begin
     d = pdf((e;p)->e^2+p.a; lims=(-1,2), p=(a=1.0,))
-    @test typeof(pars(d)) <: AlgebraPDF.TwoNamedTuples
+    @test typeof(pars(d)) <: NamedTuple
     @test length(freepars(d)) == 1
     @test length(fixedpars(d)) == 0
 end
 
 @testset "fix parameters example" begin
-    d0 = pdf((e;p)->e^2+p.a; p=(a=1.0,), lims=(-1,2))
+    d0 = pdf((e;p)->e^2+p.a; p=TwoNamedTuples(a=1.0), lims=(-1,2))
     @test d0(1.0) ≈ 2.0/(9/3+3*pars(d0).a)
     #
     d1 = fixpar(d0, :a, 2.9)
@@ -90,7 +90,6 @@ end
 end
 
 
-
 #  _|_|_|  _|_|      _|_|_|    _|_|_|  _|  _|_|    _|_|      _|_|_|  
 #  _|    _|    _|  _|    _|  _|        _|_|      _|    _|  _|_|      
 #  _|    _|    _|  _|    _|  _|        _|        _|    _|      _|_|  
@@ -98,7 +97,7 @@ end
 
 
 @typepdf BW(x; p) = p.m*p.Γ/(p.m^2-x^2-1im*p.m*p.Γ) |> abs2
-bw = BW(p=(m=3.1,Γ=0.1), lims=(1,5))
+bw = BW((m=3.1,Γ=0.1), (1,5))
 
 @testset "User-def type" begin
     @test pars(bw).m == 3.1

@@ -93,7 +93,7 @@ macro typepdf(ex)
             p::T
             lims::N
         end
-        $(esc(name))(;p,lims) = $(esc(name))(TwoNamedTuples(p), lims)
+        $(esc(name))(;p,lims) = $(esc(name))(p, lims)
 
         import AlgebraPDF: func
         import Base: copy
@@ -121,7 +121,7 @@ macro newfunc(ex)
         struct $name{T} <: AbstractFunctionWithParameters
             p::T
         end
-        $(esc(name))(;p) = $(esc(name))(TwoNamedTuples(p))
+        $(esc(name))(;p) = $(esc(name))(p)
 
         import AlgebraPDF: func
         import Base: copy
@@ -171,7 +171,7 @@ pars(d::SumFunc) = pars(d.f1) + pars(d.f2) + d.α
     f::Function
     p::T
 end
-FunctionWithParameters(f;p) = FunctionWithParameters(;f=f,p=TwoNamedTuples(p))
+FunctionWithParameters(f;p) = FunctionWithParameters(;f,p)
 
 # two methods to be defined
 func(d::FunctionWithParameters, x::Number; p=pars(d)) = d.f(x; p)
@@ -185,7 +185,7 @@ copy(d::FunctionWithParameters, p) = FunctionWithParameters(;f=d.f, p)
     lims::N
 end
 pdf(f;p,lims) = pdf(;
-    lineshape = FunctionWithParameters(f; p=TwoNamedTuples(p)),
+    lineshape = FunctionWithParameters(f; p),
         lims = lims)
 
 # two methods to be defined

@@ -41,6 +41,7 @@ end
 
 TwoNamedTuples(t::NamedTuple) = TwoNamedTuples(t,∅)
 TwoNamedTuples(ps::TwoNamedTuples) = TwoNamedTuples(freepars(ps),fixedpars(ps))
+TwoNamedTuples(; kw...) = TwoNamedTuples((;kw...))
 
 nt(s::Symbol, v = 0.0) = NamedTuple{(s,)}([v])
 

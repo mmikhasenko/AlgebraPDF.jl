@@ -167,11 +167,3 @@ end
     @test func(h12, 1.1) ≈ func(copy(h12, pars(h12)), 1.1)
     @test func(h1sq, 1.1) ≈ func(copy(h1sq, pars(h1sq)), 1.1)
 end
-
-
-# updatepars(::AlgebraPDF.TwoNamedTuples{NamedTuple{(:a,),Tuple{Float64}},NamedTuple{(),Tuple{}},NamedTuple{(),Tuple{}}},
-#     ::AlgebraPDF.TwoNamedTuples{NamedTuple{(),Tuple{}},NamedTuple{(:a,),Tuple{Float64}},NamedTuple{(),Tuple{}}})
-# Closest candidates are:
-#   updatepars(::AlgebraPDF.TwoNamedTuples, !Matched::NamedTuple) at C:\Users\mikha\.julia\dev\AlgebraPDF\src\parameters.jl:45
-#   updatepars(!Matched::AbstractFunctionWithParameters, ::Any...) at C:\Users\mikha\.julia\dev\AlgebraPDF\src\pdf.jl:27
-# Stacktrace:
