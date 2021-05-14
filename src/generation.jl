@@ -32,6 +32,6 @@ function generate(Nev::Int, d::T where T <: AbstractFunctionWithParameters; p=fr
     centers = (grid[2:end] .+ grid[1:end-1]) ./ 2
     #
     weights = d(centers)
-    bD = binned1dDensity(grid, weights; density=x->d(x;p=p))
+    bD = binned1dDensity(grid, weights; density=x->d(x;p))
     return [rand(bD) for _ in 1:Nev]
 end

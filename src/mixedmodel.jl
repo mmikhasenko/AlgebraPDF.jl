@@ -28,8 +28,8 @@ lims(mm::MixedModel) = lims(mm.components[1])
 
 pars(mm::MixedModel) = sum(pars.(mm.components)) + fractions(mm)
 function func(mm::MixedModel,x;p)
-    fracs = fractionvalues(mm; p=p)
-    v = sum(func(d,x;p=p)*f for (d,f) in zip(mm.components, fracs))
+    fracs = fractionvalues(mm; p)
+    v = sum(func(d,x;p)*f for (d,f) in zip(mm.components, fracs))
     ! prod(iszero, isnan.(v)) &&  @show p#, v
     return v
 end
@@ -44,15 +44,15 @@ function fractionvalues(mm::MixedModel; p=∅)
 end
 # calls
 function (mm::MixedModel)(x; p=freepars(mm))
-    fracs = fractionvalues(mm; p=p)
-    v = sum(d(x;p=p)*f for (d,f) in zip(mm.components, fracs))
+    fracs = fractionvalues(mm; p)
+    v = sum(d(x;p)*f for (d,f) in zip(mm.components, fracs))
     ! prod(iszero, isnan.(v)) &&  @show p#, v
     return v
 end
 (mm::MixedModel)(x, v) = mm(x; p=v2p(v,mm))
 
 noparsnormf(mm::MixedModel; p=freepars(mm)) = MixedModel(
-    SVector(noparsnormf.(mm.components; p=p)),
+    SVector(noparsnormf.(mm.components; p)),
     updatepars(mm.fractions,p))
 
 # fix parameters
@@ -67,8 +67,8 @@ copy(mm::MixedModel, p) = MixedModel(
 Computes integrals of the components in a given range.
 """
 function integrals(mm::MixedModel, lims; p=freepars(mm))
-    fracs = fractionvalues(mm; p=p)
-    ints = integral.(mm.components, Ref(lims); p=p)
+    fracs = fractionvalues(mm; p)
+    ints = integral.(mm.components, Ref(lims); p)
     return ints .* fracs
 end
-integral(mm::MixedModel, lims; p=freepars(mm)) = sum(integrals(mm, lims; p=p))
+integral(mm::MixedModel, lims; p=freepars(mm)) = sum(integrals(mm, lims; p))

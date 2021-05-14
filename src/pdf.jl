@@ -39,7 +39,7 @@ func(d::Number, x::Number; p=∅) = d
 abstract type AbstractPDF <: AbstractFunctionWithParameters end
 
 normalizationintegral(d::AbstractPDF; p=freepars(d)) =
-    quadgk(x->func(d, x; p=p), lims(d)...)[1]
+    quadgk(x->func(d, x; p), lims(d)...)[1]
 function integral(d::AbstractPDF, lims; p=freepars(d))
     allpars = p+fixedpars(d)
     quadgk(x->func(d,x; p=allpars), lims...)[1] / normalizationintegral(d; p=allpars)
@@ -58,8 +58,8 @@ function (d::AbstractPDF)(x; p=freepars(d))
 end
 
 (d::AbstractPDF)(x, v) = d(x; p=v2p(v,d))
-func(d::AbstractPDF, x::AbstractArray; p=pars(d)) = func.(Ref(d), x; p=p)
-func(d::AbstractPDF, x::AbstractRange; p=pars(d)) = func.(Ref(d), x; p=p)
+func(d::AbstractPDF, x::AbstractArray; p=pars(d)) = func.(Ref(d), x; p)
+func(d::AbstractPDF, x::AbstractRange; p=pars(d)) = func.(Ref(d), x; p)
 
 # assumes that the fields "lims" and "p" are present
 lims(d::AbstractPDF) = d.lims
@@ -135,7 +135,7 @@ end
 struct Abs2Func{T<:AbstractFunctionWithParameters} <: AbstractFunctionWithParameters
     f::T
 end
-func(d::Abs2Func, x::Number; p=pars(d)) = abs2(func(d.f,x;p=p))
+func(d::Abs2Func, x::Number; p=pars(d)) = abs2(func(d.f,x;p))
 copy(d::Abs2Func, p) = Abs2Func(copy(d.f,p))
 pars(d::Abs2Func) = pars(d.f)
 # 
@@ -150,7 +150,7 @@ struct SumFunc{
     f2::T2
     α::V
 end
-func(d::SumFunc, x::Number; p=pars(d)) = func(d.f1,x;p=p) + getproperty(p,keys(d.α)[1])*func(d.f2,x;p=p)
+func(d::SumFunc, x::Number; p=pars(d)) = func(d.f1,x;p) + getproperty(p,keys(d.α)[1])*func(d.f2,x;p)
 copy(d::SumFunc, p) = SumFunc(copy(d.f1, p), copy(d.f2, p), copy(d.α, p))
 pars(d::SumFunc) = pars(d.f1) + pars(d.f2) + d.α
 # 
@@ -174,8 +174,8 @@ end
 FunctionWithParameters(f;p) = FunctionWithParameters(;f=f,p=TwoNamedTuples(p))
 
 # two methods to be defined
-func(d::FunctionWithParameters, x::Number; p=pars(d)) = d.f(x; p=p)
-copy(d::FunctionWithParameters, p) = FunctionWithParameters(;f=d.f, p=p)
+func(d::FunctionWithParameters, x::Number; p=pars(d)) = d.f(x; p)
+copy(d::FunctionWithParameters, p) = FunctionWithParameters(;f=d.f, p)
 #
 
 #################################################################### 
@@ -191,13 +191,13 @@ pdf(f;p,lims) = pdf(;
 # two methods to be defined
 import Base:getproperty
 getproperty(d::pdf, sym::Symbol) = sym==:p ? pars(d.lineshape) : getfield(d, sym)
-func(d::pdf, x::Number; p=pars(d)) = func(d.lineshape, x; p=p)
+func(d::pdf, x::Number; p=pars(d)) = func(d.lineshape, x; p)
 copy(d::pdf, p) = pdf(; lineshape=copy(d.lineshape,p), lims=lims(d))
 #
 
 # 
 #
-noparsf(d::pdf; p=pars(d)) = (x;kw...)->func(d,x;p=p)
-noparsnormf(d::pdf; p=pars(d)) = (ns=normalizationintegral(d;p=p); (x;kw...)->func(d,x;p=p)/ns)
+noparsf(d::pdf; p=pars(d)) = (x;kw...)->func(d,x;p)
+noparsnormf(d::pdf; p=pars(d)) = (ns=normalizationintegral(d;p); (x;kw...)->func(d,x;p)/ns)
 
 fixedshapepdf(f, lims) = pdf((x;p)->f(x); lims=lims, p=∅)

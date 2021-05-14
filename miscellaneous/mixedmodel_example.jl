@@ -27,5 +27,5 @@ fr = fit_llh(sample, mm0, init_pars=p2v(p, mm0))
 pfr = v2p(minimizer(fr), mm0)
 
 stephist(sample,bins=70, norm=true)
-plot!(x->mm0(x; p=p),-3,3)
+plot!(x->mm0(x; p),-3,3)
 plot!(x->mm0(x; p=pfr),-3,3)
