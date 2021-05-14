@@ -169,9 +169,9 @@ end
 end
 
 
-# updatepars(::AlgebraPDF.Parameters{NamedTuple{(:a,),Tuple{Float64}},NamedTuple{(),Tuple{}},NamedTuple{(),Tuple{}}},
-#     ::AlgebraPDF.Parameters{NamedTuple{(),Tuple{}},NamedTuple{(:a,),Tuple{Float64}},NamedTuple{(),Tuple{}}})
+# updatepars(::AlgebraPDF.TwoNamedTuples{NamedTuple{(:a,),Tuple{Float64}},NamedTuple{(),Tuple{}},NamedTuple{(),Tuple{}}},
+#     ::AlgebraPDF.TwoNamedTuples{NamedTuple{(),Tuple{}},NamedTuple{(:a,),Tuple{Float64}},NamedTuple{(),Tuple{}}})
 # Closest candidates are:
-#   updatepars(::AlgebraPDF.Parameters, !Matched::NamedTuple) at C:\Users\mikha\.julia\dev\AlgebraPDF\src\parameters.jl:45
+#   updatepars(::AlgebraPDF.TwoNamedTuples, !Matched::NamedTuple) at C:\Users\mikha\.julia\dev\AlgebraPDF\src\parameters.jl:45
 #   updatepars(!Matched::AbstractFunctionWithParameters, ::Any...) at C:\Users\mikha\.julia\dev\AlgebraPDF\src\pdf.jl:27
 # Stacktrace:

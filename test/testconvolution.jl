@@ -18,24 +18,24 @@ end
     σ0 = 0.3
     aconv(e) = (erf(e/sqrt(2*σ0^2))+1)/2
     #
-    nconv(e) = conv_with_gauss(e, x->x>0, σ0)
-    @test df(nconv, aconv, (-1, 1); Ns=1000) < 0.01
+    nconv1(e) = conv_with_gauss(e, x->x>0, σ0)
+    @test df(nconv1, aconv, (-1, 1); Ns=1000) < 0.01
     #
     step = pdf((e;p)->e>0; p=∅, lims=(-1,1))
     func(step, 1.1; p=∅)
     smeared_step = conv_with_gauss(step, σ0)
-    nconv(e) = func(smeared_step, e; p=∅)
+    nconv2(e) = func(smeared_step, e; p=∅)
     # smeared_step(1.1)
     func(smeared_step, 1.1; p=∅)
-    @test df(nconv, aconv, (-1, 1); Ns=1000) < 0.01
+    @test df(nconv2, aconv, (-1, 1); Ns=1000) < 0.01
     # 
     smeared_step_sampling = conv_with_gauss_sampling(step, σ0; Ns=50)
-    nconv(e) = func(smeared_step_sampling, e; p = freepars(smeared_step_sampling))
-    @test df(nconv, aconv, (-1, 1); Ns=1000) < 0.01
+    nconv3(e) = func(smeared_step_sampling, e; p = freepars(smeared_step_sampling))
+    @test df(nconv3, aconv, (-1, 1); Ns=1000) < 0.01
     # 
     smeared_step_sampling = conv_with_gauss_sampling(step, σ0; Ns=10)
-    nconv(e) = func(smeared_step_sampling, e; p = freepars(smeared_step_sampling))
-    @test 0.01 < df(nconv, aconv, (-1, 1); Ns=1000) < 0.04
+    nconv4(e) = func(smeared_step_sampling, e; p = freepars(smeared_step_sampling))
+    @test 0.01 < df(nconv4, aconv, (-1, 1); Ns=1000) < 0.04
 end
 
 

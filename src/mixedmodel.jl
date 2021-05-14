@@ -5,7 +5,7 @@ struct MixedModel{N1,N2,T} <: AbstractFunctionWithParameters
     keys::SVector{N2,Symbol}
 end
 # additional constructor
-MixedModel(c::Vector, f::NamedTuple) = MixedModel(SVector{length(c)}(c...), Parameters(f), SVector{length(c)-1}(keys(f)...))
+MixedModel(c::Vector, f::NamedTuple) = MixedModel(SVector{length(c)}(c...), TwoNamedTuples(f), SVector{length(c)-1}(keys(f)...))
 
 function nt_fractions(N)
     f = 1/N
@@ -35,7 +35,7 @@ function func(mm::MixedModel,x;p)
 end
 
 # inner working
-orderedfractionvalues(fs::Parameters, keys) = [getproperty(fs, k) for k in keys]
+orderedfractionvalues(fs::TwoNamedTuples, keys) = [getproperty(fs, k) for k in keys]
 # 
 function fractionvalues(mm::MixedModel; p=∅)
     updated_fractions = updatepars(mm.fractions, p)

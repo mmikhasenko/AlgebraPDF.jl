@@ -93,7 +93,7 @@ macro typepdf(ex)
             p::T
             lims::N
         end
-        $(esc(name))(;p,lims) = $(esc(name))(Parameters(p), lims)
+        $(esc(name))(;p,lims) = $(esc(name))(TwoNamedTuples(p), lims)
 
         import AlgebraPDF: func
         import Base: copy
@@ -121,7 +121,7 @@ macro newfunc(ex)
         struct $name{T} <: AbstractFunctionWithParameters
             p::T
         end
-        $(esc(name))(;p) = $(esc(name))(Parameters(p))
+        $(esc(name))(;p) = $(esc(name))(TwoNamedTuples(p))
 
         import AlgebraPDF: func
         import Base: copy
@@ -171,7 +171,7 @@ pars(d::SumFunc) = pars(d.f1) + pars(d.f2) + d.α
     f::Function
     p::T
 end
-FunctionWithParameters(f;p) = FunctionWithParameters(;f=f,p=Parameters(p))
+FunctionWithParameters(f;p) = FunctionWithParameters(;f=f,p=TwoNamedTuples(p))
 
 # two methods to be defined
 func(d::FunctionWithParameters, x::Number; p=pars(d)) = d.f(x; p=p)
@@ -185,7 +185,7 @@ copy(d::FunctionWithParameters, p) = FunctionWithParameters(;f=d.f, p=p)
     lims::N
 end
 pdf(f;p,lims) = pdf(;
-    lineshape = FunctionWithParameters(f; p=Parameters(p)),
+    lineshape = FunctionWithParameters(f; p=TwoNamedTuples(p)),
         lims = lims)
 
 # two methods to be defined
@@ -200,12 +200,4 @@ copy(d::pdf, p) = pdf(; lineshape=copy(d.lineshape,p), lims=lims(d))
 noparsf(d::pdf; p=pars(d)) = (x;kw...)->func(d,x;p=p)
 noparsnormf(d::pdf; p=pars(d)) = (ns=normalizationintegral(d;p=p); (x;kw...)->func(d,x;p=p)/ns)
 
-
 fixedshapepdf(f, lims) = pdf((x;p)->f(x); lims=lims, p=∅)
-
-
-# pdf((e;p)->e^2+p.a; lims=(-1,2), p=(a=1.0,))
-# # 
-# pdf(
-#     FunctionWithParameters((e;p)->e^2+p.a; p=(a=1.0,)),
-#     (-1,2))

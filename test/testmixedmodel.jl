@@ -12,7 +12,7 @@ g2 = pdf((x;p)->1/p.σ2*exp(-(x-p.μ2)^2/(2*p.σ2^2)); p=(μ2=-0.7, σ2=0.7 ), l
 mm0 = MixedModel([g1, g2], (f1=0.33,))
 
 @testset "Parameters of the mixed model" begin
-    @test typeof(pars(mm0)) <: AlgebraPDF.Parameters
+    @test typeof(pars(mm0)) <: AlgebraPDF.TwoNamedTuples
     @test length(freepars(mm0)) == 5
     @test length(fixedpars(mm0)) == 0
     # 

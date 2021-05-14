@@ -1,7 +1,7 @@
 
 @testset "Parameters of pdf" begin
     d = pdf((e;p)->e^2+p.a; lims=(-1,2), p=(a=1.0,))
-    @test typeof(pars(d)) <: AlgebraPDF.Parameters
+    @test typeof(pars(d)) <: AlgebraPDF.TwoNamedTuples
     @test length(freepars(d)) == 1
     @test length(fixedpars(d)) == 0
 end
@@ -77,7 +77,7 @@ end
 
 @testset "pdf with NamedTuple" begin
     # here I create the structure directly,
-    #    p=(...) would call Parameters(p)
+    #    p=(...) would call TwoNamedTuples(p)
     d = FunctionWithParameters((x;p)->x*5+p.a, (a=1.1,))
     # 
     @test func(d,1.1) != 0.0

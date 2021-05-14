@@ -29,7 +29,7 @@ end
     @test nt(:d, 3) == (d=3, )
     @test nt(:d, (1.1,0.1)) == (d = (1.1,0.1), )
     #
-    ps0 = AlgebraPDF.Parameters((a=1.1,b=2.2,c=3.3))
+    ps0 = AlgebraPDF.TwoNamedTuples((a=1.1,b=2.2,c=3.3))
     #
     ps1 = fixpar(ps0, :a)
     @test length(fixedpars(ps1)) == 1 && length(freepars(ps1)) == 2
@@ -45,12 +45,12 @@ end
 end
 
 @testset "copy parameters" begin
-    ps0 = AlgebraPDF.Parameters((a=1.1,b=2.2,c=3.3))
+    ps0 = AlgebraPDF.TwoNamedTuples((a=1.1,b=2.2,c=3.3))
     ps1 = fixpars(ps0, (a=4.4,b=5.5))
     ps2 = copy(ps0, ps1)
     @test ps2 == ps1
     # 
-    ps_bigger = AlgebraPDF.Parameters((a=12.1,c=3.3,d=-40), (b=7.7,g=33))
+    ps_bigger = AlgebraPDF.TwoNamedTuples((a=12.1,c=3.3,d=-40), (b=7.7,g=33))
     ps4 = copy(ps2, ps_bigger)
     @test Set(keys(AlgebraPDF.allpars(ps4))) == Set(keys(AlgebraPDF.allpars(ps0)))
     @test ps4.a == ps_bigger.a
