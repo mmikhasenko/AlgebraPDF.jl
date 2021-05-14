@@ -17,7 +17,7 @@ import Base:copy
 import Optim: minimizer, minimum
 import ForwardDiff: hessian
 
-export fixpar, releasepar, constrainpar, unconstrainpar
+export fixpar, releasepar
 export updatepars, selectpars
 export nt
 export Pars
@@ -37,7 +37,7 @@ export fixpars, fixpar
 export fixedshapepdf
 export noparsf, noparsnormf
 export func, lims
-export freepars, fixedpars, constrainedpars
+export freepars, fixedpars
 export pars
 export normalizationintegral
 include("pdf.jl")

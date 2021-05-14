@@ -86,8 +86,6 @@ end
     @test_throws DomainError fixpar(d, :a, 1.2)
     @test_throws DomainError fixpars(d, (a=1.2,))
     @test_throws DomainError releasepar(d, :a)
-    @test_throws DomainError constrainpar(d, :a, 1.1, 0.2)
-    @test_throws DomainError unconstrainpar(d, :a)
     # 
 end
 

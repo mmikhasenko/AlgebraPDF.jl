@@ -22,8 +22,6 @@ fixpars(d::AbstractFunctionWithParameters, s::Union{Tuple,Array{Symbol}}) =
 #
 fixpars(       d::AbstractFunctionWithParameters, args...) = copy(d, fixpars(       pars(d), args...))
 releasepar(    d::AbstractFunctionWithParameters, args...) = copy(d, releasepar(    pars(d), args...))
-constrainpar(  d::AbstractFunctionWithParameters, args...) = copy(d, constrainpar(  pars(d), args...))
-unconstrainpar(d::AbstractFunctionWithParameters, args...) = copy(d, unconstrainpar(pars(d), args...))
 updatepars(    d::AbstractFunctionWithParameters, args...) = copy(d, updatepars(    pars(d), args...))
 
 # scalar

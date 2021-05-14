@@ -37,14 +37,9 @@ end
     @test ps2.a == 3.3 && ps2.b == 6.6
     # 
     @test releasepar(fixpar(ps0, :c), :c) == ps0
-    # 
-    ps3 = constrainpar(ps0, :a, 1.1, 0.1)
-    @test length(constrainedpars(ps3)) == 1 && length(freepars(ps3)) == 3
-    @test unconstrainpar(ps3, :a) == ps0
     #
     @test length(freepars(ps0)) == 3
     @test length(freepars(ps1)) == 2
-    @test length(freepars(ps3)) == 3
     #
     @test updatepars(ps0, (a=5.5,)).a == 5.5
 end
@@ -55,7 +50,7 @@ end
     ps2 = copy(ps0, ps1)
     @test ps2 == ps1
     # 
-    ps_bigger = AlgebraPDF.Parameters((a=12.1,c=3.3,d=-40), (b=7.7,g=33), ∅)
+    ps_bigger = AlgebraPDF.Parameters((a=12.1,c=3.3,d=-40), (b=7.7,g=33))
     ps4 = copy(ps2, ps_bigger)
     @test Set(keys(AlgebraPDF.allpars(ps4))) == Set(keys(AlgebraPDF.allpars(ps0)))
     @test ps4.a == ps_bigger.a
