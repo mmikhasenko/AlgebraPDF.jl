@@ -197,7 +197,7 @@ copy(d::pdf, p) = pdf(; lineshape=copy(d.lineshape,p), lims=lims(d))
 
 # 
 #
-noparsf(d::pdf; p=pars(d)) = (x;kw...)->func(d,x;p)
-noparsnormf(d::pdf; p=pars(d)) = (ns=normalizationintegral(d;p); (x;kw...)->func(d,x;p)/ns)
+noparsf(d::AbstractPDF; p=pars(d)) = (x;kw...)->func(d,x;p=p)
+noparsnormf(d::AbstractPDF; p=pars(d)) = (ns=normalizationintegral(d;p=p); (x;kw...)->func(d,x;p=p)/ns)
 
 fixedshapepdf(f, lims) = pdf((x;p)->f(x); lims=lims, p=∅)
