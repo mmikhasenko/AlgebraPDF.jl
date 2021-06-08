@@ -47,7 +47,6 @@ mybw_conv = convGauss(mybw, 5e-3)
     @test pars(updatepars(mybw_conv, (Δm=0.15,))).Δm == 0.15
 end
 
-
 function maxdensity(d, Δm)
     xv = range(0,0.22,length=100)
     maximum(updatepars(d,(Δm=Δm,))(xv))

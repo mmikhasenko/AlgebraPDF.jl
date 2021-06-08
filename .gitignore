@@ -6,3 +6,5 @@
 Manifest.toml
 
 /dev/
+miscellaneous/ComponentArraysProt.jl
+test_struct.jl

@@ -20,9 +20,12 @@ struct convGauss{T,S} <: AbstractPDF
     σ::S
 end
 
-pars(d::convGauss) = pars(d.pdf) + pars(d.σ)
+pars(d::convGauss, isfree::Bool) = pars(d.pdf, isfree) + pars(d.σ, isfree)
 lims(d::convGauss) = lims(d.pdf)
-copy(d::convGauss,p) = convGauss(copy(d.pdf,p), d.σ)
+updatevalueorflag(d::convGauss, s::Symbol, isfree::Bool, v=getproperty(pars(d),s)) = 
+    convGauss(
+        ispar(d.pdf,s) ? updatevalueorflag(d.pdf,s,isfree,v) : d.pdf,
+        ispar(d.σ,  s) ? updatevalueorflag(d.σ,  s,isfree,v) : d.σ)
 
 function func(d::convGauss, x::Number; p=pars(d))
     σ = func(d.σ, x; p)

@@ -14,7 +14,10 @@ using Measurements
 #
 export ∅
 
+import Base:+,-
 import Base:copy
+import Base: getproperty
+import Base: abs2
 import Optim: minimizer, minimum
 import ForwardDiff: hessian
 

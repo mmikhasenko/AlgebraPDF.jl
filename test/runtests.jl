@@ -145,25 +145,25 @@ sum_of_w = sWeights_signal(xv) + sWeights_backgr(xv)
     @test prod(sum_of_w .- sum_of_w[30] .< 1e-10)
 end
 
-@newfunc GG1(x;p) = x^2+p.a*x^3
-@newfunc GG2(x;p) = x^1+p.b*x^2
-h1 = GG1(p=(a=0.5,))
-h2 = GG2(p=(b=0.5,))
+# @newfunc GG1(x;p) = x^2+p.a*x^3
+# @newfunc GG2(x;p) = x^1+p.b*x^2
+# h1 = GG1(p=(a=0.5,))
+# h2 = GG2(p=(b=0.5,))
 
-h12 = h1+h2
-@testset "sum of functions" begin
-    @test func(h12,1.1) == func(h1,1.1) + func(h2,1.1)
-    @test keys(freepars(h12)) == (:a,:b,:α)
-end
+# h12 = h1+h2
+# @testset "sum of functions" begin
+#     @test func(h12,1.1) == func(h1,1.1) + func(h2,1.1)
+#     @test keys(freepars(h12)) == (:a,:b,:α)
+# end
 
-h1sq = abs2(h1)
-@testset "abs2 of functions" begin
-    @test pars(h1sq) == pars(h1)
-    @test func(h1sq, 1.1) == func(h1, 1.1)^2
-end
+# h1sq = abs2(h1)
+# @testset "abs2 of functions" begin
+#     @test pars(h1sq) == pars(h1)
+#     @test func(h1sq, 1.1) == func(h1, 1.1)^2
+# end
 
-@testset "implementation of copy" begin
-    @test func(h1, 1.1) ≈ func(copy(h1, pars(h1)), 1.1)
-    @test func(h12, 1.1) ≈ func(copy(h12, pars(h12)), 1.1)
-    @test func(h1sq, 1.1) ≈ func(copy(h1sq, pars(h1sq)), 1.1)
-end
+# @testset "implementation of copy" begin
+#     @test func(h1, 1.1) ≈ func(copy(h1, pars(h1)), 1.1)
+#     @test func(h12, 1.1) ≈ func(copy(h12, pars(h12)), 1.1)
+#     @test func(h1sq, 1.1) ≈ func(copy(h1sq, pars(h1sq)), 1.1)
+# end

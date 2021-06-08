@@ -66,11 +66,12 @@ macro typepdf(ex)
         end
         $(esc(name))(;p,lims) = $(esc(name))(p, lims)
 
-        import AlgebraPDF: func
-        import Base: copy
+        import AlgebraPDF: func, pars, updatevalueorflag
         # 
         $(esc(:func))(d::$(esc(name)), $(esc(x))::Number; p=$(esc(:pars))(d)) = $(esc(body))
-        $(esc(:copy))(d::$(esc(name)), p) = $(esc(name))(;p=copy(d.p, p),lims=$(esc(:lims))(d))
+        $(esc(:pars))(d::$(esc(name)), isfree::Bool) = $(esc(:pars))(d.p)
+        $(esc(:updatevalueorflag))(d::$(esc(name)), s::Symbol, isfree::Bool, v=getproperty($(esc(:pars))(d),s)) = 
+            $(esc(name))(;p=$(esc(:updatevalueorflag))(d.p, s, isfree, v), lims=d.lims)
     end
 end
 
@@ -89,7 +90,10 @@ pdf(f;p,lims) = pdf(;
 import Base:getproperty
 getproperty(d::pdf, sym::Symbol) = sym==:p ? pars(d.lineshape) : getfield(d, sym)
 func(d::pdf, x::Number; p=pars(d)) = func(d.lineshape, x; p)
-copy(d::pdf, p) = pdf(; lineshape=copy(d.lineshape,p), lims=lims(d))
+pars(d::pdf, isfree::Bool) = pars(d.lineshape, isfree)
+updatevalueorflag(d::pdf, s::Symbol, isfree::Bool, v=getproperty(pars(d),s)) =
+    pdf(lineshape=updatevalueorflag(d.lineshape, s, isfree, v), lims=d.lims)
+
 #
 
 # 

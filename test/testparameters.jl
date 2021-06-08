@@ -6,16 +6,6 @@
     @test keys(sp) == (:f,)
     @test sp == -(p, [:μ, :σ])
     #
-    sp = selectpars(p, (:μ, :σ))
-    @test keys(sp) == (:μ, :σ)
-    @test sp == selectpars(p, [:μ, :σ])
-    #
-    up = updatepars(  p, (μ = 3.1, σ = 5.2))
-    @test length(up) == 3
-    @test up.μ == 3.1
-    @test up.σ == 5.2
-    @test up.f == 2.2
-    # 
     @test (a=1,b=2) + (d=1,c=2) == (a=1,b=2,d=1,c=2)
     @test (a=1,b=2,d=1,c=2) - (d=1,) == (a=1,b=2,c=2)
     @test (a=1,b=2,d=1,c=2) - :d == (a=1,b=2,c=2)
@@ -30,30 +20,18 @@ end
     @test nt(:d, (1.1,0.1)) == (d = (1.1,0.1), )
     #
     ps0 = AlgebraPDF.TwoNamedTuples((a=1.1,b=2.2,c=3.3))
-    #
-    ps1 = fixpar(ps0, :a)
-    @test length(fixedpars(ps1)) == 1 && length(freepars(ps1)) == 2
-    ps2 = fixpars(ps0, (a=3.3, b=6.6))
-    @test ps2.a == 3.3 && ps2.b == 6.6
+    d0 = FunctionWithParameters(f=(x;p)->x^2,p=ps0)
+    # #
+    d1 = fixpar(d0, :a)
+    @test length(fixedpars(d1)) == 1 && length(freepars(d1)) == 2
+    d2 = fixpars(d0, (a=3.3, b=6.6))
+    @test pars(d2).a == 3.3 && pars(d2).b == 6.6
     # 
-    @test releasepar(fixpar(ps0, :c), :c) == ps0
+    @test releasepar(fixpar(d0, :c), :c) == d0
+    # #
+    @test length(freepars(d0)) == 3
+    @test length(freepars(d1)) == 2
     #
-    @test length(freepars(ps0)) == 3
-    @test length(freepars(ps1)) == 2
-    #
-    @test updatepars(ps0, (a=5.5,)).a == 5.5
+    @test pars(updatepars(d0, (a=5.5,))).a == 5.5
 end
 
-@testset "copy parameters" begin
-    ps0 = AlgebraPDF.TwoNamedTuples((a=1.1,b=2.2,c=3.3))
-    ps1 = fixpars(ps0, (a=4.4,b=5.5))
-    ps2 = copy(ps0, ps1)
-    @test ps2 == ps1
-    # 
-    ps_bigger = AlgebraPDF.TwoNamedTuples((a=12.1,c=3.3,d=-40), (b=7.7,g=33))
-    ps4 = copy(ps2, ps_bigger)
-    @test Set(keys(AlgebraPDF.allpars(ps4))) == Set(keys(AlgebraPDF.allpars(ps0)))
-    @test ps4.a == ps_bigger.a
-    @test ps4.b == ps_bigger.b
-    @test ps4.c == ps_bigger.c    
-end

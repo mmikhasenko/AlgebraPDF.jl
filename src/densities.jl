@@ -4,23 +4,23 @@ amplitudeBW(x,m,Γ) = m*Γ/(m^2-x^2-1im*m*Γ)
 amplitudeBWsq(x,m,Γ) = abs2(amplitudeBW(x,m,Γ))
 # 
 function aGauss(p, lims)
-    μ, σ = keys(p)
+    μ, σ = keys(pars(p))
     return pdf((x;p)->standardgauss.(x .- getproperty(p,μ), getproperty(p,σ)), p=p, lims=lims)
 end
 function aBreitWigner(p, lims)
-    m, Γ = keys(p)
+    m, Γ = keys(pars(p))
     return pdf((x;p)->amplitudeBWsq.(x,getproperty(p,m), getproperty(p,Γ)), p=p, lims=lims)
 end
 function aExp(p, lims)
-    α, = keys(p)
+    α, = keys(pars(p))
     return pdf((x;p)->exp.(x .*getproperty(p,α)), p=p, lims=lims)
 end
 function aPowExp(p, lims)
-    α,β = keys(p)
+    α,β = keys(pars(p))
     return pdf((x;p)->x.^getproperty(p,α) .* exp.(x .*getproperty(p,β)), p=p, lims=lims)
 end
 function aPol(p, lims)
-    cs = keys(p)
+    cs = keys(pars(p))
     return pdf((x;p)->sum(x.^(i-1) .* getproperty(p,c) for (i,c) in enumerate(cs)), p=p, lims=lims)
 end
 

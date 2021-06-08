@@ -85,8 +85,6 @@ end
     # parameter manipulation are not supposed to work with NamedTuple
     @test_throws DomainError fixpar(d, :a, 1.2)
     @test_throws DomainError fixpars(d, (a=1.2,))
-    @test_throws DomainError releasepar(d, :a)
-    # 
 end
 
 
@@ -95,6 +93,11 @@ end
 #  _|    _|    _|  _|    _|  _|        _|        _|    _|      _|_|  
 #  _|    _|    _|    _|_|_|    _|_|_|  _|          _|_|    _|_|_|    
 
+
+@macroexpand( @typepdf BW(x; p) = p.m*p.Γ/(p.m^2-x^2-1im*p.m*p.Γ) )
+
+
+@macroexpand( @typepdf BW(x; p) = p.m*p.Γ/(p.m^2-x^2-1im*p.m*p.Γ) )
 
 @typepdf BW(x; p) = p.m*p.Γ/(p.m^2-x^2-1im*p.m*p.Γ) |> abs2
 bw = BW((m=3.1,Γ=0.1), (1,5))
