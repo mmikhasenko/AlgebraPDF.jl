@@ -12,33 +12,40 @@ using LinearAlgebra
 using Measurements
 
 #
+export ∅
 
 import Base:copy
 import Optim: minimizer, minimum
 import ForwardDiff: hessian
 
-export fixpar, releasepar
+export fixpars, releasepars
 export updatepars, selectpars
 export nt
+export TwoNamedTuples
+#
+export fixpar, releasepar
 include("parameters.jl")
 
-export SumFunc, Abs2Func
 # 
-export TwoNamedTuples
 export @typepdf, @newfunc
 export AbstractFunctionWithParameters
 export FunctionWithParameters
+export SumFunc, Abs2Func
 # 
-export AbstractPDF
-export ∅
-export pdf, npars, p2v, v2p
-export integral, integrals
-export fixpars, fixpar
-export fixedshapepdf
-export noparsf, noparsnormf
-export func, lims
+export func
+export npars, p2v, v2p
 export freepars, fixedpars
 export pars
+# 
+include("functionwithparameters.jl")
+
+# 
+export AbstractPDF
+export pdf
+export integral, integrals
+export fixedshapepdf
+export noparsf, noparsnormf
+export lims
 export normalizationintegral
 include("pdf.jl")
 

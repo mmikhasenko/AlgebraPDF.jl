@@ -1,3 +1,5 @@
+const ∅ = NamedTuple()
+
 import Base:+,-
 +(t1::NamedTuple, t2::NamedTuple) = merge(t1,t2)
 -(t1::NamedTuple, t2::NamedTuple) = Base.structdiff(t1,t2)
@@ -26,7 +28,7 @@ updatepars(p::NamedTuple, from_p::NamedTuple) = p + selectintersect(p, from_p)
 complain_about_Pars() = throw(DomainError("Not able to fix, release parameters since parameters are held by a NamedTuple!"))
 fixpars(ps::NamedTuple, from_p)        = complain_about_Pars()
 fixpar(ps::NamedTuple, s, v = 0.0)     = complain_about_Pars()
-releasepar(ps::NamedTuple, s, v = 0.0) = complain_about_Pars()
+releasepars(ps::NamedTuple, s, v = 0.0) = complain_about_Pars()
 
 #              _|                                      _|      
 #    _|_|_|  _|_|_|_|  _|  _|_|  _|    _|    _|_|_|  _|_|_|_|  
@@ -59,8 +61,10 @@ getproperty(ps::TwoNamedTuples, s::Symbol) = hasproperty(freepars(ps), s) ? getp
 
 fixpars(ps::TwoNamedTuples, from_p) = TwoNamedTuples(freepars(ps) - from_p, fixedpars(ps) + from_p)
 fixpar(ps::TwoNamedTuples, s::Symbol, v::T where T <: Real = getproperty(freepars(ps),s)) = fixpars(ps, nt(s,v))
-releasepar(ps::TwoNamedTuples, s::Symbol, v::T where T <: Real = getproperty(fixedpars(ps),s)) =
-    TwoNamedTuples(freepars(ps) + nt(s, v), fixedpars(ps) - s)
+releasepars(ps::TwoNamedTuples, sv) =
+    TwoNamedTuples(freepars(ps) + sv, fixedpars(ps) - sv)
+releasepar(ps::TwoNamedTuples, s::Symbol) =
+    TwoNamedTuples(freepars(ps) + nt(s, getproperty(fixedpars(ps),s)), fixedpars(ps) - s)
 #
 #
 updatepars(ps::TwoNamedTuples, from_p::NamedTuple) = TwoNamedTuples(updatepars(freepars(ps), from_p), updatepars(fixedpars(ps), from_p))
