@@ -21,8 +21,8 @@ pars(ps::NamedTuple, isfree) = isfree==true ? ps : ∅
 # 
 selectintersect(p::NamedTuple, from_p::NamedTuple) = selectpars(from_p, intersect(keys(p), keys(from_p)))
 
-updatevalueorflag( p::NamedTuple, s::Symbol, isfree::Bool, v=getproperty(pars(d),s)) =
-    isfree==true ? p+nt(s,v) : # join and replace the old value
+updatevalueorflag(p::NamedTuple, s::Symbol, isfree::Bool, v=getproperty(pars(d),s)) =
+    isfree==true ? NamedTuple{keys(p)}(p+nt(s,v)) : # join and replace the old value
     throw(DomainError("Not able to fix, release parameters since parameters are held by a NamedTuple!"))
 
 #              _|                                      _|      
