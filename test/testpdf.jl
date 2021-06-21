@@ -14,8 +14,8 @@ end
     @test d1(1.0) ≈ 3.9/(9/3+3*pars(d1).a)
     # 
     d1′ = fixpars(d0, (:a,))
-    @test d1′ == fixpars(d0, [:a])
-    @test d1′ == fixpars(d0, (a=1.0,))
+    @test freepars(d1′) == freepars(fixpars(d0, [:a]))
+    @test freepars(d1′) == freepars(fixpars(d0, (a=1.0,)))
 end
 
 @testset "parameters to values" begin
