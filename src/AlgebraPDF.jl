@@ -1,5 +1,6 @@
 module AlgebraPDF
 #
+# using Base: NamedTuple
 using Parameters
 using QuadGK
 using Optim
@@ -14,10 +15,11 @@ using Measurements
 #
 export ∅
 
-import Base:+,-
+import Base:+,-,==
 import Base:copy
 import Base: getproperty
 import Base: abs2
+import Base: keys
 import Optim: minimizer, minimum
 import ForwardDiff: hessian
 
