@@ -4,8 +4,7 @@
     return (xv, norm .* d(xv))
 end
 
-# @recipe f(d::AbstractFunctionWithParameters) = x->func(d,x;p=pars(d))
-
+@recipe f(::Type{T}, d::T) where {T<:AbstractFunctionWithParameters} = x->func(d,x;p=pars(d))
 
 scaletobinneddata(Nd,lims,Nbins) = Nd * (lims[2]-lims[1]) / Nbins
 scaletobinneddata(Nd, bins) = Nd * (bins[end]-bins[1]) / (length(bins)-1)
