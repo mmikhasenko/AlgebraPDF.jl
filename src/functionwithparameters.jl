@@ -1,4 +1,5 @@
 
+pars(d, isfree::Bool) = pars(d.p, isfree)
 pars(d) = pars(d, true) + pars(d, false)
 freepars(d) = pars(d, true)
 fixedpars(d) = pars(d, false)
@@ -9,6 +10,10 @@ isfreepar(d, s::Symbol) = (s ∈ keys(freepars(d)))
 abstract type AbstractFunctionWithParameters end
 #
 npars(d::AbstractFunctionWithParameters) = length(freepars(d))
+# 
+func(d::AbstractFunctionWithParameters, x::AbstractArray; p=pars(d)) = func.(Ref(d), x; p)
+func(d::AbstractFunctionWithParameters, x::AbstractRange; p=pars(d)) = func.(Ref(d), x; p)
+
 # methods that call `updatevalueorflag`
 
 updateisfree(d::AbstractFunctionWithParameters, s::Symbol, isfree::Bool) =
@@ -69,9 +74,9 @@ struct Abs2Func{T<:AbstractFunctionWithParameters} <: AbstractFunctionWithParame
     f::T
 end
 func(d::Abs2Func, x::Number; p=pars(d)) = abs2(func(d.f,x;p))
-pars(d::Abs2Func, isfree) = pars(d.f, isfree)
+pars(d::Abs2Func, isfree::Bool) = pars(d.f, isfree)
 updatevalueorflag( d::Abs2Func, s::Symbol, isfree::Bool, v=getproperty(pars(d),s)) =
-    Abs2Func(updatevalueorflag(f,s,isfree,v))
+    Abs2Func(updatevalueorflag(d.f,s,isfree,v))
 # 
 abs2(f::AbstractFunctionWithParameters) = Abs2Func(f)
 
@@ -86,7 +91,7 @@ struct SumFunc{
     α2::V
 end
 func(d::SumFunc, x::Number; p=pars(d)) = func(d.f1,x;p) + getproperty(p,keys(d.α2)[1])*func(d.f2,x;p)
-pars(d::SumFunc) = pars(d.f1) + pars(d.f2) + d.α2
+pars(d::SumFunc, isfree::Bool) = pars(d.f1, isfree) + pars(d.f2, isfree) + pars(d.α2, isfree)
 updatevalueorflag( d::SumFunc, s::Symbol, isfree::Bool, v=getproperty(pars(d),s)) =
     SumFunc(
         ispar(d.f1,s) ? updatevalueorflag(d.f1,s,isfree,v) : d.f1,

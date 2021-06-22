@@ -29,8 +29,6 @@ function (d::AbstractPDF)(x; p=freepars(d))
 end
 
 (d::AbstractPDF)(x, v) = d(x; p=v2p(v,d))
-func(d::AbstractPDF, x::AbstractArray; p=pars(d)) = func.(Ref(d), x; p)
-func(d::AbstractPDF, x::AbstractRange; p=pars(d)) = func.(Ref(d), x; p)
 
 # assumes that the fields "lims" and "p" are present
 lims(d::AbstractPDF) = d.lims

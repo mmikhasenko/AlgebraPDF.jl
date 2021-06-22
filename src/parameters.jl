@@ -17,7 +17,7 @@ nt(s::Symbol, v = 0.0) = NamedTuple{(s,)}([v])
 #                      _|                      
 
 
-pars(ps::NamedTuple, isfree) = isfree==true ? ps : ∅
+pars(ps::NamedTuple, isfree::Bool) = isfree==true ? ps : ∅
 # 
 selectintersect(p::NamedTuple, from_p::NamedTuple) = selectpars(from_p, intersect(keys(p), keys(from_p)))
 

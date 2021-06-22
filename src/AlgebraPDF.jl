@@ -26,10 +26,11 @@ import ForwardDiff: hessian
 export fixpars, releasepars
 export updatepars, selectpars
 export nt
-export TwoNamedTuples
-#
+# 
 export fixpar, releasepar
 include("parameters.jl")
+const Ext = TwoNamedTuples
+export Ext, TwoNamedTuples
 
 # 
 export @typepdf, @newfunc
