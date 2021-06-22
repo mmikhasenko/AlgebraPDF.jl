@@ -33,43 +33,40 @@ updatevalueorflag(p::NamedTuple, s::Symbol, isfree::Bool, v=getproperty(pars(d),
                                                              
 struct TwoNamedTuples{R}
     allpars::NamedTuple{R}
-    whichfixed::Vector{Symbol}
+    whichfixed::Tuple
 end
 allpars(ps::TwoNamedTuples) = getfield(ps,:allpars)
 whichfixed(ps::TwoNamedTuples) = getfield(ps,:whichfixed)
 
-keys(ps::TwoNamedTuples, isfree::Bool) = isfree==false ? Tuple(whichfixed(ps)) : Base.diff_names(keys(allpars(ps)), Tuple(whichfixed(ps)))
+keys(ps::TwoNamedTuples) = keys(allpars(ps))
+keys(ps::TwoNamedTuples, isfree::Bool) = isfree==false ? whichfixed(ps) : Base.diff_names(keys(allpars(ps)), whichfixed(ps))
 pars(ps::TwoNamedTuples, isfree::Bool) = NamedTuple{keys(ps, isfree)}(allpars(ps))
 
 getproperty(ps::TwoNamedTuples, s::Symbol) = hasproperty(freepars(ps), s) ? getproperty(freepars(ps), s) : getproperty(fixedpars(ps), s)
 
 
-# +(ps::TwoNamedTuples, t2::NamedTuple) = TwoNamedTuples(freepars(ps)+t2, fixedpars(ps))
-# +(t2::NamedTuple, ps::TwoNamedTuples) = +(ps, t2)
-# +(ps1::TwoNamedTuples, ps2::TwoNamedTuples) = TwoNamedTuples(freepars(ps1)+freepars(ps2), fixedpars(ps1)+fixedpars(ps2))
-#
+# inner working
 updatednamedtuple(p::NamedTuple, s::Symbol, v) = NamedTuple{keys(p)}(p+nt(s,v))
-
-mustinclude(whichfixed::Vector,s) = s ∈ whichfixed ? whichfixed : push!(whichfixed,s)
-mustexclude(whichfixed::Vector,s) = s ∈ whichfixed ? filter!(x->x!=s,whichfixed) : whichfixed
-# 
-function updateflag!(whichfixed::Vector{Symbol}, s::Symbol, isfree::Bool)
+mustinclude(whichfixed::Tuple,s) = s ∈ whichfixed ? whichfixed : (whichfixed...,s)
+mustexclude(whichfixed::Tuple,s) = s ∈ whichfixed ? Base.diff_names(whichfixed, (s,)) : whichfixed
+function updateflag(whichfixed::Tuple, s::Symbol, isfree::Bool)
     isfree ? mustexclude(whichfixed,s) : mustinclude(whichfixed,s)
 end
 
+"""
+    updatevalueorflag(p::TwoNamedTuples, s::Symbol, isfree::Bool, v=getproperty(pars(p),s))
+
+Implementation of the main update method for `TwoNamedTuples` parameters.
+"""
 function updatevalueorflag(p::TwoNamedTuples, s::Symbol, isfree::Bool, v=getproperty(pars(p),s))
-    # newp = (v == getproperty(pars(p),s)) ? p : 
-    newp = TwoNamedTuples(updatednamedtuple(allpars(p),s,v), copy(whichfixed(p)))
-    updateflag!(getfield(newp,:whichfixed), s, isfree)
-    return newp
+    return TwoNamedTuples(
+        updatednamedtuple(allpars(p),s,v),
+        updateflag(whichfixed(p), s, isfree))
 end
 
-TwoNamedTuples(t::NamedTuple) = TwoNamedTuples(t,Symbol[])
+TwoNamedTuples(t::NamedTuple) = TwoNamedTuples(t,())
 TwoNamedTuples(ps::TwoNamedTuples) = TwoNamedTuples(freepars(ps),fixedpars(ps))
 TwoNamedTuples(; kw...) = TwoNamedTuples((;kw...))
-
-==(ps1::TwoNamedTuples, ps2::TwoNamedTuples) =
-    (freepars(ps1)==freepars(ps2))&&(fixedpars(ps1)==fixedpars(ps2))
 
 const ParTypes = Union{NamedTuple,TwoNamedTuples}
 #

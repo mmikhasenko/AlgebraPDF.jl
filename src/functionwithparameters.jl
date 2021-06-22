@@ -103,8 +103,6 @@ updatevalueorflag( d::SumFunc, s::Symbol, isfree::Bool, v=getproperty(pars(d),s)
     p::T
 end
 FunctionWithParameters(f;p) = FunctionWithParameters(;f,p)
-==(d1::FunctionWithParameters, d2::FunctionWithParameters) =
-    (d1.f==d2.f)&&(d1.p==d2.p)
 
 # two methods to be defined
 func(d::FunctionWithParameters, x::Number; p=pars(d)) = d.f(x; p)
