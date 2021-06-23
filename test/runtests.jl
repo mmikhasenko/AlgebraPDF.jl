@@ -5,6 +5,27 @@ using SpecialFunctions
 using LinearAlgebra
 using Measurements
 
+# struct BW{T} <: AlgebraPDF.AbstractFunctionWithParameters
+#     p::T
+# end
+# import AlgebraPDF: func
+# function func(d::BW, x::Number; p=freepars(d))
+#     m,Γ = (getproperty(p,s) for s in keys(d.p))
+#     1 / (m^2 - x - 1im*m*Γ)
+# end
+
+# bw1 = BW((m1=1.1,Γ1=0.2))
+# bw2 = BW((m2=1.5,Γ2=0.2))
+
+# func(bw1, 1.1)
+# func(bw1, rand(10))
+
+# freepars(bw1)
+# freepars(bw2)
+
+# f0 = abs2(+(bw1,bw2,Ext(β=1.4,)))
+# f1 = fixpar(f0, :β, 2.2)
+# plot(f1, 0, 5)
 
 @testset "func on scalars" begin
     @test func(1.1, 3.3) == 1.1

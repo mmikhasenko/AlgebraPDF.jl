@@ -4,7 +4,7 @@ const ∅ = NamedTuple()
 -(t1::NamedTuple, t2::NamedTuple) = Base.structdiff(t1,t2)
 -(t1::NamedTuple, s::Symbol) = Base.structdiff(t1, nt(s))
 -(t1::NamedTuple, ss::Vector{Symbol}) = Base.structdiff(t1, sum(nt.(ss)))
--(t1::NamedTuple, ss::Tuple) = Base.structdiff(t1, sum(nt.(ss)))
+-(t1::NamedTuple, ss::Tuple{Vararg{Symbol}}) = Base.structdiff(t1, sum(nt.(ss)))
 
 nt(s::Symbol, v = 0.0) = NamedTuple{(s,)}([v])
 
@@ -33,7 +33,7 @@ updatevalueorflag(p::NamedTuple, s::Symbol, isfree::Bool, v=getproperty(pars(d),
                                                              
 struct TwoNamedTuples{R}
     allpars::NamedTuple{R}
-    whichfixed::Tuple
+    whichfixed::Tuple{Vararg{Symbol}}
 end
 allpars(ps::TwoNamedTuples) = getfield(ps,:allpars)
 whichfixed(ps::TwoNamedTuples) = getfield(ps,:whichfixed)
@@ -47,9 +47,9 @@ getproperty(ps::TwoNamedTuples, s::Symbol) = hasproperty(freepars(ps), s) ? getp
 
 # inner working
 updatednamedtuple(p::NamedTuple, s::Symbol, v) = NamedTuple{keys(p)}(p+nt(s,v))
-mustinclude(whichfixed::Tuple,s) = s ∈ whichfixed ? whichfixed : (whichfixed...,s)
-mustexclude(whichfixed::Tuple,s) = s ∈ whichfixed ? Base.diff_names(whichfixed, (s,)) : whichfixed
-function updateflag(whichfixed::Tuple, s::Symbol, isfree::Bool)
+mustinclude(whichfixed::Tuple{Vararg{Symbol}},s) = s ∈ whichfixed ? whichfixed : (whichfixed...,s)
+mustexclude(whichfixed::Tuple{Vararg{Symbol}},s) = s ∈ whichfixed ? Base.diff_names(whichfixed, (s,)) : whichfixed
+function updateflag(whichfixed::Tuple{Vararg{Symbol}}, s::Symbol, isfree::Bool)
     isfree ? mustexclude(whichfixed,s) : mustinclude(whichfixed,s)
 end
 
