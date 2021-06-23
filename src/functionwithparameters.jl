@@ -9,7 +9,7 @@ isfreepar(d, s::Symbol) = (s ∈ keys(freepars(d)))
 
 abstract type AbstractFunctionWithParameters end
 #
-npars(d::AbstractFunctionWithParameters) = length(freepars(d))
+nfreepars(d::AbstractFunctionWithParameters) = length(freepars(d))
 # 
 func(d::AbstractFunctionWithParameters, x::AbstractArray; p=pars(d)) = func.(Ref(d), x; p)
 func(d::AbstractFunctionWithParameters, x::AbstractRange; p=pars(d)) = func.(Ref(d), x; p)
@@ -28,7 +28,7 @@ fixpar(    d::AbstractFunctionWithParameters, s::Symbol) = updateisfree(d, s, fa
 fixpar(    d::AbstractFunctionWithParameters, s::Symbol, v) = updateisfree(updatepar(d, s, v), s, false)
 
 # plural
-const SymbolSequenceType = Union{Vector{Symbol}, Tuple}
+const SymbolSequenceType = Union{AbstractVector{Symbol}, Tuple{Vararg{Symbol}}}
 function fixpars(d::AbstractFunctionWithParameters, sequence::SymbolSequenceType)
     dnew = d
     for s in sequence

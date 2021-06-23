@@ -38,7 +38,7 @@ end
 
 # @testset "Mixed Model" begin
 #     @test typeof(freepars(mm0)) <: NamedTuple
-#     @test npars(mm0) == 5
+#     @test nfreepars(mm0) == 5
 #     @test v2p(p2v(mm0),mm0) == freepars(mm0)
 #     #
 #     sample = vcat((0.5 .* randn(1000) .- 1.0), (0.7.*randn(100) .+ 2.0))

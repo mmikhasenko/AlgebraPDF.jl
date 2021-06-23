@@ -1,3 +1,4 @@
+using Base: _free_pat_replacer
 using AlgebraPDF
 using StaticArrays
 using Test
@@ -5,33 +6,8 @@ using SpecialFunctions
 using LinearAlgebra
 using Measurements
 
-# struct BW{T} <: AlgebraPDF.AbstractFunctionWithParameters
-#     p::T
-# end
-# import AlgebraPDF: func
-# function func(d::BW, x::Number; p=freepars(d))
-#     m,Γ = (getproperty(p,s) for s in keys(d.p))
-#     1 / (m^2 - x - 1im*m*Γ)
-# end
-
-# bw1 = BW((m1=1.1,Γ1=0.2))
-# bw2 = BW((m2=1.5,Γ2=0.2))
-
-# func(bw1, 1.1)
-# func(bw1, rand(10))
-
-# freepars(bw1)
-# freepars(bw2)
-
-# f0 = abs2(+(bw1,bw2,Ext(β=1.4,)))
-# f1 = fixpar(f0, :β, 2.2)
-# plot(f1, 0, 5)
-
 include("testparameters.jl")
-
-@testset "func on scalars" begin
-    @test func(1.1, 3.3) == 1.1
-end
+include("testfuncions.jl")
 
 include("testpdf.jl")
 include("testdensities.jl")
@@ -104,10 +80,10 @@ end
     @test length(freepars(pdf2)) == 3
     #
     pdf_sum = pdf1 + pdf2
-    @test npars(pdf_sum) == 5
+    @test nfreepars(pdf_sum) == 5
 
     pdf_ratio = pdf1 / pdf2
-    @test npars(pdf_ratio) == 5
+    @test nfreepars(pdf_ratio) == 5
 end
 
                                                                                    

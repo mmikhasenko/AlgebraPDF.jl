@@ -23,15 +23,16 @@ import Base: keys
 import Optim: minimizer, minimum
 import ForwardDiff: hessian
 
-export fixpars, releasepars
-export updatepars, selectpars
 export nt
 # 
-export fixpar, releasepar
 include("parameters.jl")
 const Ext = TwoNamedTuples
 export Ext, TwoNamedTuples
 
+# 
+export updatepar, updatepars
+export fixpar, fixpars
+export releasepar, releasepars
 # 
 export @typepdf, @newfunc
 export AbstractFunctionWithParameters
@@ -39,9 +40,10 @@ export FunctionWithParameters
 export SumFunc, Abs2Func
 # 
 export func
-export npars, p2v, v2p
+export nfreepars
 export freepars, fixedpars
 export pars
+export p2v, v2p
 # 
 include("functionwithparameters.jl")
 
