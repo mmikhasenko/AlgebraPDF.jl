@@ -1,11 +1,13 @@
 
-@testset "Operations on NamedTuple" begin
-    p = (μ = 1.1, σ = 2.2, f = 2.2)
+using AlgebraPDF
 
-    sp = p - (:μ, :σ)
-    @test keys(sp) == (:f,)
-    @test sp == -(p, [:μ, :σ])
-    #
+@testset "Parameter utils" begin
+    @test nt(:d) == (d=0.0, )
+    @test nt(:d, 3) == (d=3, )
+    @test nt(:d, (1.1,0.1)) == (d = (1.1,0.1), )
+end
+
+@testset "Operations on NamedTuple" begin
     @test (a=1,b=2) + (d=1,c=2) == (a=1,b=2,d=1,c=2)
     @test (a=1,b=2,d=1,c=2) - (d=1,) == (a=1,b=2,c=2)
     @test (a=1,b=2,d=1,c=2) - :d == (a=1,b=2,c=2)
@@ -13,25 +15,35 @@
     @test (a=1,b=2,d=1,c=2) - (:d, :a) == (b=2,c=2)
 end
 
-@testset "parameter logic" begin
-    # 
-    @test nt(:d) == (d=0.0, )
-    @test nt(:d, 3) == (d=3, )
-    @test nt(:d, (1.1,0.1)) == (d = (1.1,0.1), )
-    #
-    ps0 = AlgebraPDF.TwoNamedTuples((a=1.1,b=2.2,c=3.3))
-    d0 = FunctionWithParameters(f=(x;p)->x^2,p=ps0)
-    # #
-    d1 = fixpar(d0, :a)
-    @test length(fixedpars(d1)) == 1 && length(freepars(d1)) == 2
-    d2 = fixpars(d0, (a=3.3, b=6.6))
-    @test pars(d2).a == 3.3 && pars(d2).b == 6.6
-    # 
-    @test releasepar(fixpar(d0, :c), :c) == d0
-    # #
-    @test length(freepars(d0)) == 3
-    @test length(freepars(d1)) == 2
-    #
-    @test pars(updatepars(d0, (a=5.5,))).a == 5.5
+
+@testset "Parameter structure: NamedTuple" begin
+    p0 = (a=1,b=2)
+    @test pars(p0) == p0
+    @test freepars(p0) == p0
+    @test fixedpars(p0) == ∅
+    @test AlgebraPDF.updatevalueorflag(p0, :a, true, 2) == (a=2,b=2)
+    @test_throws ArgumentError AlgebraPDF.updatevalueorflag(p0, :a, false)
 end
 
+
+@testset "Parameter structure: NamedTuple" begin
+    #
+    p0 = TwoNamedTuples(a=1,b=2)
+    @test p0.a == 1
+    @test p0.b == 2
+    # 
+    p1 = AlgebraPDF.updatevalueorflag(p0, :a, true, 2)
+    @test pars(p1) == (a=2,b=2)
+    #
+    p2 = AlgebraPDF.updatevalueorflag(p0, :a, false)
+    @test pars(p0) == pars(p2)
+    @test freepars(p2) == (b=2,)
+    @test fixedpars(p2) == (a=1,)
+    #
+    @test p0 == TwoNamedTuples((a=1,b=2))
+    @test p2 == TwoNamedTuples(p2)
+    # 
+    @test keys(p1) == keys(p2)
+    @test keys(p2, true) == (:b,)
+    @test keys(p2, false) == (:a,)
+end

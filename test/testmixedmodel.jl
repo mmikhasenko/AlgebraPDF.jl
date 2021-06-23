@@ -16,7 +16,7 @@ mm1 = MixedModel([g1, g2], AlgebraPDF.TwoNamedTuples((f1=0.33,)))
     @test length(freepars(mm1)) == 5
     @test length(fixedpars(mm1)) == 0
     # 
-    @test_throws DomainError fixpar(mm0, :f1, 1.1)
+    @test_throws ArgumentError fixpar(mm0, :f1, 1.1)
     @test fixpar(mm1, :σ1, 1.1) == fixpars(mm1, (σ1=1.1,))
     @test fixpars(mm1, (:σ1,)) == fixpar(mm1, :σ1) 
     mm_fixed = fixpar(mm1, :σ1, 1.1)

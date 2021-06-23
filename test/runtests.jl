@@ -27,11 +27,12 @@ using Measurements
 # f1 = fixpar(f0, :β, 2.2)
 # plot(f1, 0, 5)
 
+include("testparameters.jl")
+
 @testset "func on scalars" begin
     @test func(1.1, 3.3) == 1.1
 end
 
-include("testparameters.jl")
 include("testpdf.jl")
 include("testdensities.jl")
 include("testconvolution.jl")

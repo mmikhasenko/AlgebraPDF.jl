@@ -3,7 +3,7 @@ const ∅ = NamedTuple()
 +(t1::NamedTuple, t2::NamedTuple) = merge(t1,t2)
 -(t1::NamedTuple, t2::NamedTuple) = Base.structdiff(t1,t2)
 -(t1::NamedTuple, s::Symbol) = Base.structdiff(t1, nt(s))
--(t1::NamedTuple, ss::Vector{Symbol}) = Base.structdiff(t1, sum(nt.(ss)))
+-(t1::NamedTuple, ss::AbstractVector{Symbol}) = Base.structdiff(t1, sum(nt.(ss)))
 -(t1::NamedTuple, ss::Tuple{Vararg{Symbol}}) = Base.structdiff(t1, sum(nt.(ss)))
 
 nt(s::Symbol, v = 0.0) = NamedTuple{(s,)}([v])
@@ -21,9 +21,9 @@ pars(ps::NamedTuple, isfree::Bool) = isfree==true ? ps : ∅
 # 
 selectintersect(p::NamedTuple, from_p::NamedTuple) = selectpars(from_p, intersect(keys(p), keys(from_p)))
 
-updatevalueorflag(p::NamedTuple, s::Symbol, isfree::Bool, v=getproperty(pars(d),s)) =
+updatevalueorflag(p::NamedTuple, s::Symbol, isfree::Bool, v=getproperty(pars(p),s)) =
     isfree==true ? NamedTuple{keys(p)}(p+nt(s,v)) : # join and replace the old value
-    throw(DomainError("Not able to fix, release parameters since parameters are held by a NamedTuple!"))
+    throw(ArgumentError("Not able to fix, release parameters since parameters are held by a NamedTuple!"))
 
 #              _|                                      _|      
 #    _|_|_|  _|_|_|_|  _|  _|_|  _|    _|    _|_|_|  _|_|_|_|  
@@ -65,11 +65,11 @@ function updatevalueorflag(p::TwoNamedTuples, s::Symbol, isfree::Bool, v=getprop
 end
 
 TwoNamedTuples(t::NamedTuple) = TwoNamedTuples(t,())
-TwoNamedTuples(ps::TwoNamedTuples) = TwoNamedTuples(freepars(ps),fixedpars(ps))
+TwoNamedTuples(ps::TwoNamedTuples) = TwoNamedTuples(allpars(ps),whichfixed(ps))
 TwoNamedTuples(; kw...) = TwoNamedTuples((;kw...))
 
 const ParTypes = Union{NamedTuple,TwoNamedTuples}
 #
-pars(ps::ParTypes) = pars(ps, true) + pars(ps, false)
+pars(ps::ParTypes) = NamedTuple{keys(ps)}(pars(ps, true) + pars(ps, false))
 freepars(d::ParTypes) = pars(d, true)
 fixedpars(d::ParTypes) = pars(d, false)
