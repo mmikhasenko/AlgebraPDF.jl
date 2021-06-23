@@ -59,21 +59,21 @@ end
 #    _|_|_|    _|_|    _|    _|  _|_|_|        _|_|  _|        
 
 
-@testset "Constrained fit" begin
-    @test AlgebraPDF.chi2((a=(1,0.2), b=(3,0.2)); p = (a=1.1, b=2.2)) ≈
-        (0.1/0.2)^2+(0.8/0.2)^2
-    #
-    d = aGauss((a=0.01,b = 1.1), (-3,3))
-    data = randn(1000)
-    my_fr = fit_llh(data, d)
-    my_pfr = v2p(minimizer(my_fr), d)
-    # 
-    constraints = (a = (0.2,0.01),)
-    my_fr2 = fit_llh_with_constraints(data, d, constraints)
-    my_pfr2 = v2p(minimizer(my_fr2), d)
-    #
-    @test abs(my_pfr2.a - constraints.a[1]) < abs(my_pfr.a - constraints.a[1])
-end
+# @testset "Constrained fit" begin
+#     @test AlgebraPDF.chi2((a=(1,0.2), b=(3,0.2)); p = (a=1.1, b=2.2)) ≈
+#         (0.1/0.2)^2+(0.8/0.2)^2
+#     #
+#     d = aGauss((a=0.01,b = 1.1), (-3,3))
+#     data = randn(1000)
+#     my_fr = fit_llh(data, d)
+#     my_pfr = v2p(minimizer(my_fr), d)
+#     # 
+#     constraints = (a = (0.2,0.01),)
+#     my_fr2 = fit_llh_with_constraints(data, d, constraints)
+#     my_pfr2 = v2p(minimizer(my_fr2), d)
+#     #
+#     @test abs(my_pfr2.a - constraints.a[1]) < abs(my_pfr.a - constraints.a[1])
+# end
 
 #            _|                      
 #  _|_|_|    _|  _|    _|    _|_|_|  
@@ -140,14 +140,14 @@ xr = mylims[1]+rand()*(mylims[2]-mylims[1])
     @test length(freepars(sum3)) == 0
 end
 
-@testset "Example with sum pdf" begin
-    ds = generate(5000, sum1)
-    ft = fit_llh(ds,sum1; init_pars=[0.3])
-    pfr = minimizer(ft)
-    sum1_fit = fixpars(sum1, v2p(pfr,sum1))
-    println("δf = ", (pfr[1] - freepars(sum1)[1]) / freepars(sum1)[1])
-    @test (pfr[1] - freepars(sum1)[1]) / freepars(sum1)[1] < 0.05
-end
+# @testset "Example with sum pdf" begin
+#     ds = generate(5000, sum1)
+#     ft = fit_llh(ds,sum1; init_pars=[0.3])
+#     pfr = minimizer(ft)
+#     sum1_fit = fixpars(sum1, v2p(pfr,sum1))
+#     println("δf = ", (pfr[1] - freepars(sum1)[1]) / freepars(sum1)[1])
+#     @test (pfr[1] - freepars(sum1)[1]) / freepars(sum1)[1] < 0.05
+# end
 
 
 #            _|_|_|    _|              _|      
