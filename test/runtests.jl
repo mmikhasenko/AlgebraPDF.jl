@@ -1,15 +1,16 @@
-using Base: _free_pat_replacer
 using AlgebraPDF
 using StaticArrays
 using Test
 using SpecialFunctions
 using LinearAlgebra
 using Measurements
+using StaticArrays: getproperty
+
 
 include("testparameters.jl")
 include("testfuncions.jl")
-
 include("testpdf.jl")
+# 
 include("testdensities.jl")
 include("testconvolution.jl")
 include("testmultid.jl")
@@ -25,7 +26,7 @@ include("testmixedmodel.jl")
 
 
 @testset "Plotting utils" begin
-    scaletobinneddata(10,(0,1),10) ≈ 1.0
+    scaletobinneddata(10, (0,1),10) ≈ 1.0
     scaletobinneddata(10, range(0,1,length=11)) ≈ 1.0
 end
 
@@ -95,12 +96,12 @@ end
 #                                      _|                            
 #                                      _|                            
 
-g(x) = exp(-(4x)^2)
+myg(x) = exp(-(4x)^2)
 e(x) = exp(-x)
 mylims = (-1, 2)
 # 
-sum0 = sumpdf(g,e,mylims)
-pdf1 = fixedshapepdf(g, mylims)
+sum0 = sumpdf(myg,e,mylims)
+pdf1 = fixedshapepdf(myg, mylims)
 pdf2 = fixedshapepdf(e, mylims)
 # 
 sum1 = sumpdf(pdf1, pdf2)
@@ -143,12 +144,12 @@ sum_of_w = sWeights_signal(xv) + sWeights_backgr(xv)
     @test prod(sum_of_w .- sum_of_w[30] .< 1e-10)
 end
 
-# @newfunc GG1(x;p) = x^2+p.a*x^3
-# @newfunc GG2(x;p) = x^1+p.b*x^2
+# @maketype GG1(x;p) = x^2+p.a*x^3
+# @maketype GG2(x;p) = x^1+p.b*x^2
 # h1 = GG1(p=(a=0.5,))
 # h2 = GG2(p=(b=0.5,))
-
 # h12 = h1+h2
+
 # @testset "sum of functions" begin
 #     @test func(h12,1.1) == func(h1,1.1) + func(h2,1.1)
 #     @test keys(freepars(h12)) == (:a,:b,:α)

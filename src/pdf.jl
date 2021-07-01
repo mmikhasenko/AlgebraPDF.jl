@@ -7,15 +7,8 @@
 #  _|    _|  _|_|_|    _|_|_|        _|_|  _|          _|_|_|    _|_|_|      _|_|  _|        _|_|_|    _|        
                                                                                                                
 
-abstract type AbstractPDF <: AbstractFunctionWithParameters end
+abstract type AbstractPDF{N} <: AbstractFunctionWithParameters end  # N is the dimension
 
-normalizationintegral(d::AbstractPDF; p=freepars(d)) =
-    quadgk(x->func(d, x; p), lims(d)...)[1]
-function integral(d::AbstractPDF, lims; p=freepars(d))
-    allpars = p+fixedpars(d)
-    quadgk(x->func(d,x; p=allpars), lims...)[1] / normalizationintegral(d; p=allpars)
-end
-#
 # calls
 function (d::AbstractPDF)(x; p=freepars(d))
     allp = p+fixedpars(d)
@@ -24,15 +17,68 @@ function (d::AbstractPDF)(x; p=freepars(d))
         println("Error: normalization ≈ 0!")
         normalization = 1.0
     end
-#     normalization ≈ 0.0 && error("norm = 0 with p = $(p)!")
     return func(d,x; p=allp) / normalization
 end
 
-(d::AbstractPDF)(x, v) = d(x; p=v2p(v,d))
+# call on 
+(d::AbstractPDF)(x, v::AbstractVector) = d(x; p=v2p(v,d))
 
-# assumes that the fields "lims" and "p" are present
-lims(d::AbstractPDF) = d.lims
+# 1 dims
+normalizationintegral(d::AbstractPDF{1}; p=freepars(d)) =
+    quadgk(x->func(d, x; p=p), lims(d)...)[1]
+#
+# 2 dims
+# function normalizationintegral(d::AbstractPDF{2}; p=freepars(d))
+#     xmap = x->mapx_to_unit(x,lims(d))
+#     curhe((x,f)->f[1]=func(d, xmap(x); p=p), lims(d)...)[1]
+# end
 
+
+"""
+noparsnormf(d::AbstractPDF; p=pars(d))
+
+Returns a single-argument lambda-function with parameters fixed to `p` and normalization computed.
+""" 
+noparsnormf(d::AbstractPDF; p=pars(d)) = (ns=normalizationintegral(d;p=p); (x;kw...)->func(d,x;p=p)/ns)
+
+
+# by default, I assume that the fields "lims" is present
+lims(d::AbstractPDF) = getfield(d, :lims)
+updatevalueorflag(d::AbstractPDF, s::Symbol, isfree::Bool, v=getproperty(pars(d),s)) =
+    typeof(d)(updatevalueorflag(d.p, s, isfree, v), d.lims)
+
+# other methods
+function integral(d::AbstractPDF{1}, lims; p=freepars(d))
+    allpars = p+fixedpars(d)
+    quadgk(x->func(d,x; p=allpars), lims...)[1] / normalizationintegral(d; p=allpars)
+end
+
+#################################################################### 
+
+struct PDFWithParameters{T<:AbstractFunctionWithParameters,L} <: AbstractPDF{1}
+    lineshape::T
+    lims::L
+end
+lineshape(d::PDFWithParameters) = getfield(d, :lineshape)
+
+# two methods to be defined
+import Base: getproperty
+getproperty(d::PDFWithParameters, sym::Symbol) = sym==:p ? pars(lineshape(d)) : getfield(d, sym)
+func(d::PDFWithParameters, x::Number; p=pars(d)) = func(lineshape(d), x; p)
+pars(d::PDFWithParameters, isfree::Bool) = pars(lineshape(d), isfree)
+updatevalueorflag(d::PDFWithParameters, s::Symbol, isfree::Bool, v=getproperty(pars(d),s)) =
+    PDFWithParameters(updatevalueorflag(lineshape(d), s, isfree, v), d.lims)
+
+
+# short cuts
+# 1 argument
+PDFWithParameters(f;p,lims) = PDFWithParameters(FunctionWithParameters(f; p), lims)
+
+###################################################################### 
+
+fixedshapepdf(f, lims) = PDFWithParameters((x;p)->f(x); lims=lims, p=∅)
+
+###################################################################### 
 
 #    _|                                                    _|      _|_|  
 #  _|_|_|_|  _|    _|  _|_|_|      _|_|    _|_|_|      _|_|_|    _|      
@@ -44,11 +90,11 @@ lims(d::AbstractPDF) = d.lims
 
 
 """
-    @typepdf MyPDF(x;p) = unnormdensity(x, p.a, p.b)
+    @makepdftype MyPDF(x;p) = unnormdensity(x, p.a, p.b)
 
     Expected form of the expression is `f(x;p)` on the left
 """
-macro typepdf(ex)
+macro makepdftype(ex)
     # 
     fpx = ex.args[1].args
     name = fpx[1]
@@ -58,45 +104,14 @@ macro typepdf(ex)
     body = ex.args[2]
     # 
     quote
-        struct $name{T,N} <: AbstractPDF
+        struct $name{T,N} <: AbstractPDF{1}
             p::T
             lims::N
         end
         $(esc(name))(;p,lims) = $(esc(name))(p, lims)
 
         import AlgebraPDF: func, pars, updatevalueorflag
-        # 
+        #
         $(esc(:func))(d::$(esc(name)), $(esc(x))::Number; p=$(esc(:pars))(d)) = $(esc(body))
-        $(esc(:pars))(d::$(esc(name)), isfree::Bool) = $(esc(:pars))(d.p)
-        $(esc(:updatevalueorflag))(d::$(esc(name)), s::Symbol, isfree::Bool, v=getproperty($(esc(:pars))(d),s)) = 
-            $(esc(name))(;p=$(esc(:updatevalueorflag))(d.p, s, isfree, v), lims=d.lims)
     end
 end
-
-
-#################################################################### 
-
-@with_kw struct pdf{T<:AbstractFunctionWithParameters,N} <: AbstractPDF
-    lineshape::T
-    lims::N
-end
-pdf(f;p,lims) = pdf(;
-    lineshape = FunctionWithParameters(f; p),
-        lims = lims)
-
-# two methods to be defined
-import Base:getproperty
-getproperty(d::pdf, sym::Symbol) = sym==:p ? pars(d.lineshape) : getfield(d, sym)
-func(d::pdf, x::Number; p=pars(d)) = func(d.lineshape, x; p)
-pars(d::pdf, isfree::Bool) = pars(d.lineshape, isfree)
-updatevalueorflag(d::pdf, s::Symbol, isfree::Bool, v=getproperty(pars(d),s)) =
-    pdf(lineshape=updatevalueorflag(d.lineshape, s, isfree, v), lims=d.lims)
-
-#
-
-# 
-#
-noparsf(d::AbstractPDF; p=pars(d)) = (x;kw...)->func(d,x;p=p)
-noparsnormf(d::AbstractPDF; p=pars(d)) = (ns=normalizationintegral(d;p=p); (x;kw...)->func(d,x;p=p)/ns)
-
-fixedshapepdf(f, lims) = pdf((x;p)->f(x); lims=lims, p=∅)

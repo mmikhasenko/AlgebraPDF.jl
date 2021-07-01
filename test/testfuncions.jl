@@ -1,4 +1,6 @@
 using AlgebraPDF
+using Test
+
 
 @testset "FunctionWithParameters{NamedTuples}" begin
     d0 = FunctionWithParameters(
@@ -98,4 +100,61 @@ end
     # 
     sum5 = fixpar(sum3,:d, 2)
     @test func(sum5,3.3) == func(a1,3.3) + 2* func(a2,3.3)
+end
+
+
+@testset "no-parameters f and no-parameters normalized f" begin
+    d0 = FunctionWithParameters((e;p)->e^2+p.a; p=(a=1.0,))
+    f0 = noparsf(d0)
+    xv = -1:10
+    @test func(d0,xv;p=freepars(d0)) ≈ f0(xv)
+end
+
+
+# implementation with NAMES of parameters build into the funciton call
+struct BW1{P} <: AbstractFunctionWithParameters
+    p::P
+end
+import AlgebraPDF:func
+func(bw::BW1, x::Number; p=pars(bw)) = p.m*p.Γ/(p.m^2-x^2-1im*p.m*p.Γ)
+
+
+@testset "User-def type with fixed name" begin
+    bw = BW1((m=3.1,Γ=0.1))
+    @test pars(bw).m == 3.1
+    @test pars(bw).Γ == 0.1
+    @test bw(1.1) != 0.0
+end
+
+
+# implementation with ORDER of parameters build into the funciton call
+struct BW2{P} <: AbstractFunctionWithParameters
+    p::P
+end
+import AlgebraPDF:func
+function func(bw::BW2, x::Number; p=pars(bw))
+    m,Γ = (getproperty(p,s) for s in keys(bw.p))
+    m*Γ/(m^2-x^2-1im*m*Γ)
+end
+
+
+@testset "User-def type with fixed order" begin
+    bw = BW2((m1=3.1,Γ1=0.1))
+    # 
+    @test pars(bw).m1 == 3.1
+    @test pars(bw).Γ1 == 0.1
+    @test real(bw(3.1)) ≈ 0.0
+    @test real(bw(3.1; p=(m1=1.1,Γ1=3.3))) != 0
+    # 
+    bw = BW2((m2=3.1,Γ2=0.1))
+    @test pars(bw).m2 == 3.1
+    @test pars(bw).Γ2 == 0.1
+end
+
+@makefuntype SuperF(x;p) = x^2+p.a*x^3
+g = SuperF(p=(a=0.5,))
+
+@testset "@maketype macro" begin
+    @test keys(pars(g)) == (:a,)
+    @test g(1) == 1.5
 end

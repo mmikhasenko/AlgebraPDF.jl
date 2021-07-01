@@ -60,3 +60,38 @@ end
 ```
 ![example](plots/gaus.background.png)
 
+
+
+
+
+```julia
+# implementation with NAMES of parameters build into the funciton call
+struct BW1{P} <: AbstractFunctionWithParameters
+    p::P
+end
+import AlgebraPDF:func
+func(bw::BW1, x::Number; p=pars(bw)) = p.m*p.Γ/(p.m^2-x^2-1im*p.m*p.Γ)
+
+bw = BW1((m=0.77, Γ=0.15))
+# 
+bw(0.77)  # 0.0 + 0.9999999999999999im
+bw(0.77; p=(m=0.8, Γ=0.15))  # 0.34010473926206014 + 0.866508889839641im
+```
+
+Slightly better implementation where only the order of the arguments are fixed, while the names are determined when the instance is created.
+```julia
+# implementation with ORDER of parameters build into the funciton call
+struct BW2{P} <: AbstractFunctionWithParameters
+    p::P
+end
+import AlgebraPDF:func
+function func(bw::BW2, x::Number; p=pars(bw))
+    m,Γ = (getproperty(p,s) for s in keys(bw.p))
+    m*Γ/(m^2-x^2-1im*m*Γ)
+end
+
+# same function with different names
+bw_i = BW2((m_i=1.1, Γ_i=0.2))
+bw_j = BW2((m_j=1.1, Γ_j=0.2))
+bw_k = BW2((m_k=1.1, Γ_k=0.2))
+```

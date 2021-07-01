@@ -1,5 +1,3 @@
-
-pars(d, isfree::Bool) = pars(d.p, isfree)
 pars(d) = pars(d, true) + pars(d, false)
 freepars(d) = pars(d, true)
 fixedpars(d) = pars(d, false)
@@ -13,6 +11,8 @@ nfreepars(d::AbstractFunctionWithParameters) = length(freepars(d))
 # 
 func(d::AbstractFunctionWithParameters, x::AbstractArray; p=pars(d)) = func.(Ref(d), x; p)
 func(d::AbstractFunctionWithParameters, x::AbstractRange; p=pars(d)) = func.(Ref(d), x; p)
+# 
+(d::AbstractFunctionWithParameters)(x; p=freepars(d)) = func(d,x;p)
 
 # methods that call `updatevalueorflag`
 
@@ -68,6 +68,13 @@ func(f::Function, x::Number; p=∅) = f(x)
 # pars(d::F, isfree::Bool)
 # updatevalueorflag( d::F, s::Symbol, isfree::Bool, v=getproperty(pars(d),s))
 
+# default method assumes that the d has d.p, and is a single arg
+pars(d::AbstractFunctionWithParameters, isfree::Bool) = pars(d.p, isfree)
+updatevalueorflag(d::AbstractFunctionWithParameters, s::Symbol, isfree::Bool, v=getproperty(pars(d),s)) =
+    typeof(d)(updatevalueorflag(d.p), s, isfree, v)
+#
+
+
 ###################################################################### 
 
 struct Abs2Func{T<:AbstractFunctionWithParameters} <: AbstractFunctionWithParameters
@@ -117,37 +124,34 @@ updatevalueorflag(d::FunctionWithParameters, s::Symbol, isfree::Bool, v=getprope
 #
 
 
-# """
-#     @newfunc MyPDF(x;p) = unnormdensity(x, p.a, p.b)
+"""
+    @makefuntype MyPDF(x;p) = unnormdensity(x, p.a, p.b)
 
-#     Expected form of the expression is `f(x;p)` on the left
-# """
-# macro newfunc(ex)
-#     # 
-#     fpx = ex.args[1].args
-#     name = fpx[1]
-#     p = fpx[2].args[1]
-#     (p != :p) && error("expected format f(x;p) = ... " )
-#     x = fpx[3]
-#     body = ex.args[2]
-#     # 
-#     quote
-#         struct $name{T} <: AbstractFunctionWithParameters
-#             p::T
-#         end
-#         $(esc(name))(;p) = $(esc(name))(p)
-
-#         import AlgebraPDF: func
-#         import Base: copy
-#         # 
-#         $(esc(:func))(d::$(esc(name)), $(esc(x))::Number; p=$(esc(:pars))(d)) = $(esc(body))
-#         $(esc(:copy))(d::$(esc(name)), p) = $(esc(name))(;p=copy(d.p, p))
-#     end
-# end
+    Expected form of the expression is `f(x;p)` on the left
+"""
+macro makefuntype(ex)
+    # 
+    fpx = ex.args[1].args
+    name = fpx[1]
+    p = fpx[2].args[1]
+    (p != :p) && error("expected format f(x;p) = ... " )
+    x = fpx[3]
+    body = ex.args[2]
+    #
+    quote
+        struct $name{T} <: AbstractFunctionWithParameters
+            p::T
+        end
+        $(esc(name))(;p) = $(esc(name))(p)
+        import AlgebraPDF: func
+        $(esc(:func))(d::$(esc(name)), $(esc(x))::Number; p=$(esc(:pars))(d)) = $(esc(body))
+    end
+end
 
 # parameters conversion
 v2p(v,d::AbstractFunctionWithParameters) = NamedTuple{keys(freepars(d))}(v)
 p2v(p,d::AbstractFunctionWithParameters) = [getproperty(p, k) for k in keys(freepars(d))]
 p2v(  d::AbstractFunctionWithParameters) = p2v(freepars(d), d)
 
-
+# single-argument lambda-function with fixed parameters
+noparsf(d::AbstractFunctionWithParameters; p=pars(d)) = (x;kw...)->func(d,x;p=p)

@@ -15,7 +15,7 @@ conv_with_gauss_sampling(d::pdf,σ; Ns=10) =
 
 #
 
-struct convGauss{T,S} <: AbstractPDF
+struct convGauss{T,S} <: AbstractPDF{1}
     pdf::T
     σ::S
 end

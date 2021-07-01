@@ -34,7 +34,7 @@ export updatepar, updatepars
 export fixpar, fixpars
 export releasepar, releasepars
 # 
-export @typepdf, @newfunc
+export @makefuntype
 export AbstractFunctionWithParameters
 export FunctionWithParameters
 export SumFunc, Abs2Func
@@ -48,14 +48,19 @@ export p2v, v2p
 include("functionwithparameters.jl")
 
 # 
+export @makepdftype
 export AbstractPDF
-export pdf
+export PDFWithParameters
 export integral, integrals
 export fixedshapepdf
 export noparsf, noparsnormf
 export lims
 export normalizationintegral
 include("pdf.jl")
+
+const pdf = PDFWithParameters
+export pdf
+
 
 export fit_llh, llh
 export fit_llh_with_constraints
