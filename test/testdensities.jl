@@ -15,7 +15,7 @@
     @test AlgebraPDF.amplitudeBW(x, m, Γ) ≈ 1im
     @test AlgebraPDF.amplitudeBWsq(x, m, Γ) ≈ 1.0
     # 
-    x,σ,r,n = 0,0.1,0.3,5
+    x, σ, r, n = 0, 0.1, 0.3, 5
     @test AlgebraPDF.standarddoublegauss(x,σ,r,n) ≈ 1/sqrt(2π)/σ*(r+(1-r)/n)
     # 
 end
@@ -57,9 +57,9 @@ end
     d8 = FTabulated(xv,yv)
     @test length(freepars(d8)) == 0
     @test d8(1.1) != 0.0
-    @test d8(3π) == 0.0
-    @test d8(-π) != 0.0
-    @test d8(2π) != 0.0
+    @test d8( 3π) == 0.0
+    @test d8( -π) != 0.0
+    @test d8( 2π) != 0.0
 end
 
 # here is MWE of the normalization problem

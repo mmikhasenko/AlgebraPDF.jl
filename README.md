@@ -113,3 +113,14 @@ bw_i = BW2((m_i=1.1, Γ_i=0.2))
 bw_j = BW2((m_j=1.1, Γ_j=0.2))
 bw_k = BW2((m_k=1.1, Γ_k=0.2))
 ```
+
+## Convolution
+
+The most common case of smearing a function with gaussian denisity is implemented.
+The convolved function is created with
+```julia
+f_conv = convGauss(f::F, σ::T) where F <: AbstractFunctionWithParameters
+```
+σ can be a number, but can also be a function `<: AbstractFunctionWithParameters`.
+
+A customary confolved function or pdf can be defined the same was as e.g. [`FBreitWignerConvGauss`](src/densities.jl).

@@ -96,7 +96,10 @@ struct FBreitWignerConvGauss{P} <: AbstractFunctionWithParameters
 end
 function func(d::FBreitWignerConvGauss, x::Number; p=pars(d))
     m,Γ,σ = (getproperty(p,s) for s in keys(d.p))
-    conv_with_gauss.(x, y->abs2(amplitudeBW(y, m, Γ)), σ)
+    # 
+    quadgk(
+        y->abs2(amplitudeBW(x-y, m, Γ)) *
+            standardgauss(y,σ), -5*σ, +5*σ)[1]
 end
 
 ###############################################################
