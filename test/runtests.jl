@@ -13,7 +13,6 @@ include("testpdf.jl")
 include("testdensities.jl")
 include("testconvolution.jl")
 # 
-include("testmultid.jl")
 include("testmixedmodel.jl")
 
 #            _|              _|      _|      _|                      

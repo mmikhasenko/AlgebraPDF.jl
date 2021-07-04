@@ -84,9 +84,6 @@ include("convolution.jl")
 export scaletobinneddata
 include("plottingrecipe.jl")
 
-export xProductPDF
-include("multidim.jl")
-
 export FGauss, FBreitWigner, FExp
 export FPowExp, FPol
 export FDoubleGaussFixedRatio
@@ -96,7 +93,6 @@ include("densities.jl")
 
 export inrange
 include("utils.jl")
-
 
 # requires further work
 import Base: +, *, /
