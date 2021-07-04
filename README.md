@@ -4,65 +4,49 @@
 [![Codecov](https://codecov.io/gh/mmikhasenko/AlgebraPDF.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/mmikhasenko/AlgebraPDF.jl)
 
 Basic functionality:
- * constructing a pdf object from arbitraty function:
-    - required function format `myfunc(x;p)` where `p` is a NamedTuple of parameters
-    - the normalization is computed automatically using `QuadGK.jl` in the giben `lims`
-    - algebra of functions with parameters: `*`, `+`, `-`, `/`
+ * Attach default values of parameters to a function
+ * Update, fix, release parameters
+ * constructing a complex model object from set of function:
+     - algebra of functions with parameters, e.g. `f₁ + f₂`, or `abs2(f)`.
+ * On-fly normalization
  * construction of mixed models in the form `f₁ PDF₁ + f₂ PDF₂ + (1-f₁-f₂) PDF₃`.
  * fitting data distribution using the maximum likelihood (`Optim.jl`)
- * plotting recipies
+ * plotting recipes
 
+## Functions with parameters
+It is just a function to which a container with parameters (default values) is attached.
+The container can be static `NamedTuple`, or extended which can flag parameters as `free` and `fixed`.
+
+There are three main constructors:
+1. lambda-function is explicitly given
 ```julia
-using AlgebraPDF
-using Plots
-theme(:wong)
-
-# create a model
-snl = aGauss((μ=1.4, σ=0.15), (0, 3))
-bkg = pdf(@. (x;p) -> sqrt(x)*exp(-p.α*x); p = (α=1.3,), lims=(0, 3))
-bkg_f = bkg * (fb=2.5,)
-pdf_sum = snl + bkg_f
-
-# generating
-const data = generate(1000, pdf_sum);
-
-# fitting
-fr = fit_llh(data, pdf_sum; init_pars=p2v(pdf_sum))
-pfr = v2p(minimizer(fr), pdf_sum) # NamedTuple (parameter = value, ...)
-efr = v2p(errors(fr), pdf_sum) # NamedTuple (parameter = error, ...)
-mfr = v2p(measurements(fr), pdf_sum) # NamedTuple (parameter = value ± error, ...)
-
-# plotting
-let
-  plot()
-  plot!(x->pdf_sum(x; p=pfr), lims(pdf_sum)..., lab="fit")
-  plot!(x->snl(x; p=pfr, norm_according_to=pdf_sum), lims(pdf_sum)..., lab="signal")
-  plot!(x->bkg(x; p=pfr, norm_according_to=pdf_sum), lims(pdf_sum)..., lab="background")
-  stephist!(data, norm=true, c=:black, bins=50, lab="data")
-end
-
-# Alternatively one can use a mixed model
-model = MixedModel([snl, bkg], (fS = 0.5,))
-fr = fit_llh(data, model)
-pfr = v2p(minimizer(fr), pdf_sum)
-fixed_model = fixpars(model, pfr)
-# 
-let
-  Nd = length(data)
-  bins = range(lims(fixed_model)..., length = 40)
-  Ns = scaletobinneddata(Nd, bins)
-  #
-  plot(pdf_sum, Ns, lab="fit")
-  plot!(pdf_sum.components[1], fractionvalues(fixed_model)[1]*Ns, lab="signal")
-  plot!(pdf_sum.components[2], fractionvalues(fixed_model)[2]*Ns, lab="background")
-  stephist!(data, c=:black, bins=bins, lab="data")
-end
+FunctionWithParameters(f::F, p::P)
 ```
-![example](plots/gaus.background.png)
 
+2. user-defined stucture which is subtype of `AbstractFunctionWithParameters`:
+```julia
+struct myAmazingF{P} <: AbstractFunctionWithParameters
+    p::P
+end
+func(d::myAmazingF, x::Number; p=pars(d)) = ... # expression
+```
 
+3. using a macro `@makefuntype`:
+```julia
+@makefuntype myAmazingF(x;p) = ... # expression
+```
 
-The PDF has two main representations:
+## Normalized functions
+
+The idea is to attach also the limit to the function and compute the integral of it for the given parameter on-fly.
+To make the normalization efficient, a call of the function on the `AbstractVector` implements a broadcasting with a single computation of normalization.
+```julia
+mypdf(1.1) # use default values of parameters, calls normalization once
+mypdf(rand(100)) # use default values of parameters, also calls normalization once
+mypdf(rand(100); p = (a=1.2, b=3.3)) # ignors defalt parameters
+```
+
+The PDF has two main representations (the ways to define):
 1. A struct with the reference to the `unnormdensity<:AbstractFunctionWithParameters`. 
 ```julia
 struct PDFWithParameters{T<:AbstractFunctionWithParameters,L} <: AbstractPDF{1}
@@ -80,7 +64,6 @@ struct Pol1SinSq{T,N} <: AbstractPDF{1}
 end
 func(d::Pol1SinSq, x::Number; p=pars(d)) = p.a*sin(x+p.b)^2+1  # an example of the function
 ```
-
 
 ```julia
 # implementation with NAMES of parameters build into the funciton call
