@@ -74,24 +74,6 @@ function func(d::FPol, x::Number; p=pars(d))
 end
 
 ###############################################################
-
-standarddoublegauss(x,σ,r,n) =
-    r*standardgauss(x,σ) + (1-r)*standardgauss(x,n*σ)
-
-# shortcut with fixed parameter names
-# @makefuntype FDoubleGaussFixedRatio(x;p) = gauss(x,p.σ,p.r,p.n)
-# 
-# better: just order of parameters is fixed
-struct FDoubleGaussFixedRatio{P} <: AbstractFunctionWithParameters
-    p::P
-end
-function func(d::FDoubleGaussFixedRatio, x::Number; p=pars(d))
-    μ,σ,r,n = (getproperty(p,s) for s in keys(d.p))
-    standarddoublegauss(x-μ,σ,r,n)
-end
-
-###############################################################
-
 standarddoublegauss(x,σ,r,n) =
     r*standardgauss(x,σ) + (1-r)*standardgauss(x,n*σ)
 

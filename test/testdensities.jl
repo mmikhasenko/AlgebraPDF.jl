@@ -8,6 +8,19 @@
 
 
 
+@testset "Standard functions" begin
+    @test AlgebraPDF.standardgauss(0,1) ≈ 1/sqrt(2π)
+    @test AlgebraPDF.standardgauss(2,2) ≈ exp(-1/2)/sqrt(2π*4)
+    x, m, Γ = 1.0, 1.0, 0.1
+    @test AlgebraPDF.amplitudeBW(x, m, Γ) ≈ 1im
+    @test AlgebraPDF.amplitudeBWsq(x, m, Γ) ≈ 1.0
+    # 
+    x,σ,r,n = 0,0.1,0.3,5
+    @test AlgebraPDF.standarddoublegauss(x,σ,r,n) ≈ 1/sqrt(2π)/σ*(r+(1-r)/n)
+    # 
+end
+
+
 @testset "Precodded pdfs" begin
     dGauss = PDFWithParameters(FGauss((μ1=1.0,σ1=0.3)), (-2,2))
     @test keys(pars(dGauss)) == (:μ1,:σ1)

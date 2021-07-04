@@ -14,9 +14,6 @@ end
 
 
 @testset "convolution with gauss" begin
-    @test AlgebraPDF.standardgauss(0,1) ≈ 1/sqrt(2π)
-    @test AlgebraPDF.standardgauss(2,2) ≈ exp(-1/2)/sqrt(2π*4)
-    # tests
     σ0 = 0.3
     aconv(e) = (erf(e/sqrt(2*σ0^2))+1)/2
     #
