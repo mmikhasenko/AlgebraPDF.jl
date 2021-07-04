@@ -16,20 +16,20 @@ conv_with_gauss_sampling(d::pdf,σ; Ns=10) =
 #
 
 struct convGauss{T,S} <: AbstractPDF{1}
-    pdf::T
+    source::T
     σ::S
 end
 
-pars(d::convGauss, isfree::Bool) = pars(d.pdf, isfree) + pars(d.σ, isfree)
-lims(d::convGauss) = lims(d.pdf)
+pars(d::convGauss, isfree::Bool) = pars(d.source, isfree) + pars(d.σ, isfree)
+lims(d::convGauss) = lims(d.source)
 updatevalueorflag(d::convGauss, s::Symbol, isfree::Bool, v=getproperty(pars(d),s)) = 
     convGauss(
-        ispar(d.pdf,s) ? updatevalueorflag(d.pdf,s,isfree,v) : d.pdf,
-        ispar(d.σ,  s) ? updatevalueorflag(d.σ,  s,isfree,v) : d.σ)
+        ispar(d.source,s) ? updatevalueorflag(d.source,s,isfree,v) : d.source,
+        ispar(d.σ,     s) ? updatevalueorflag(d.σ,     s,isfree,v) : d.σ)
 
 function func(d::convGauss, x::Number; p=pars(d))
     σ = func(d.σ, x; p)
     g(z) = AlgebraPDF.standardgauss(z, σ)
-    f(z) = func(d.pdf, z; p)
+    f(z) = func(d.source, z; p)
     return quadgk(y->f(x-y) * g(y), -5*σ, +5*σ)[1]
 end
