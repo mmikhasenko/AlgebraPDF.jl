@@ -62,6 +62,24 @@ end
 
 
 
+The PDF has two main representations:
+1. A struct with the reference to the `unnormdensity<:AbstractFunctionWithParameters`. 
+```julia
+struct PDFWithParameters{T<:AbstractFunctionWithParameters,L} <: AbstractPDF{1}
+    unnormdensity::T
+    lims::L
+end
+```
+A regular function can be wrapper to FunctionWithParameters: `FunctionWithParameters((x;p)->p.c0+p.c1*x, (c0=1.0, c1=2.0))`
+
+2. Alternativerly, the density can be defined using a dispatch on a `customaty_type <: AbstractPDF{1}`. E.g.,
+```julia
+struct Pol1SinSq{T,N} <: AbstractPDF{1}
+    p::T
+    lims::N
+end
+func(d::Pol1SinSq, x::Number; p=pars(d)) = p.a*sin(x+p.b)^2+1  # an example of the function
+```
 
 
 ```julia

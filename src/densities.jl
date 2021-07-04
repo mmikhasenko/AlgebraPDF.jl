@@ -1,50 +1,133 @@
 
 standardgauss(x,σ) = exp(-x^2/(2*σ^2)) / sqrt(2π) / σ
+# 
+# shortcut with fixed parameter names
+# @makefuntype FGauss(x;p) = exp(-(x-p.μ)^2/(2*p.σ^2))
+# 
+# better: just order of parameters is fixed
+struct FGauss{P} <: AbstractFunctionWithParameters
+    p::P
+end
+function func(d::FGauss, x::Number; p=pars(d))
+    μ,σ = (getproperty(p,s) for s in keys(d.p))
+    standardgauss(x-μ,σ)
+end
+
+###############################################################
+
 amplitudeBW(x,m,Γ) = m*Γ/(m^2-x^2-1im*m*Γ)
 amplitudeBWsq(x,m,Γ) = abs2(amplitudeBW(x,m,Γ))
+
+# shortcut with fixed parameter names
+# @makefuntype FBreitWigner(x;p) = amplitudeBW(x,p.m,p.Γ)
 # 
-function aGauss(p, lims)
-    μ, σ = keys(pars(p))
-    return pdf((x;p)->standardgauss.(x .- getproperty(p,μ), getproperty(p,σ)), p=p, lims=lims)
+# better: just order of parameters is fixed
+struct FBreitWigner{P} <: AbstractFunctionWithParameters
+    p::P
 end
-function aBreitWigner(p, lims)
-    m, Γ = keys(pars(p))
-    return pdf((x;p)->amplitudeBWsq.(x,getproperty(p,m), getproperty(p,Γ)), p=p, lims=lims)
+function func(d::FBreitWigner, x::Number; p=pars(d))
+    m,Γ = (getproperty(p,s) for s in keys(d.p))
+    amplitudeBW(x,m,Γ)
 end
-function aExp(p, lims)
-    α, = keys(pars(p))
-    return pdf((x;p)->exp.(x .*getproperty(p,α)), p=p, lims=lims)
+
+###############################################################
+
+# shortcut with fixed parameter names
+# @makefuntype FExp(x;p) = exp(-(x-p.μ)^2/(2*p.σ^2))
+# 
+# better: just order of parameters is fixed
+struct FExp{P} <: AbstractFunctionWithParameters
+    p::P
 end
-function aPowExp(p, lims)
-    α,β = keys(pars(p))
-    return pdf((x;p)->x.^getproperty(p,α) .* exp.(x .*getproperty(p,β)), p=p, lims=lims)
+function func(d::FExp, x::Number; p=pars(d))
+    β, = (getproperty(p,s) for s in keys(d.p))
+    exp(x*β)
 end
-function aPol(p, lims)
-    cs = keys(pars(p))
-    return pdf((x;p)->sum(x.^(i-1) .* getproperty(p,c) for (i,c) in enumerate(cs)), p=p, lims=lims)
+
+###############################################################
+
+# shortcut with fixed parameter names
+# @makefuntype FPowExp(x;p) = x^p.α*exp(x*p.β)
+# 
+# better: just order of parameters is fixed
+struct FPowExp{P} <: AbstractFunctionWithParameters
+    p::P
 end
+function func(d::FPowExp, x::Number; p=pars(d))
+    α,β = (getproperty(p,s) for s in keys(d.p))
+    x^α*exp(x*β)
+end
+
+###############################################################
+
+# shortcut with fixed parameter names
+# @makefuntype FPol1(x;p) = p.c0+x*p.c1
+# @makefuntype FPol2(x;p) = p.c0+x*p.c1+x^2*p.c2
+# 
+# better: just order of parameters is fixed
+struct FPol{P} <: AbstractFunctionWithParameters
+    p::P
+end
+function func(d::FPol, x::Number; p=pars(d))
+    cs = (getproperty(p,s) for s in keys(d.p))
+    sum(x^(i-1)*c for (i,c) in enumerate(cs))
+end
+
+###############################################################
 
 standarddoublegauss(x,σ,r,n) =
-    r*AlgebraPDF.standardgauss(x,σ) + (1-r)*AlgebraPDF.standardgauss(x,n*σ)
+    r*standardgauss(x,σ) + (1-r)*standardgauss(x,n*σ)
 
-function aDoubleGaussFixedRatio(pars, lims; fixpars)
-    μ,σ = keys(pars)
-    r,n = fixpars
-    return pdf((x;p)->standarddoublegauss.(x .- getproperty(p, μ), getproperty(p, σ), r,n),
-        p=pars, lims=lims)
+# shortcut with fixed parameter names
+# @makefuntype FDoubleGaussFixedRatio(x;p) = gauss(x,p.σ,p.r,p.n)
+# 
+# better: just order of parameters is fixed
+struct FDoubleGaussFixedRatio{P} <: AbstractFunctionWithParameters
+    p::P
+end
+function func(d::FDoubleGaussFixedRatio, x::Number; p=pars(d))
+    μ,σ,r,n = (getproperty(p,s) for s in keys(d.p))
+    standarddoublegauss(x-μ,σ,r,n)
 end
 
-function aBreitWignerConvGauss(pars, lims; fixpars)
-    m,Γ = keys(pars)
-    σ, = fixpars
-    density = (x;p)->conv_with_gauss.(x,
-        y->abs2(AlgebraPDF.amplitudeBWsq(y, getproperty(p,m), getproperty(p,Γ))), σ)
-    return pdf(density, p=pars, lims=lims)
+###############################################################
+
+standarddoublegauss(x,σ,r,n) =
+    r*standardgauss(x,σ) + (1-r)*standardgauss(x,n*σ)
+
+# shortcut with fixed parameter names
+# @makefuntype FDoubleGaussFixedRatio(x;p) = standarddoublegauss(x-p.μ,p.σ,p.r,p.n)
+# 
+# better: just order of parameters is fixed
+struct FDoubleGaussFixedRatio{P} <: AbstractFunctionWithParameters
+    p::P
+end
+function func(d::FDoubleGaussFixedRatio, x::Number; p=pars(d))
+    μ,σ,r,n = (getproperty(p,s) for s in keys(d.p))
+    standarddoublegauss(x-μ,σ,r,n)
 end
 
-function aTabulated(xv,yv,lims)
-    itr = interpolate((xv,), yv, Gridded(Linear()))
-    tlims = (prevfloat(xv[1]),nextfloat(xv[end]))
-    f(x) = inrange(x,tlims) ? itr(x) : 0.0
-    fixedshapepdf(x->f.(x), lims)
+###############################################################
+
+struct FBreitWignerConvGauss{P} <: AbstractFunctionWithParameters
+    p::P
 end
+function func(d::FBreitWignerConvGauss, x::Number; p=pars(d))
+    m,Γ,σ = (getproperty(p,s) for s in keys(d.p))
+    conv_with_gauss.(x, y->abs2(amplitudeBW(y, m, Γ)), σ)
+end
+
+###############################################################
+
+struct FTabulated{T} <: AbstractFunctionWithParameters
+    itr::T
+end
+FTabulated(xv,yv) = FTabulated(interpolate((xv,), yv, Gridded(Linear())))
+# 
+function func(d::FTabulated, x::Number; p=pars(d))    
+    tlims = extrema(collect(d.itr.knots)[1])
+    inrange(x,tlims) ? d.itr(x) : 0.0
+end
+pars(d::FTabulated, isfree::Bool) = ∅
+
+###############################################################

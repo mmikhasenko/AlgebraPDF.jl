@@ -56,8 +56,9 @@ export fixedshapepdf
 export noparsf, noparsnormf
 export lims
 export normalizationintegral
+# 
 include("pdf.jl")
-
+# 
 const pdf = PDFWithParameters
 export pdf
 
@@ -89,11 +90,11 @@ include("plottingrecipe.jl")
 export xProductPDF
 include("multidim.jl")
 
-export aGauss, aBreitWigner, aExp
-export aPowExp, aPol
-export aDoubleGaussFixedRatio
-export aBreitWignerConvGauss
-export aTabulated
+export FGauss, FBreitWigner, FExp
+export FPowExp, FPol
+export FDoubleGaussFixedRatio
+export FBreitWignerConvGauss
+export FTabulated
 include("densities.jl")
 
 export inrange

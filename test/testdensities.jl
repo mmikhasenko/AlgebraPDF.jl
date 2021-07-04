@@ -7,36 +7,46 @@
 #    _|_|_|    _|_|_|    _|_|_|    _|_|_|  _|_|_|    
 
 
-@testset "Precodded pdfs" begin
-    pdf1 = aGauss((mΩb = 6030, σ=17.0), (5600, 6400))
-    @test freepars(pdf1) === (mΩb = 6030, σ=17.0)
-    pdf2 = aBreitWigner((mΩb = 6030, Γ=17.0), (5600, 6400))
-    @test freepars(pdf2) === (mΩb = 6030, Γ=17.0)
-    pdf3 = aExp((τ = -1.1,), (-2, 2))
-    @test freepars(pdf3) === (τ = -1.1,)
 
-    pdfPowExp = aPowExp((n=3.3, τ=-4.0), (0, 2.2))
-    @test pdfPowExp(1.1) != 0.0
-    @test freepars(pdfPowExp) === (n=3.3, τ=-4.0)
+@testset "Precodded pdfs" begin
+    dGauss = PDFWithParameters(FGauss((μ1=1.0,σ1=0.3)), (-2,2))
+    @test keys(pars(dGauss)) == (:μ1,:σ1)
+    exp_gauss_at_zero = 1/sqrt(2π)/pars(dGauss).σ1
+    @test abs(dGauss(1.0) - exp_gauss_at_zero) / exp_gauss_at_zero < 1e-3
+end
+
+
+@testset "Precodded pdfs" begin
+    d2 = FBreitWigner((mΩb = 6030, Γ=17.0))
+    @test freepars(d2) == (mΩb = 6030, Γ=17.0)
+    @test real(d2(freepars(d2).mΩb)) ≈ 0
+    # 
+    d3 = FExp((τ = -1.1,))
+    @test freepars(d3) === (τ = -1.1,)
+    # 
+    d4 = FPowExp((n=3.3, τ=-4.0))
+    @test d4(1.1) != 0.0
+    @test freepars(d4) == (n=3.3, τ=-4.0)
     # 
     pars3 = (c0=1.1, c1=2.2, c2=3.3, c4=4.4)
-    pdfPpol3 = aPol(pars3, (-2,12))
-    @test func(pdfPpol3, 1.1; p=pars3) == sum(1.1^(i-1)*c for (i,c) in enumerate(pars3))
-    @test freepars(pdfPpol3) === pars3
+    d5 = FPol(pars3)
+    @test func(d5, 1.1; p=pars3) == sum(1.1^(i-1)*c for (i,c) in enumerate(pars3))
+    @test freepars(d5) == pars3
     # 
-    pdf4 = aDoubleGaussFixedRatio((m = 0.77, Γ=0.15), (0, 1.0); fixpars=(r=0.8,n=3))
-    @test pdf4(0.77) != 0.0
-    pdf5 = aBreitWignerConvGauss((m = 0.77, Γ=0.15), (0, 1.0); fixpars=(σ=0.03,))
-    @test pdf5(0.77) != 0.0
+    d6 = FDoubleGaussFixedRatio((m = 0.77, Γ=0.15, r=0.8, n=3))
+    @test d6(0.77) != 0.0
     # 
+    d7 = FBreitWignerConvGauss((m = 0.77, Γ=0.15, σ=0.03))
+    @test d7(0.77) != 0.0
+    #
     xv = range(-π, 2π, length=40)
     yv = map(x->x*cos(3x) - 3*sin(x), xv)
-    pdf6 = aTabulated(xv,yv,(-π,π))
-    @test length(freepars(pdf6)) == 0
-    @test pdf6(1.1) != 0.0
-    @test pdf6(3π) == 0.0
-    @test pdf6(-π) != 0.0
-    @test pdf6(2π) != 0.0
+    d8 = FTabulated(xv,yv)
+    @test length(freepars(d8)) == 0
+    @test d8(1.1) != 0.0
+    @test d8(3π) == 0.0
+    @test d8(-π) != 0.0
+    @test d8(2π) != 0.0
 end
 
 # here is MWE of the normalization problem
