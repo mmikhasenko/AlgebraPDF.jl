@@ -1,7 +1,7 @@
 name = "AlgebraPDF"
 uuid = "e09e93a3-870c-4c75-9b71-3eefe58c6e5b"
 authors = ["Misha Mikhasenko"]
-version = "0.2.8"
+version = "0.2.9"
 
 [deps]
 ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210"
@@ -16,7 +16,7 @@ RecipesBase = "3cdcf5f2-1ef4-517c-9805-6587b60abb01"
 StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 
 [compat]
-julia = "1.5"
+julia = "1.6"
 
 [extras]
 SpecialFunctions = "276daf66-3868-5448-9aa4-cd146d93841b"

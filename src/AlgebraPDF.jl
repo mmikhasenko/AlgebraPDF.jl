@@ -16,14 +16,12 @@ using Measurements
 export ∅
 
 import Base:+,-,==
-import Base:copy
 import Base: getproperty
 import Base: abs2
 import Base: keys
 import Optim: minimizer, minimum
 import ForwardDiff: hessian
-
-export nt
+# 
 # 
 include("parameters.jl")
 const Ext = TwoNamedTuples
@@ -91,18 +89,8 @@ export FBreitWignerConvGauss
 export FTabulated
 include("densities.jl")
 
+export nt
 export inrange
 include("utils.jl")
-
-# requires further work
-import Base: +, *, /
-include("arithmetics.jl")
-
-export sumpdf
-include("sumpdf.jl")
-
-export sWeights
-include("sWeights.jl")
-
 
 end # module

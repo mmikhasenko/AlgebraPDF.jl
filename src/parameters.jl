@@ -6,8 +6,6 @@ const ∅ = NamedTuple()
 -(t1::NamedTuple, ss::AbstractVector{Symbol}) = Base.structdiff(t1, sum(nt.(ss)))
 -(t1::NamedTuple, ss::Tuple{Vararg{Symbol}}) = Base.structdiff(t1, sum(nt.(ss)))
 
-nt(s::Symbol, v = 0.0) = NamedTuple{(s,)}([v])
-
 #    _|                          _|            
 #  _|_|_|_|  _|    _|  _|_|_|    _|    _|_|    
 #    _|      _|    _|  _|    _|  _|  _|_|_|_|  
