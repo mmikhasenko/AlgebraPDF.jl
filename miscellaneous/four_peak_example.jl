@@ -29,7 +29,7 @@ function construct_pdf_directly_integral_conv()
     end
     #
     pdf_direct = 
-        pdf(four_peaks_and_background; lims=fitlims, p=(
+        Normalized(four_peaks_and_background; lims=fitlims, p=(
             m1=Mv[1]-mth, Γ1=Γv[1],
             m2=Mv[2]-mth, Γ2=Γv[2],
             m3=Mv[3]-mth, Γ3=Γv[3],
@@ -41,11 +41,11 @@ function construct_pdf_directly_integral_conv()
 end
 
 function construct_pdf_modular_integral_conv()
-    pdf1 = pdf(@. (e;p)->abs2(BWmth(e, p.m1, p.Γ1));  p = (m1=Mv[1]-mth, Γ1=Γv[1]), lims = fitlims)
-    pdf2 = pdf(@. (e;p)->abs2(BWmth(e, p.m2, p.Γ2));  p = (m2=Mv[2]-mth, Γ2=Γv[2]), lims = fitlims)
-    pdf3 = pdf(@. (e;p)->abs2(BWmth(e, p.m3, p.Γ3));  p = (m3=Mv[3]-mth, Γ3=Γv[3]), lims = fitlims)
-    pdf4 = pdf(@. (e;p)->abs2(BWmth(e, p.m4, p.Γ4));  p = (m4=Mv[4]-mth, Γ4=Γv[4]), lims = fitlims)
-    pdfb = pdf(@. (e;p)->bgd(e, αv, βv);  p = NamedTuple(), lims = fitlims)
+    pdf1 = Normalized(@. (e;p)->abs2(BWmth(e, p.m1, p.Γ1));  p = (m1=Mv[1]-mth, Γ1=Γv[1]), lims = fitlims)
+    pdf2 = Normalized(@. (e;p)->abs2(BWmth(e, p.m2, p.Γ2));  p = (m2=Mv[2]-mth, Γ2=Γv[2]), lims = fitlims)
+    pdf3 = Normalized(@. (e;p)->abs2(BWmth(e, p.m3, p.Γ3));  p = (m3=Mv[3]-mth, Γ3=Γv[3]), lims = fitlims)
+    pdf4 = Normalized(@. (e;p)->abs2(BWmth(e, p.m4, p.Γ4));  p = (m4=Mv[4]-mth, Γ4=Γv[4]), lims = fitlims)
+    pdfb = Normalized(@. (e;p)->bgd(e, αv, βv);  p = NamedTuple(), lims = fitlims)
     pdfS = [
         conv_with_gauss(pdf1, σev[1]),
         conv_with_gauss(pdf2, σev[2]),
@@ -53,7 +53,7 @@ function construct_pdf_modular_integral_conv()
         conv_with_gauss(pdf4, σev[4]),
         pdfb]
     #
-    phsp = pdf(@. (e;p)->pqmth(e);  p = NamedTuple(), lims = fitlims)
+    phsp = Normalized(@. (e;p)->pqmth(e);  p = NamedTuple(), lims = fitlims)
     pdfS = [d * phsp for d in pdfS]
     #
     pdfS[2] *= (f2=5.0,)
@@ -68,11 +68,11 @@ end
 
 
 function construct_pdf_light_modular_integral_conv()
-    pdf1 = pdf(@. (e;p)->abs2(BWmth(e, p.m1, p.Γ1)) * pqmth(e) * 1.0 ;  p = (m1=Mv[1]-mth, Γ1=Γv[1]          ), lims = fitlims)
-    pdf2 = pdf(@. (e;p)->abs2(BWmth(e, p.m2, p.Γ2)) * pqmth(e) * p.f2;  p = (m2=Mv[2]-mth, Γ2=Γv[2], f2 = 5.0), lims = fitlims)
-    pdf3 = pdf(@. (e;p)->abs2(BWmth(e, p.m3, p.Γ3)) * pqmth(e) * p.f3;  p = (m3=Mv[3]-mth, Γ3=Γv[3], f3 = 0.2), lims = fitlims)
-    pdf4 = pdf(@. (e;p)->abs2(BWmth(e, p.m4, p.Γ4)) * pqmth(e) * p.f4;  p = (m4=Mv[4]-mth, Γ4=Γv[4], f4 = 0.1), lims = fitlims)
-    pdfb = pdf(@. (e;p)->bgd(e, αv, βv) * pqmth(e) * p.f4;  p = (fb=0.1,), lims = fitlims)
+    pdf1 = Normalized(@. (e;p)->abs2(BWmth(e, p.m1, p.Γ1)) * pqmth(e) * 1.0 ;  p = (m1=Mv[1]-mth, Γ1=Γv[1]          ), lims = fitlims)
+    pdf2 = Normalized(@. (e;p)->abs2(BWmth(e, p.m2, p.Γ2)) * pqmth(e) * p.f2;  p = (m2=Mv[2]-mth, Γ2=Γv[2], f2 = 5.0), lims = fitlims)
+    pdf3 = Normalized(@. (e;p)->abs2(BWmth(e, p.m3, p.Γ3)) * pqmth(e) * p.f3;  p = (m3=Mv[3]-mth, Γ3=Γv[3], f3 = 0.2), lims = fitlims)
+    pdf4 = Normalized(@. (e;p)->abs2(BWmth(e, p.m4, p.Γ4)) * pqmth(e) * p.f4;  p = (m4=Mv[4]-mth, Γ4=Γv[4], f4 = 0.1), lims = fitlims)
+    pdfb = Normalized(@. (e;p)->bgd(e, αv, βv) * pqmth(e) * p.f4;  p = (fb=0.1,), lims = fitlims)
     pdfS = [
         conv_with_gauss(pdf1, σev[1]),
         conv_with_gauss(pdf2, σev[2]),

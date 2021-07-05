@@ -48,7 +48,7 @@ include("functionwithparameters.jl")
 # 
 export @makepdftype
 export AbstractPDF
-export PDFWithParameters
+export Normalized
 export integral, integrals
 export fixedshapepdf
 export noparsf, noparsnormf
@@ -57,7 +57,7 @@ export normalizationintegral
 # 
 include("pdf.jl")
 # 
-const pdf = PDFWithParameters
+const pdf = Normalized
 export pdf
 
 

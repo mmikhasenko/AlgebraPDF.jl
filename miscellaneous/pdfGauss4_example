@@ -111,7 +111,7 @@ md"""
 # ╔═╡ 5303c090-7825-11eb-01ba-192971bdd14e
 function pdfGauss4(p, lims)
     μ, σ = keys(p)
-    return pdf(
+    return Normalized(
 		(x;p)->exp.( # function
 				-(x .- getproperty(p,μ)) .^ 4 ./ (2*getproperty(p,σ))^4),
 		p,    # parameters

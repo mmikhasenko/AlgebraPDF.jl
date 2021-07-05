@@ -98,15 +98,15 @@ func(d::myAmazingF, x::Number; p=pars(d)) = ... # expression
 The idea is to attach also the limit to the function and compute the integral of it for the given parameter on-fly.
 To make the normalization efficient, a call of the function on the `AbstractVector` implements a broadcasting with a single computation of normalization.
 ```julia
-mypdf(1.1) # use default values of parameters, calls normalization once
-mypdf(rand(100)) # use default values of parameters, also calls normalization once
-mypdf(rand(100); p = (a=1.2, b=3.3)) # ignors defalt parameters
+myNormalized(1.1) # use default values of parameters, calls normalization once
+myNormalized(rand(100)) # use default values of parameters, also calls normalization once
+myNormalized(rand(100); p = (a=1.2, b=3.3)) # ignors defalt parameters
 ```
 
 The PDF has two main representations (the ways to define):
 1. A struct with the reference to the `unnormdensity<:AbstractFunctionWithParameters`. 
 ```julia
-struct PDFWithParameters{T<:AbstractFunctionWithParameters,L} <: AbstractPDF{1}
+struct Normalized{T<:AbstractFunctionWithParameters,L} <: AbstractPDF{1}
     unnormdensity::T
     lims::L
 end
@@ -188,9 +188,9 @@ yv = sin.(xv)
 FTabulated(xv,yv)
 ```
 
-The corresponding pdf can be defined with `PDFWithParameters` by adding a limits. E.g.,
+The corresponding pdf can be defined with `Normalized` by adding a limits. E.g.,
 ```julia
-d = PDFWithParameters(FGauss((μ=1.2, σ=0.2)), (-1,4))
+d = Normalized(FGauss((μ=1.2, σ=0.2)), (-1,4))
 ```
 
 ## Plotting
@@ -203,7 +203,7 @@ It is replaced to a lambda function by the type recipe.
 
 For a PDF that has the limits, the plotting command will just work
 ```julia
-d1 = PDFWithParameters(FGauss((μ1=1.2, σ1=0.2)), (0,4))
+d1 = Normalized(FGauss((μ1=1.2, σ1=0.2)), (0,4))
 plot(d1, l=(:orange,3),
     lab="FGauss(μ1=1.2, σ1=0.2)",
     title="Gaussian normalized in (0,4)")

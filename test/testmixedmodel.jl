@@ -7,8 +7,8 @@
 #  _|    _|    _|  _|  _|    _|    _|_|_|    _|_|_|  _|    _|    _|    _|_|      _|_|_|  
 
 
-g1 = pdf((x;p)->1/p.σ1*exp(-(x-p.μ1)^2/(2*p.σ1^2)); p=TwoNamedTuples((μ1= 2.1, σ1=0.7 )), lims=(-3, 3))
-g2 = pdf((x;p)->1/p.σ2*exp(-(x-p.μ2)^2/(2*p.σ2^2)); p=TwoNamedTuples((μ2=-0.7, σ2=0.7 )), lims=(-3, 3))
+g1 = Normalized((x;p)->1/p.σ1*exp(-(x-p.μ1)^2/(2*p.σ1^2)); p=TwoNamedTuples((μ1= 2.1, σ1=0.7 )), lims=(-3, 3))
+g2 = Normalized((x;p)->1/p.σ2*exp(-(x-p.μ2)^2/(2*p.σ2^2)); p=TwoNamedTuples((μ2=-0.7, σ2=0.7 )), lims=(-3, 3))
 mm0 = MixedModel([g1, g2], (f1=0.33,))
 mm1 = MixedModel([g1, g2], AlgebraPDF.TwoNamedTuples((f1=0.33,)))
 
@@ -60,8 +60,8 @@ end
 # end
 
 @testset "Update parameters of the mixed model" begin
-    g2 = PDFWithParameters(FGauss(Ext(μ2=2.1, σ=0.3)), (-2, 7))
-    g1 = PDFWithParameters(FGauss(Ext(μ1=1.1, σ=0.3)), (-2, 7))
+    g2 = Normalized(FGauss(Ext(μ2=2.1, σ=0.3)), (-2, 7))
+    g1 = Normalized(FGauss(Ext(μ1=1.1, σ=0.3)), (-2, 7))
     # 
     mm = MixedModel([g1, g2], TwoNamedTuples((f1=0.1,)))
     mm = fixpar(mm, :f1, 0.3)

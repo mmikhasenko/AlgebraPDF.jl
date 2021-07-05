@@ -22,7 +22,7 @@ end
 
 
 @testset "Precodded pdfs" begin
-    dGauss = PDFWithParameters(FGauss((μ1=1.0,σ1=0.3)), (-2,2))
+    dGauss = Normalized(FGauss((μ1=1.0,σ1=0.3)), (-2,2))
     @test keys(pars(dGauss)) == (:μ1,:σ1)
     exp_gauss_at_zero = 1/sqrt(2π)/pars(dGauss).σ1
     @test abs(dGauss(1.0) - exp_gauss_at_zero) / exp_gauss_at_zero < 1e-3

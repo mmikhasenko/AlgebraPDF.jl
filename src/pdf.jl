@@ -55,28 +55,28 @@ end
 
 #################################################################### 
 
-struct PDFWithParameters{T<:AbstractFunctionWithParameters,L} <: AbstractPDF{1}
+struct Normalized{T<:AbstractFunctionWithParameters,L} <: AbstractPDF{1}
     lineshape::T
     lims::L
 end
-lineshape(d::PDFWithParameters) = getfield(d, :lineshape)
+lineshape(d::Normalized) = getfield(d, :lineshape)
 
 # two methods to be defined
 import Base: getproperty
-getproperty(d::PDFWithParameters, sym::Symbol) = sym==:p ? pars(lineshape(d)) : getfield(d, sym)
-func(d::PDFWithParameters, x::Number; p=pars(d)) = func(lineshape(d), x; p)
-pars(d::PDFWithParameters, isfree::Bool) = pars(lineshape(d), isfree)
-updatevalueorflag(d::PDFWithParameters, s::Symbol, isfree::Bool, v=getproperty(pars(d),s)) =
-    PDFWithParameters(updatevalueorflag(lineshape(d), s, isfree, v), d.lims)
+getproperty(d::Normalized, sym::Symbol) = sym==:p ? pars(lineshape(d)) : getfield(d, sym)
+func(d::Normalized, x::Number; p=pars(d)) = func(lineshape(d), x; p)
+pars(d::Normalized, isfree::Bool) = pars(lineshape(d), isfree)
+updatevalueorflag(d::Normalized, s::Symbol, isfree::Bool, v=getproperty(pars(d),s)) =
+    Normalized(updatevalueorflag(lineshape(d), s, isfree, v), d.lims)
 
 
 # short cuts
 # 1 argument
-PDFWithParameters(f;p,lims) = PDFWithParameters(FunctionWithParameters(f; p), lims)
+Normalized(f;p,lims) = Normalized(FunctionWithParameters(f; p), lims)
 
 ###################################################################### 
 
-fixedshapepdf(f, lims) = PDFWithParameters((x;p)->f(x); lims=lims, p=∅)
+fixedshapepdf(f, lims) = Normalized((x;p)->f(x); lims=lims, p=∅)
 
 ###################################################################### 
 
