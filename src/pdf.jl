@@ -20,9 +20,6 @@ function (d::AbstractPDF)(x; p=freepars(d))
     return func(d,x; p=allp) / normalization
 end
 
-# call on 
-(d::AbstractPDF)(x, v::AbstractVector) = d(x; p=v2p(v,d))
-
 # 1 dims
 normalizationintegral(d::AbstractPDF{1}; p=freepars(d)) =
     quadgk(x->func(d, x; p=p), lims(d)...)[1]

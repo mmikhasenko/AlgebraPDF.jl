@@ -37,8 +37,6 @@ bindiffs(x) = x[2:end]- x[1:end-1]
     end
 end
 
-# two dimensional
-const ArrayOrRange = Union{AbstractArray,AbstractRange}
 # 
 @recipe f(
     xv::ArrayOrRange, yv::ArrayOrRange,

@@ -13,6 +13,8 @@ func(d::AbstractFunctionWithParameters, x::AbstractArray; p=pars(d)) = func.(Ref
 func(d::AbstractFunctionWithParameters, x::AbstractRange; p=pars(d)) = func.(Ref(d), x; p)
 # 
 (d::AbstractFunctionWithParameters)(x; p=freepars(d)) = func(d,x;p=p+fixedpars(d))
+const ArrayOrRange = Union{AbstractArray,AbstractRange}
+(d::AbstractFunctionWithParameters)(x, v::ArrayOrRange) = d(x; p=v2p(v,d))
 
 # methods that call `updatevalueorflag`
 

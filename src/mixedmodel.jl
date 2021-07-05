@@ -22,9 +22,22 @@ fractions(mm::MixedModel) = mm.fractions
 
 pars(mm::MixedModel, isfree::Bool) = sum(pars.(mm.components, isfree)) + pars(fractions(mm), isfree)
 
-function func(mm::MixedModel,x;p)
+"""
+    func(mm::MixedModel,x; p=pars(mm))
+
+Calls func on components
+"""
+function func(mm::MixedModel,x; p=pars(mm))
     fracs = fractionvalues(mm; p=p)
     v = sum(func(d,x;p=p)*f for (d,f) in zip(mm.components, fracs))
+    ! prod(iszero, isnan.(v)) &&  @show p#, v
+    return v
+end
+
+# calls
+function (mm::MixedModel)(x; p=freepars(mm))
+    fracs = fractionvalues(mm; p=p)
+    v = sum(d(x; p=p)*f for (d,f) in zip(mm.components, fracs))
     ! prod(iszero, isnan.(v)) &&  @show p#, v
     return v
 end
@@ -41,18 +54,6 @@ function updatevalueorflag(d::MixedModel{N,T}, s::Symbol, isfree::Bool, v=getpro
         SVector{N}(newcomponents),
         ispar(fs,s) ? updatevalueorflag(fs, s, isfree, v) : fs)
 end
-
-# calls
-function (mm::MixedModel)(x; p=freepars(mm))
-    fracs = fractionvalues(mm; p=p)
-    v = sum(d(x; p=p)*f for (d,f) in zip(mm.components, fracs))
-    ! prod(iszero, isnan.(v)) &&  @show p#, v
-    return v
-end
-(mm::MixedModel)(x, v) = mm(x; p=v2p(v,mm))
-
-
-
 
 # extra functions
 
@@ -83,8 +84,8 @@ lims(mm::MixedModel) = lims(mm.components[1])
 
 
 # inner working
-fractionvalues(mm::MixedModel; p=∅) = vcat(mm.fractions..., (1-sum(mm.fractions)))
-
+fractionvalues(mm::MixedModel; p=∅) =
+    vcat(pars(mm.fractions)..., (1-sum(pars(mm.fractions))))
 
 # 
 """
