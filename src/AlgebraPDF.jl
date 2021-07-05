@@ -13,7 +13,11 @@ using LinearAlgebra
 using Measurements
 
 #
+const ∅ = NamedTuple()
 export ∅
+# 
+const NumberOrTuple = Union{Number,Tuple{Vararg{Number}}}
+export NumberOrTuple
 
 import Base:+,-,==
 import Base: getproperty
@@ -23,6 +27,7 @@ import Optim: minimizer, minimum
 import ForwardDiff: hessian
 # 
 # 
+export ParTypes
 include("parameters.jl")
 const Ext = TwoNamedTuples
 export Ext, TwoNamedTuples

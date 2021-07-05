@@ -64,7 +64,7 @@ lineshape(d::Normalized) = getfield(d, :lineshape)
 # two methods to be defined
 import Base: getproperty
 getproperty(d::Normalized, sym::Symbol) = sym==:p ? pars(lineshape(d)) : getfield(d, sym)
-func(d::Normalized, x::Number; p=pars(d)) = func(lineshape(d), x; p)
+func(d::Normalized, x::NumberOrTuple; p=pars(d)) = func(lineshape(d), x; p)
 pars(d::Normalized, isfree::Bool) = pars(lineshape(d), isfree)
 updatevalueorflag(d::Normalized, s::Symbol, isfree::Bool, v=getproperty(pars(d),s)) =
     Normalized(updatevalueorflag(lineshape(d), s, isfree, v), d.lims)
@@ -112,6 +112,6 @@ macro makepdftype(ex)
 
         import AlgebraPDF: func, pars, updatevalueorflag
         #
-        $(esc(:func))(d::$(esc(name)), $(esc(x))::Number; p=$(esc(:pars))(d)) = $(esc(body))
+        $(esc(:func))(d::$(esc(name)), $(esc(x))::NumberOrTuple; p=$(esc(:pars))(d)) = $(esc(body))
     end
 end

@@ -57,14 +57,14 @@ fixpars(d::AbstractFunctionWithParameters, sequence::NamedTuple) =
 
 # Number <: AbstractFunctionWithParameters
 pars(d::Number, isfree::Bool) = ∅
-func(d::Number, x::Number; p=∅) = d
+func(d::Number, x::NumberOrTuple; p=∅) = d
 
 # Function <: AbstractFunctionWithParameters
 pars(f::Function, isfree::Bool) = ∅
-func(f::Function, x::Number; p=∅) = f(x)
+func(f::Function, x::NumberOrTuple; p=∅) = f(x)
 
 # # to be implemented for F <: AbstractFunctionWithParameters
-# func(d::F, x::Number; p)
+# func(d::F, x::NumberOrTuple; p)
 # pars(d::F, isfree::Bool)
 # updatevalueorflag( d::F, s::Symbol, isfree::Bool, v=getproperty(pars(d),s))
 
@@ -80,7 +80,7 @@ updatevalueorflag(d::AbstractFunctionWithParameters, s::Symbol, isfree::Bool, v=
 struct Abs2Func{T<:AbstractFunctionWithParameters} <: AbstractFunctionWithParameters
     f::T
 end
-func(d::Abs2Func, x::Number; p=pars(d)) = abs2(func(d.f,x;p))
+func(d::Abs2Func, x::NumberOrTuple; p=pars(d)) = abs2(func(d.f,x;p))
 pars(d::Abs2Func, isfree::Bool) = pars(d.f, isfree)
 updatevalueorflag( d::Abs2Func, s::Symbol, isfree::Bool, v=getproperty(pars(d),s)) =
     Abs2Func(updatevalueorflag(d.f,s,isfree,v))
@@ -97,7 +97,7 @@ struct SumFunc{
     f2::T2
     α2::V
 end
-func(d::SumFunc, x::Number; p=pars(d)) = func(d.f1,x;p) + getproperty(p,keys(d.α2)[1])*func(d.f2,x;p)
+func(d::SumFunc, x::NumberOrTuple; p=pars(d)) = func(d.f1,x;p) + getproperty(p,keys(d.α2)[1])*func(d.f2,x;p)
 pars(d::SumFunc, isfree::Bool) = pars(d.f1, isfree) + pars(d.f2, isfree) + pars(d.α2, isfree)
 updatevalueorflag( d::SumFunc, s::Symbol, isfree::Bool, v=getproperty(pars(d),s)) =
     SumFunc(
@@ -117,7 +117,7 @@ end
 FunctionWithParameters(f;p) = FunctionWithParameters(;f,p)
 
 # two methods to be defined
-func(d::FunctionWithParameters, x::Number; p=pars(d)) = d.f(x; p)
+func(d::FunctionWithParameters, x::NumberOrTuple; p=pars(d)) = d.f(x; p)
 pars(d::FunctionWithParameters, isfree::Bool) = pars(d.p, isfree)
 updatevalueorflag(d::FunctionWithParameters, s::Symbol, isfree::Bool, v=getproperty(pars(d),s)) =
     FunctionWithParameters(;f=d.f, p=updatevalueorflag(d.p,s,isfree,v))
@@ -144,7 +144,7 @@ macro makefuntype(ex)
         end
         $(esc(name))(;p) = $(esc(name))(p)
         import AlgebraPDF: func
-        $(esc(:func))(d::$(esc(name)), $(esc(x))::Number; p=$(esc(:pars))(d)) = $(esc(body))
+        $(esc(:func))(d::$(esc(name)), $(esc(x))::NumberOrTuple; p=$(esc(:pars))(d)) = $(esc(body))
     end
 end
 

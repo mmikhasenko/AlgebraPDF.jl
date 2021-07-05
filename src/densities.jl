@@ -8,7 +8,7 @@ standardgauss(x,σ) = exp(-x^2/(2*σ^2)) / sqrt(2π) / σ
 struct FGauss{P} <: AbstractFunctionWithParameters
     p::P
 end
-function func(d::FGauss, x::Number; p=pars(d))
+function func(d::FGauss, x::NumberOrTuple; p=pars(d))
     μ,σ = (getproperty(p,s) for s in keys(d.p))
     standardgauss(x-μ,σ)
 end
@@ -25,7 +25,7 @@ amplitudeBWsq(x,m,Γ) = abs2(amplitudeBW(x,m,Γ))
 struct FBreitWigner{P} <: AbstractFunctionWithParameters
     p::P
 end
-function func(d::FBreitWigner, x::Number; p=pars(d))
+function func(d::FBreitWigner, x::NumberOrTuple; p=pars(d))
     m,Γ = (getproperty(p,s) for s in keys(d.p))
     amplitudeBW(x,m,Γ)
 end
@@ -39,7 +39,7 @@ end
 struct FExp{P} <: AbstractFunctionWithParameters
     p::P
 end
-function func(d::FExp, x::Number; p=pars(d))
+function func(d::FExp, x::NumberOrTuple; p=pars(d))
     β, = (getproperty(p,s) for s in keys(d.p))
     exp(x*β)
 end
@@ -53,7 +53,7 @@ end
 struct FPowExp{P} <: AbstractFunctionWithParameters
     p::P
 end
-function func(d::FPowExp, x::Number; p=pars(d))
+function func(d::FPowExp, x::NumberOrTuple; p=pars(d))
     α,β = (getproperty(p,s) for s in keys(d.p))
     x^α*exp(x*β)
 end
@@ -68,7 +68,7 @@ end
 struct FPol{P} <: AbstractFunctionWithParameters
     p::P
 end
-function func(d::FPol, x::Number; p=pars(d))
+function func(d::FPol, x::NumberOrTuple; p=pars(d))
     cs = (getproperty(p,s) for s in keys(d.p))
     sum(x^(i-1)*c for (i,c) in enumerate(cs))
 end
@@ -84,7 +84,7 @@ standarddoublegauss(x,σ,r,n) =
 struct FDoubleGaussFixedRatio{P} <: AbstractFunctionWithParameters
     p::P
 end
-function func(d::FDoubleGaussFixedRatio, x::Number; p=pars(d))
+function func(d::FDoubleGaussFixedRatio, x::NumberOrTuple; p=pars(d))
     μ,σ,r,n = (getproperty(p,s) for s in keys(d.p))
     standarddoublegauss(x-μ,σ,r,n)
 end
@@ -94,7 +94,7 @@ end
 struct FBreitWignerConvGauss{P} <: AbstractFunctionWithParameters
     p::P
 end
-function func(d::FBreitWignerConvGauss, x::Number; p=pars(d))
+function func(d::FBreitWignerConvGauss, x::NumberOrTuple; p=pars(d))
     m,Γ,σ = (getproperty(p,s) for s in keys(d.p))
     # 
     quadgk(
@@ -109,7 +109,7 @@ struct FTabulated{T} <: AbstractFunctionWithParameters
 end
 FTabulated(xv,yv) = FTabulated(interpolate((xv,), yv, Gridded(Linear())))
 # 
-function func(d::FTabulated, x::Number; p=pars(d))    
+function func(d::FTabulated, x::NumberOrTuple; p=pars(d))    
     tlims = extrema(collect(d.itr.knots)[1])
     inrange(x,tlims) ? d.itr(x) : 0.0
 end

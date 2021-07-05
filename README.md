@@ -13,7 +13,7 @@ Basic functionality:
  * fitting data distribution using the maximum likelihood (`Optim.jl`)
  * plotting recipes
 
-
+Current implementation is limited to one-dimensional functions and immutable operations.
 ## Call the function
 The object behave similar to a regular function with a keyword argument `p` set to `freepars(d)` by default.
 Once `p` is used a full set of parameters needs to be provided. 
@@ -85,7 +85,7 @@ FunctionWithParameters(f::F, p::P)
 struct myAmazingF{P} <: AbstractFunctionWithParameters
     p::P
 end
-func(d::myAmazingF, x::Number; p=pars(d)) = ... # expression
+func(d::myAmazingF, x::NumberOrTuple; p=pars(d)) = ... # expression
 ```
 
 3. using a macro `@makefuntype`:
@@ -119,8 +119,9 @@ struct Pol1SinSq{T,N} <: AbstractPDF{1}
     p::T
     lims::N
 end
-func(d::Pol1SinSq, x::Number; p=pars(d)) = p.a*sin(x+p.b)^2+1  # an example of the function
+func(d::Pol1SinSq, x::NumberOrTuple; p=pars(d)) = p.a*sin(x+p.b)^2+1  # an example of the function
 ```
+The limits can be checked with `lims(d)`.
 
 ## Defined parameter names or defined parameter order
 
@@ -139,7 +140,7 @@ struct BW1{P} <: AbstractFunctionWithParameters
     p::P
 end
 import AlgebraPDF:func
-func(bw::BW1, x::Number; p=pars(bw)) = p.m*p.Γ/(p.m^2-x^2-1im*p.m*p.Γ)
+func(bw::BW1, x::NumberOrTuple; p=pars(bw)) = p.m*p.Γ/(p.m^2-x^2-1im*p.m*p.Γ)
 ```
 
 Slightly better implementation where only the order of the arguments are fixed, while the names are determined when the instance is created.
@@ -149,7 +150,7 @@ struct BW2{P} <: AbstractFunctionWithParameters
     p::P
 end
 import AlgebraPDF:func
-function func(bw::BW2, x::Number; p=pars(bw))
+function func(bw::BW2, x::NumberOrTuple; p=pars(bw))
     m,Γ = (getproperty(p,s) for s in keys(bw.p))
     m*Γ/(m^2-x^2-1im*m*Γ)
 end

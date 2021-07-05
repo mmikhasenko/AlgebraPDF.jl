@@ -44,7 +44,7 @@ struct nBW1{P,L} <: AbstractPDF{1}
     lims::L
 end
 import AlgebraPDF:func
-func(bw::nBW1, x::Number; p=pars(bw)) = abs2(p.m*p.Γ/(p.m^2-x^2-1im*p.m*p.Γ))
+func(bw::nBW1, x::NumberOrTuple; p=pars(bw)) = abs2(p.m*p.Γ/(p.m^2-x^2-1im*p.m*p.Γ))
 
 @testset "User-def type with fixed name" begin
     bw = nBW1((m=3.1,Γ=0.1), (0,4))
@@ -61,7 +61,7 @@ struct nBW2{P,L} <: AbstractPDF{1}
     lims::L
 end
 import AlgebraPDF:func
-function func(bw::nBW2, x::Number; p=pars(bw))
+function func(bw::nBW2, x::NumberOrTuple; p=pars(bw))
     m,Γ = (getproperty(p,s) for s in keys(bw.p))
     m*Γ/(m^2-x^2-1im*m*Γ)
 end

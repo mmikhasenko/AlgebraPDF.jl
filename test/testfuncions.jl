@@ -138,7 +138,7 @@ struct BW1{P} <: AbstractFunctionWithParameters
     p::P
 end
 import AlgebraPDF:func
-func(bw::BW1, x::Number; p=pars(bw)) = p.m*p.Γ/(p.m^2-x^2-1im*p.m*p.Γ)
+func(bw::BW1, x::NumberOrTuple; p=pars(bw)) = p.m*p.Γ/(p.m^2-x^2-1im*p.m*p.Γ)
 
 
 @testset "User-def type with fixed name" begin
@@ -154,7 +154,7 @@ struct BW2{P} <: AbstractFunctionWithParameters
     p::P
 end
 import AlgebraPDF:func
-function func(bw::BW2, x::Number; p=pars(bw))
+function func(bw::BW2, x::NumberOrTuple; p=pars(bw))
     m,Γ = (getproperty(p,s) for s in keys(bw.p))
     m*Γ/(m^2-x^2-1im*m*Γ)
 end

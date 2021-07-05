@@ -1,5 +1,3 @@
-const ∅ = NamedTuple()
-
 +(t1::NamedTuple, t2::NamedTuple) = merge(t1,t2)
 -(t1::NamedTuple, t2::NamedTuple) = Base.structdiff(t1,t2)
 -(t1::NamedTuple, s::Symbol) = Base.structdiff(t1, nt(s))
@@ -65,9 +63,9 @@ end
 TwoNamedTuples(t::NamedTuple) = TwoNamedTuples(t,())
 TwoNamedTuples(ps::TwoNamedTuples) = TwoNamedTuples(allpars(ps),whichfixed(ps))
 TwoNamedTuples(; kw...) = TwoNamedTuples((;kw...))
-
-const ParTypes = Union{NamedTuple,TwoNamedTuples}
 #
+const ParTypes = Union{NamedTuple,TwoNamedTuples}
+# 
 pars(ps::ParTypes) = NamedTuple{keys(ps)}(pars(ps, true) + pars(ps, false))
 freepars(d::ParTypes) = pars(d, true)
 fixedpars(d::ParTypes) = pars(d, false)
