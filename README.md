@@ -14,7 +14,7 @@ Basic functionality:
  * plotting recipes
 
 
-## How to call
+## Call the function
 The object behave similar to a regular function with a keyword argument `p` set to `freepars(d)` by default.
 Once `p` is used a full set of parameters needs to be provided. 
 ```julia
@@ -69,7 +69,8 @@ fit_results = fit_llh(data, f; init)
 The method returns a named tuple with the named tuple of optimized parameters,
 parameters with uncertainties, and best-estimation function.
 
-## Functions with parameters
+
+## Create/implement the functions with parameters
 It is just a function to which a container with parameters (default values) is attached.
 The container can be static `NamedTuple`, or extended which can flag parameters as `free` and `fixed`.
 
@@ -92,7 +93,7 @@ func(d::myAmazingF, x::Number; p=pars(d)) = ... # expression
 @makefuntype myAmazingF(x;p) = ... # expression
 ```
 
-## Normalized functions
+## Create/implement normalized functions
 
 The idea is to attach also the limit to the function and compute the integral of it for the given parameter on-fly.
 To make the normalization efficient, a call of the function on the `AbstractVector` implements a broadcasting with a single computation of normalization.
@@ -121,7 +122,7 @@ end
 func(d::Pol1SinSq, x::Number; p=pars(d)) = p.a*sin(x+p.b)^2+1  # an example of the function
 ```
 
-## Fixed parameter names or fixed parameter order
+## Defined parameter names or defined parameter order
 
 Creating a function or pdf can be conveniently done with macro
 ```julia
@@ -141,7 +142,6 @@ import AlgebraPDF:func
 func(bw::BW1, x::Number; p=pars(bw)) = p.m*p.Γ/(p.m^2-x^2-1im*p.m*p.Γ)
 ```
 
-
 Slightly better implementation where only the order of the arguments are fixed, while the names are determined when the instance is created.
 ```julia
 # implementation with ORDER of parameters build into the funciton call
@@ -160,7 +160,6 @@ bw_j = BW2((m_j=1.1, Γ_j=0.2))
 bw_k = BW2((m_k=1.1, Γ_k=0.2))
 ```
 
-
 ## Convolution
 
 The most common case of smearing a function with gaussian denisity is implemented.
@@ -171,3 +170,46 @@ f_conv = convGauss(f::F, σ::T) where F <: AbstractFunctionWithParameters
 σ can be a number, but can also be a function `<: AbstractFunctionWithParameters`.
 
 A customary confolved function or pdf can be defined the same was as e.g. [`FBreitWignerConvGauss`](src/densities.jl).
+
+## Some defined functions
+
+For convenience, some standard functions are predefined.
+```julia
+FGauss((μ=1.2, σ=0.2))
+FDoubleGaussFixedRatio((μ=1.2, σ=0.2, r=0.2, n=5))
+FBreitWigner((m=0.77, Γ=0.15))
+FExp((τ=-0.1,))
+FPowExp((n=1.2,τ=-0.1))
+FPol((a0=1, a1=2, a2=3, a3=5))
+FBreitWignerConvGauss((μ=0.77, Γ=0.15, σ=2.2))
+# 
+xv = -π/2:0.1:π/2
+yv = sin.(xv)
+FTabulated(xv,yv)
+```
+
+The corresponding pdf can be defined with `PDFWithParameters` by adding a limits. E.g.,
+```julia
+d = PDFWithParameters(FGauss((μ=1.2, σ=0.2)), (-1,4))
+```
+
+## Plotting
+The function object can be plotted as a regular function,
+```julia
+f1 = FGauss((μ1=1.2, σ1=0.2))
+plot(f1, 0, 5)
+```
+It is replaced to a lambda function by the type recipe.
+
+For a PDF that has the limits, the plotting command will just work
+```julia
+d1 = PDFWithParameters(FGauss((μ1=1.2, σ1=0.2)), (0,4))
+plot(d1, l=(:orange,3),
+    lab="FGauss(μ1=1.2, σ1=0.2)",
+    title="Gaussian normalized in (0,4)")
+```
+The `normalization` other than 1.0 can be passed with the method
+```julia
+plot(d1, normalization=1, Nsample=100)
+```
+where `Nsample` is the number of points at which the function is sampled.
