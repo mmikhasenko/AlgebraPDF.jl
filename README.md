@@ -13,7 +13,7 @@ Basic functionality:
  * fitting data distribution using the maximum likelihood (`Optim.jl`)
  * plotting recipes
 
-Current implementation is limited to one-dimensional functions and immutable operations.
+Current implementation is limited to immutable operations.
 ## Call the function
 The object behave similar to a regular function with a keyword argument `p` set to `freepars(d)` by default.
 Once `p` is used a full set of parameters needs to be provided. 
@@ -194,6 +194,25 @@ The corresponding pdf can be defined with `Normalized` by adding a limits. E.g.,
 d = Normalized(FGauss((μ=1.2, σ=0.2)), (-1,4))
 ```
 
+## Higher dimensions
+
+Function with higher dimensions expect the variable provided as a `Tuple`, i.e. `(x,y)`, otherwise,
+the construction and usage is analogous to the one dimensional ones.
+```julia
+@makefuntype Amazing2D(x;p) = (x[1]-p.x0)^2+(x[2]-p.y0)^2-p.R0^2
+a = Amazing2D((x0=1.1, y0=2.1, R0=0.0))
+a((1.1,2.1)) # returns 0
+# 
+data = collect(zip(rand(10), rand(10)))
+a(data) # return a vector of 10 elements
+
+@makefuntype Amazing3D(x;p) = (x[1]-p.x0)^2+(x[2]-p.y0)^2+(x[3]-p.z0)^2-p.R0^2
+b = Amazing3D((x0=1.1, y0=2.1, z0=3.1, R0=-1.0))
+b((1.1,2.1,3.1)) == -1
+# 
+data3d = collect(zip(rand(10), rand(10), rand(10)))
+b(data3d; p=(x0=1, y0=2, z0=3, R0=-1) )  # return a vector of 10 elements
+```
 ## Plotting
 The function object can be plotted as a regular function,
 ```julia
@@ -214,3 +233,14 @@ The `normalization` other than 1.0 can be passed with the method
 plot(d1, normalization=1, Nsample=100)
 ```
 where `Nsample` is the number of points at which the function is sampled.
+
+Plotting recipe for 2d functions are defined.
+```julia
+heatmap(
+    range(-1,2,length=100),
+    range(-2,1,length=100), updatepars(a, (x0=0.0, y0=0.0)))
+#
+contour(
+    range(-1,2,length=100),
+    range(-2,1,length=100), updatepars(a, (x0=0.0, y0=0.0)))
+```

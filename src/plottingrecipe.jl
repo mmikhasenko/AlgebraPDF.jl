@@ -36,3 +36,10 @@ bindiffs(x) = x[2:end]- x[1:end-1]
         (d, scaletobinneddata(length(data), bins))
     end
 end
+
+# two dimensional
+const ArrayOrRange = Union{AbstractArray,AbstractRange}
+# 
+@recipe f(
+    xv::ArrayOrRange, yv::ArrayOrRange,
+    d::AbstractFunctionWithParameters) = (xv,yv,(x,y)->func(d,(x,y)))

@@ -1,4 +1,4 @@
-using Measurements: include
+using Measurements: LinearAlgebra, include
 using AlgebraPDF
 using StaticArrays
 using Test
@@ -13,3 +13,4 @@ include("testdensities.jl")
 include("testconvolution.jl")
 include("testmixedmodel.jl")
 include("testplotting.jl")
+include("testmultidims.jl")
