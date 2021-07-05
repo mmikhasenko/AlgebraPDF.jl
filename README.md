@@ -241,4 +241,5 @@ a = Amazing2D((x0=0.1, y0=-0.1, R0=0.0))
 xv, yv = -1:0.1:2, -2:0.1:1
 heatmap(xv, yv, updatepar(a, :x0, -0.5))
 contour(xv, yv, log(abs2(a)))
+surface(xv, yv, abs2(a))
 ```
