@@ -29,8 +29,8 @@ import ForwardDiff: hessian
 # 
 export ParTypes
 include("parameters.jl")
-const Ext = TwoNamedTuples
-export Ext, TwoNamedTuples
+const Ext = FlaggedNamedTuple
+export Ext, FlaggedNamedTuple
 
 # 
 export updatepar, updatepars

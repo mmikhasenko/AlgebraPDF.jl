@@ -28,7 +28,7 @@ end
 
 @testset "Parameter structure: NamedTuple" begin
     #
-    p0 = TwoNamedTuples(a=1,b=2)
+    p0 = FlaggedNamedTuple(a=1,b=2)
     @test p0.a == 1
     @test p0.b == 2
     # 
@@ -40,8 +40,8 @@ end
     @test freepars(p2) == (b=2,)
     @test fixedpars(p2) == (a=1,)
     #
-    @test p0 == TwoNamedTuples((a=1,b=2))
-    @test p2 == TwoNamedTuples(p2)
+    @test p0 == FlaggedNamedTuple((a=1,b=2))
+    @test p2 == FlaggedNamedTuple(p2)
     # 
     @test keys(p1) == keys(p2)
     @test keys(p2, true) == (:b,)

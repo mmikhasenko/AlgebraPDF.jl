@@ -27,7 +27,7 @@ using Test
     @test p2v((b=6,a=5,c=33), d0) == [5,6]    
 end
 
-@testset "FunctionWithParameters{TwoNamedTuples}" begin
+@testset "FunctionWithParameters{FlaggedNamedTuple}" begin
     g = FunctionWithParameters(
         (x;p)->exp((x-p.μ)^3/(2*p.σ^2));
         p=Ext(μ=1.2, σ=0.1))
@@ -49,7 +49,7 @@ end
     @test g′′′ == g # true
 end
 
-@testset "FunctionWithParameters{TwoNamedTuples}" begin
+@testset "FunctionWithParameters{FlaggedNamedTuple}" begin
     m0 = FunctionWithParameters(
         (x;p)->p.a+cos(x)*p.b;
         p=Ext(a=2,b=1))
