@@ -130,7 +130,7 @@ Creating a function or pdf can be conveniently done with macro
 # for BW1 <: AbstractPDF{1}
 @makepdftype BW1(x, p) = p.m*p.Γ/(p.m^2-x^2-1im*p.m*p.Γ)
 
-# for BW1 <: AbstractPDF{1}
+# for BW1 <: AbstractFunctionWithParameters
 @makefuntype BW1(x, p) = p.m*p.Γ/(p.m^2-x^2-1im*p.m*p.Γ)
 ```
 The latter expands into
@@ -197,7 +197,7 @@ d = Normalized(FGauss((μ=1.2, σ=0.2)), (-1,4))
 ## Higher dimensions
 
 Function with higher dimensions expect the variable provided as a `Tuple`, i.e. `(x,y)`, otherwise,
-the construction and usage is analogous to the one dimensional ones.
+the construction and usage are analogous to the one dimensional case.
 ```julia
 @makefuntype Amazing2D(x;p) = (x[1]-p.x0)^2+(x[2]-p.y0)^2-p.R0^2
 a = Amazing2D((x0=1.1, y0=2.1, R0=0.0))
@@ -228,19 +228,15 @@ plot(d1, l=(:orange,3),
     lab="FGauss(μ1=1.2, σ1=0.2)",
     title="Gaussian normalized in (0,4)")
 ```
-The `normalization` other than 1.0 can be passed with the method
+The `normalization` value other than unit can be passed with the plotting method
 ```julia
-plot(d1, normalization=1, Nsample=100)
+plot(d1, normalization=1.0, Nsample=100)
 ```
 where `Nsample` is the number of points at which the function is sampled.
 
-Plotting recipe for 2d functions are defined.
+Plotting recipe for 2d functions is defined.
 ```julia
-heatmap(
-    range(-1,2,length=100),
-    range(-2,1,length=100), updatepars(a, (x0=0.0, y0=0.0)))
-#
-contour(
-    range(-1,2,length=100),
-    range(-2,1,length=100), updatepars(a, (x0=0.0, y0=0.0)))
+xv, yv = -1:0.1:2, -2:0.1:1
+heatmap(xv, yv, a)
+contour(xv, yv, updatepars(a, (x0=0.0, y0=0.0)))
 ```
