@@ -28,6 +28,28 @@ using Test
 end
 
 @testset "FunctionWithParameters{TwoNamedTuples}" begin
+    g = FunctionWithParameters(
+        (x;p)->exp((x-p.μ)^3/(2*p.σ^2));
+        p=Ext(μ=1.2, σ=0.1))
+    # 
+    g′ = fixpar(g, :μ)
+    @test fixedpars(g′).μ == 1.2
+    g′ = fixpar(g, :μ, 1.3)
+    @test fixedpars(g′).μ == 1.3
+    # 
+    @test freepars(g′) == (σ=0.1,)
+    @test fixedpars(g′) == (μ=1.3,)
+    #
+    @test g′(1.3; p=(σ=0.2,)) == 1.0 # now works since μ is fixed
+    @test g′(1.3; p=(σ=0.2, μ=1.6)) == 1.0 # will use the fixed value of μ=1.2
+    g′′ = updatepar(g′, :μ, 1.2) # however, the update fill do
+    @test g′′(1.2) == 1.0
+    # 
+    g′′′ = releasepar(g′′, :μ)
+    @test g′′′ == g # true
+end
+
+@testset "FunctionWithParameters{TwoNamedTuples}" begin
     m0 = FunctionWithParameters(
         (x;p)->p.a+cos(x)*p.b;
         p=Ext(a=2,b=1))

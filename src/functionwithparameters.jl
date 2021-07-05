@@ -12,7 +12,7 @@ nfreepars(d::AbstractFunctionWithParameters) = length(freepars(d))
 func(d::AbstractFunctionWithParameters, x::AbstractArray; p=pars(d)) = func.(Ref(d), x; p)
 func(d::AbstractFunctionWithParameters, x::AbstractRange; p=pars(d)) = func.(Ref(d), x; p)
 # 
-(d::AbstractFunctionWithParameters)(x; p=freepars(d)) = func(d,x;p)
+(d::AbstractFunctionWithParameters)(x; p=freepars(d)) = func(d,x;p=p+fixedpars(d))
 
 # methods that call `updatevalueorflag`
 
@@ -71,7 +71,7 @@ func(f::Function, x::Number; p=∅) = f(x)
 # default method assumes that the d has d.p, and is a single arg
 pars(d::AbstractFunctionWithParameters, isfree::Bool) = pars(d.p, isfree)
 updatevalueorflag(d::AbstractFunctionWithParameters, s::Symbol, isfree::Bool, v=getproperty(pars(d),s)) =
-    typeof(d)(updatevalueorflag(d.p), s, isfree, v)
+    typeof(d)(updatevalueorflag(d.p, s, isfree, v))
 #
 
 

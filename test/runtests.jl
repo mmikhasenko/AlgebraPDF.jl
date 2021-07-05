@@ -13,4 +13,3 @@ include("testdensities.jl")
 include("testconvolution.jl")
 include("testmixedmodel.jl")
 include("testplotting.jl")
-# 

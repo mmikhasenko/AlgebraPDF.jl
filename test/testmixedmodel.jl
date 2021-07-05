@@ -44,7 +44,7 @@ end
 #     sample = vcat((0.5 .* randn(1000) .- 1.0), (0.7.*randn(100) .+ 2.0))
 #     sample = filter(x->-3<x<3, sample)
 #     # 
-#     fr = fit_llh(sample, mm0, init_pars=p2v(mm0))
+#     fr = fit_llh(sample, mm0, init=p2v(mm0))
 #     pfr = v2p(minimizer(fr), mm0)
 #     @test abs(pfr.μ2 + 1.0) < 0.5
 #     @test abs(pfr.μ1 - 2.0) < 1.0

@@ -28,28 +28,28 @@ end
 #    _|      _|      _|_|  
 
 
-function optimize_get_state_hessian(func, init_pars, m = BFGS(); show_trace::Bool = true)
-    obj = OnceDifferentiable(func, init_pars, autodiff = :forwarddiff)
+function optimize_get_state_hessian(func, init, m = BFGS(); show_trace::Bool = true)
+    obj = OnceDifferentiable(func, init, autodiff = :forwarddiff)
     # 
     options = Optim.Options(show_trace = show_trace)
-    lbfgsstate = Optim.initial_state(m, options, obj, init_pars)
+    lbfgsstate = Optim.initial_state(m, options, obj, init)
     #
-    optres = optimize(obj, init_pars, m, options, lbfgsstate)
+    optres = optimize(obj, init, m, options, lbfgsstate)
     #
     hessian_callback(p) = ForwardDiff.hessian(func, p)
     #
     return FitResults(optres, lbfgsstate, hessian_callback)
 end
 
-function fit_llh(data, f; init_pars = error("init_pars!!"), weights = fill(1.0, length(data)))
+function fit_llh(data, f; init = error("give initial pars with a argument `init`!!"), weights = fill(1.0, length(data)))
     llh(p) = -sum((v>0) ? w*log(v) : -1e4 for (w,v) in zip(weights, f(data, p)))
-    return optimize_get_state_hessian(llh, init_pars, BFGS())
+    return optimize_get_state_hessian(llh, init, BFGS())
 end
 
-function fit_llh_with_constraints(data, f, fc; init_pars = error("init_pars!!"))
+function fit_llh_with_constraints(data, f, fc; init = error("init!!"))
     llh(p) = -sum((v>0) ? log(v) : -1e4 for v in f(data, p))
     llh_constr(p) = llh(p) + fc(p)
-    return optimize_get_state_hessian(llh_constr, init_pars, BFGS())
+    return optimize_get_state_hessian(llh_constr, init, BFGS())
 end
 
 
@@ -57,7 +57,7 @@ end
 # AbstractFunctionWithParameters
 function fit_llh(data, d::AbstractPDF)
     filtered_data = filter(x->inrange(x, lims(d)), data)
-    return fit_llh(filtered_data, d; init_pars=p2v(d))
+    return fit_llh(filtered_data, d; init=p2v(d))
 end
 
 chi2(specification; p) = sum(((getproperty(p, k)-v) / e)^2
@@ -66,5 +66,5 @@ chi2(specification; p) = sum(((getproperty(p, k)-v) / e)^2
 function fit_llh_with_constraints(data, d::AbstractPDF, specification)
     filtered_data = filter(x->inrange(x, lims(d)), data)
     fc(v) = chi2(specification; p=v2p(v, d))
-    return fit_llh_with_constraints(filtered_data, d, fc; init_pars=p2v(d))
+    return fit_llh_with_constraints(filtered_data, d, fc; init=p2v(d))
 end
