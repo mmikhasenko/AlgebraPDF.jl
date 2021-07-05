@@ -89,6 +89,18 @@ abs2(f::AbstractFunctionWithParameters) = Abs2Func(f)
 
 ###################################################################### 
 
+struct LogFunc{T<:AbstractFunctionWithParameters} <: AbstractFunctionWithParameters
+    f::T
+end
+func(d::LogFunc, x::NumberOrTuple; p=pars(d)) = log(func(d.f,x;p))
+pars(d::LogFunc, isfree::Bool) = pars(d.f, isfree)
+updatevalueorflag( d::LogFunc, s::Symbol, isfree::Bool, v=getproperty(pars(d),s)) =
+    LogFunc(updatevalueorflag(d.f,s,isfree,v))
+# 
+log(f::AbstractFunctionWithParameters) = LogFunc(f)
+
+###################################################################### 
+
 struct SumFunc{
         T1<:AbstractFunctionWithParameters,
         T2<:AbstractFunctionWithParameters,

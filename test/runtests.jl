@@ -1,4 +1,3 @@
-using Measurements: LinearAlgebra, include
 using AlgebraPDF
 using StaticArrays
 using Test

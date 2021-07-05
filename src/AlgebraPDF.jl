@@ -21,7 +21,7 @@ export NumberOrTuple
 
 import Base:+,-,==
 import Base: getproperty
-import Base: abs2
+import Base: abs2, log
 import Base: keys
 import Optim: minimizer, minimum
 import ForwardDiff: hessian
@@ -40,7 +40,7 @@ export releasepar, releasepars
 export @makefuntype
 export AbstractFunctionWithParameters
 export FunctionWithParameters
-export SumFunc, Abs2Func
+export SumFunc, Abs2Func, LogFunc
 # 
 export func
 export nfreepars

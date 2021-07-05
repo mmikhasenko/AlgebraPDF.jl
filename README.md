@@ -236,7 +236,9 @@ where `Nsample` is the number of points at which the function is sampled.
 
 Plotting recipe for 2d functions is defined.
 ```julia
+@makefuntype Amazing2D(x;p) = (x[1]-p.x0)^2+(x[2]-p.y0)^2-p.R0^2
+a = Amazing2D((x0=0.1, y0=-0.1, R0=0.0))
 xv, yv = -1:0.1:2, -2:0.1:1
-heatmap(xv, yv, a)
-contour(xv, yv, updatepars(a, (x0=0.0, y0=0.0)))
+heatmap(xv, yv, updatepar(a, :x0, -0.5))
+contour(xv, yv, log(abs2(a)))
 ```

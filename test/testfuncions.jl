@@ -96,6 +96,18 @@ end
     @test freepars(am0) == freepars(m0)
 end
 
+@testset "LogFunc" begin
+    m0 = FunctionWithParameters(
+        (x;p)->exp(p.b*x);
+        p=Ext(b=2,))
+    # 
+    am0 = log(m0)
+    @test am0(1) == 2 
+    am1 = updatepar(am0, :b, 4)
+    @test am1(π/2) ≈ 2π
+    @test freepars(am0) == freepars(m0)
+end
+
 @testset "SumFunc" begin
     a1 = FunctionWithParameters(
         (x;p)->p.a+cos(x)*p.b; p=Ext(a=2,b=1))
