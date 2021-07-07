@@ -41,6 +41,7 @@ export @makefuntype
 export AbstractFunctionWithParameters
 export FunctionWithParameters
 export SumFunc, Abs2Func, LogFunc
+export NegativeLogLikelihood
 # 
 export func
 export nfreepars

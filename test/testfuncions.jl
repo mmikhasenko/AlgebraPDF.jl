@@ -108,6 +108,17 @@ end
     @test freepars(am0) == freepars(m0)
 end
 
+@testset "NegativeLogLikelihood" begin
+    d = Normalized(FGauss((μ=1.1, σ=0.3)), (-3, 5))
+    data = randn(1000)
+    nll = NegativeLogLikelihood(d, data)
+    # 
+    @test nll == minussum(log(d), data)
+    @test nll(0.0) != 0.0
+    @test nll(0.0) == nll(10.0)
+    @test nll(0.0; p=(μ=1, σ=2)) == nll(0.0, [1,2])
+end
+
 @testset "SumFunc" begin
     a1 = FunctionWithParameters(
         (x;p)->p.a+cos(x)*p.b; p=Ext(a=2,b=1))

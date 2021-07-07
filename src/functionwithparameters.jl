@@ -103,6 +103,21 @@ log(f::AbstractFunctionWithParameters) = LogFunc(f)
 
 ###################################################################### 
 
+struct NegativeLogLikelihood{T<:AbstractFunctionWithParameters, D<:AbstractArray} <: AbstractFunctionWithParameters
+    f::T
+    data::D
+    nagativepenatly::Float64
+end
+func(d::LogFunc, x::NumberOrTuple; p=pars(d)) = -sum((v>0) ? log(v) : nagativepenatly for v in d(data;p))
+pars(d::LogFunc, isfree::Bool) = pars(d.f, isfree)
+updatevalueorflag( d::LogFunc, s::Symbol, isfree::Bool, v=getproperty(pars(d),s)) =
+    NegativeLogLikelihood(updatevalueorflag(d.f,s,isfree,v))
+#
+NegativeLogLikelihood(d, data::AbstractArray) = NegativeLogLikelihood(d, data, -1e4)
+minussum(d::LogFunc, data::AbstractArray) = NegativeLogLikelihood(d.f, data)
+
+###################################################################### 
+
 struct SumFunc{
         T1<:AbstractFunctionWithParameters,
         T2<:AbstractFunctionWithParameters,
