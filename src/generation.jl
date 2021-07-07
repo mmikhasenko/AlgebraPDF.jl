@@ -18,20 +18,22 @@ function getbinned1dDensity(g, lims, Nbins)
 end
 
 import Base:rand
-function rand(bD::binned1dDensity; checknonzero::Bool=false)
+function rand(bD::binned1dDensity; removenegative::Bool=false)
     # get
     binind = findfirst(bD.cumarr .> rand())-1
     σl, σr = bD.grid[binind], bD.grid[binind+1]
     σ = σl+rand()*(σr-σl)
-    checknonzero && bD.density(σ) == 0.0 && return rand(bD,checknonzero)
+    removenegative && bD.density(σ) == 0.0 && return rand(bD,removenegative)
     return σ
 end
 
-function generate(Nev::Int, d::T where T <: AbstractFunctionWithParameters; p=freepars(d), Nbins=100)
+function generate(d::T where T <: AbstractFunctionWithParameters, N::Int;
+    p=freepars(d), Nbins=100, removenegative::Bool=false)
     grid = collect(range(lims(d)..., length=Nbins))
     centers = (grid[2:end] .+ grid[1:end-1]) ./ 2
     #
-    weights = d(centers)
+    weights = d(centers; p)
     bD = binned1dDensity(grid, weights; density=x->d(x;p))
-    return [rand(bD) for _ in 1:Nev]
+    return [rand(bD; removenegative) for _ in 1:N]
 end
+rand(d::T where T <: AbstractFunctionWithParameters, N::Int=1) = generate(d, N)

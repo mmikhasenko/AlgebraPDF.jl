@@ -108,9 +108,9 @@ struct NegativeLogLikelihood{T<:AbstractFunctionWithParameters, D<:AbstractArray
     data::D
     nagativepenatly::Float64
 end
-func(d::LogFunc, x::NumberOrTuple; p=pars(d)) = -sum((v>0) ? log(v) : nagativepenatly for v in d(data;p))
-pars(d::LogFunc, isfree::Bool) = pars(d.f, isfree)
-updatevalueorflag( d::LogFunc, s::Symbol, isfree::Bool, v=getproperty(pars(d),s)) =
+func(d::NegativeLogLikelihood, x::NumberOrTuple; p=pars(d)) = -sum((v>0) ? log(v) : d.nagativepenatly for v in d.f(d.data;p))
+pars(d::NegativeLogLikelihood, isfree::Bool) = pars(d.f, isfree)
+updatevalueorflag( d::NegativeLogLikelihood, s::Symbol, isfree::Bool, v=getproperty(pars(d),s)) =
     NegativeLogLikelihood(updatevalueorflag(d.f,s,isfree,v))
 #
 NegativeLogLikelihood(d, data::AbstractArray) = NegativeLogLikelihood(d, data, -1e4)

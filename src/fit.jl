@@ -1,25 +1,13 @@
-#
-llh(data, f; weights = fill(1.0, length(data))) = -sum((v>0) ? w*log(v) : -1e4 for (w,v) in zip(weights, f(data)))
 
-struct FitResults{T<:Optim.OptimizationResults, V<:Optim.AbstractOptimizerState} 
-    optres::T
-    state::V
-    forwarddiff_hessian_callback::Function
-end
-minimizer(fr::FitResults) = minimizer(fr.optres)
-minimum(fr::FitResults) = minimum(fr.optres)
-# 
-invH(fr::FitResults) = fr.state.invH
-covmat(fr::FitResults) = invH(fr)
-errors(fr::FitResults) = sqrt.(diag(fr.state.invH))
-# 
-invexacthessian(fr::FitResults, p = minimizer(fr)) = inv(fr.forwarddiff_hessian_callback(p))
+# """
+#     nll(data::AbstractArray, d::AbstractFunctionWithParameters; nagativepenatly=-1e4)
 
-function measurements(fr, exacthessian::Bool=false)
-    mv = minimizer(fr)
-    δv = !(exacthessian) ? errors(fr) : sqrt.(diag(invexacthessian(fr)))
-    return [±(m,δ) for (m,δ) in zip(mv, δv)]
-end
+# Computes negative log likelihood of the function `d` over the `data`.
+# The negative values of the density is worked around by the replacement: `d(x)<0 -> exp(-nagativepenatly)`.
+# """
+# nll(data::AbstractArray, d::AbstractFunctionWithParameters; nagativepenatly=-1e4) =
+#     -sum((v>0) ? log(v) : nagativepenatly for v in d(data))
+
 
 #      _|_|  _|    _|      
 #    _|          _|_|_|_|  
@@ -28,43 +16,96 @@ end
 #    _|      _|      _|_|  
 
 
-function optimize_get_state_hessian(func, init, m = BFGS(); show_trace::Bool = true)
-    obj = OnceDifferentiable(func, init, autodiff = :forwarddiff)
-    # 
-    options = Optim.Options(show_trace = show_trace)
-    lbfgsstate = Optim.initial_state(m, options, obj, init)
+# function fit_llh(data, f; init = error("give initial pars with a argument `init`!!"))
+#     nll(p) = -sum((v>0) ? log(v) : -1e4 for v in f(data, p))
+#     return optimize_get_state_hessian(nll, init, BFGS())
+# end
+
+
+# function fit_llh(data, d::AbstractPDF)
+#     filtered_data = filter(x->inrange(x, lims(d)), data)
+#     return fit_llh(filtered_data, d; init=p2v(d))
+# end
+
+
+# function fit_llh(data, d::AbstractFunctionWithParameters; init_pars = p2v(d), kws...)
+#     filtered_data = filter(x->inrange(x, AlgebraPDF.lims(d)), data)
+#     # 
+#     llh(p) = -sum((v>0) ? log(v) : -1e4 for v in d(filtered_data, p))
+#     return minimize(llh, init_pars; kws...) # name=string.(keys(freepars(d)))
+# end
+
+
+function fit(model, data, optimizer = MigradAndHesse(), args...; kws...)
+    objective = NegativeLogLikelihood(model, data)
+    fit_result = minimize(x->objective(0,x), p2v(model), optimizer, args...; kws...)
+    return fit_summary(fit_result, model)
+end
+
+# the optimizer interface <: Optimizer should implement
+#  - minimize(objective, optimizer::Optimizer)
+#  - minimizer(minimizationResult)
+#  - measurement(minimizationResult)
+#  - minimum(minimizationResult)
+
+
+function fit_summary(fit_result, model)
+    nll = minimum(fit_result)
+    parameters = v2p(minimizer(fit_result), model)
+    meas = v2p(measurements(fit_result), model)
+    best_model = updatepars(model, parameters)
     #
-    optres = optimize(obj, init, m, options, lbfgsstate)
-    #
-    hessian_callback(p) = ForwardDiff.hessian(func, p)
-    #
-    return FitResults(optres, lbfgsstate, hessian_callback)
-end
-
-function fit_llh(data, f; init = error("give initial pars with a argument `init`!!"), weights = fill(1.0, length(data)))
-    llh(p) = -sum((v>0) ? w*log(v) : -1e4 for (w,v) in zip(weights, f(data, p)))
-    return optimize_get_state_hessian(llh, init, BFGS())
-end
-
-function fit_llh_with_constraints(data, f, fc; init = error("init!!"))
-    llh(p) = -sum((v>0) ? log(v) : -1e4 for v in f(data, p))
-    llh_constr(p) = llh(p) + fc(p)
-    return optimize_get_state_hessian(llh_constr, init, BFGS())
+    return (; parameters, best_model, nll, fit_result, measurements=meas)
 end
 
 
+# function fit(data::AbstractArray, model::AbstractFunctionWithParameters, args...; kws...)
+#     fit_results = fit_llh(data, model, args...; init_pars = p2v(model), kws...)
+#     return fit_summary(fit_results, model) + (fit_results = fit_results, )
+# end
 
-# AbstractFunctionWithParameters
-function fit_llh(data, d::AbstractPDF)
-    filtered_data = filter(x->inrange(x, lims(d)), data)
-    return fit_llh(filtered_data, d; init=p2v(d))
-end
 
-chi2(specification; p) = sum(((getproperty(p, k)-v) / e)^2
-    for (k,(v,e)) in zip(keys(specification),specification))
 
-function fit_llh_with_constraints(data, d::AbstractPDF, specification)
-    filtered_data = filter(x->inrange(x, lims(d)), data)
-    fc(v) = chi2(specification; p=v2p(v, d))
-    return fit_llh_with_constraints(filtered_data, d, fc; init=p2v(d))
-end
+
+
+
+
+
+                                                                                                         
+#                                            _|                          _|              _|                
+#    _|_|_|    _|_|    _|_|_|      _|_|_|  _|_|_|_|  _|  _|_|    _|_|_|      _|_|_|    _|_|_|_|    _|_|_|  
+#  _|        _|    _|  _|    _|  _|_|        _|      _|_|      _|    _|  _|  _|    _|    _|      _|_|      
+#  _|        _|    _|  _|    _|      _|_|    _|      _|        _|    _|  _|  _|    _|    _|          _|_|  
+#    _|_|_|    _|_|    _|    _|  _|_|_|        _|_|  _|          _|_|_|  _|  _|    _|      _|_|  _|_|_|    
+                                                                                                         
+
+
+
+
+
+# function fit_llh(data, d::AbstractFunctionWithParameters, constraints::NamedTuple;
+#     init_pars = p2v(d), kws...)
+#     # 
+#     filtered_data = filter(x->inrange(x, AlgebraPDF.lims(d)), data)
+#     # 
+#     llh(p) = -sum((v>0) ? log(v) : -1e4 for v in d(filtered_data, p))
+#     fc(v) = AlgebraPDF.chi2(constraints; p=v2p(v, d))
+#     llh_constr(p) = llh(p) + fc(p)
+#     return minimize(llh_constr, init_pars; kws...)
+# end
+
+
+# chi2(specification; p) = sum(((getproperty(p, k)-v) / e)^2
+#     for (k,(v,e)) in zip(keys(specification),specification))
+
+# function fit_llh_with_constraints(data, d::AbstractPDF, specification)
+#     filtered_data = filter(x->inrange(x, lims(d)), data)
+#     fc(v) = chi2(specification; p=v2p(v, d))
+#     return fit_llh_with_constraints(filtered_data, d, fc; init=p2v(d))
+# end
+
+# function fit_llh_with_constraints(data, f, fc; init = error("init!!"))
+#     nll(p) = -sum((v>0) ? log(v) : -1e4 for v in f(data, p))
+#     nll_constr(p) = nll(p) + fc(p)
+#     return optimize_get_state_hessian(nll_constr, init, BFGS())
+# end

@@ -63,8 +63,8 @@ g′′′ == g # true
 ## Fit free parameters
 The function can be subjected to the unbinned fit.
 ```julia
-fit_results = fit_llh(data, f; init)
-@unpack best = fit_results
+fit_results = fit(data, f; init)
+@unpack best_model = fit_results
 ```
 The method returns a named tuple with the named tuple of optimized parameters,
 parameters with uncertainties, and best-estimation function.
@@ -243,3 +243,73 @@ heatmap(xv, yv, updatepar(a, :x0, -0.5))
 contour(xv, yv, log(abs2(a)))
 surface(xv, yv, abs2(a))
 ```
+
+## Sample data from PDF
+A data set distributed according a given model (`<:AbstractFunctionWithParameter`, and defined limits)
+can be generated using
+a function `generate(model, N)` with `N` being the required number of events
+```julia
+@makepdftype ExpAbs(x;p) = exp(-abs(x)/p.σ)
+model = ExpAbs((σ=2.1,), (-3,2))
+# 
+data1 = generate(model, 1000)
+data2 = generate(model, 1000; p=(σ=0.3,), Nbins=1000)
+```
+The inversion of the cdf is done numerically using the binning controlled by `Nbins` variable.
+A set of parameters to be used can be passed as a key argument.
+The function `rand` will also work:
+```julia
+value = rand(model) # not efficient
+data3 = rand(model, 1000) # same as generate(model, 1000)
+```
+however, a call for a single number in inefficient (the integral is not stored but computed every time),
+the call with a set size does the same `generate` and does not take key arguments.
+Currently, `generate` works only in one dimension.
+
+## Fit
+A set of data can be fit by minimizing negative log-likelihood function.
+A simple method `fit` combines three steps:
+1. Create the negative log-likelihood function
+2. Call minimization algorithm (gradient decent and error evaluation)
+3. Build a summary combining parameters with the errors, and the model, updated to new values (best model)
+
+```julia
+d = Normalized(FGauss((μ=0.6, σ=1.5)), (-5, 5))
+data = randn(1000)
+fit_summary = fit(d, data)
+
+fit_summary.parameters # (μ = -0.023040771466510682, σ = 0.9847923919821122)
+fit_summary.measurements # (μ = -0.023 ± 0.031, σ = 0.985 ± 0.022)
+# 
+plot(fit_summary.best_model) # plot just best model
+plot(data, fit_summary.best_model, bins=30, lw=3, lab="model") # plot the fitted model together with the data
+```
+
+The negative log-likelihood function is a subtype of `AbstactFunctionWithParameters`.
+An optional argument is a value which is used instead of logarithm in case the `model(x) < 0` (might happen during the minimization process).
+```julia
+nll = NegativeLogLikelihood(model, data, nagativepenatly=-1e4)
+nll = minussum(log(model))
+```
+The second method does the same, but perhaps more intuitive.
+
+There are two options to pass to the fitting faction for minimization algorithm.
+```julia
+fs1 = fit(model, data, MigradAndHesse(errordef=1/2)) # calls Minuit from iminuit 
+fs2 = fit(model, data, OptimHesseApprox()) # calls BFGS of Optim package
+``` 
+The first method is found to be extremely stable and fast (despite finite-diff derivatives),
+therefore, used by default. The minimization algorithm is a predecessor of `BFGS` but equipped
+by objective stopping criterion [see old Minuit paper](https://www.sciencedirect.com/science/article/abs/pii/0010465575900399).
+The second method calls the `BFGS()` algorithm implemented in `Optim` that has a great convergence,
+however, noted to fail often doing the line search (HagerZhang) with the error `isfinite(phi_c) && isfinite(dphi_c)`. It happens particularly when parameters run away of the reasonable range and numerical value of
+the normalization function becomes 0.
+The errors are computed after minimization step using either `HESSE` algorithm of Minuit,
+or approximated hessian matrix attached to the state of Optim.
+
+The summary of the fit result returned by the fit function is a named tuple containing
+ * `parameters` - the values of parameters that minimize the NLL,
+ * `measurements` - the values of parameters with errors
+ * `best_model` - the input model with parameters updated
+ * `nll` - the value of NLL in the minimum, and
+ * `fit_result` - the object returned by the minimizer. Can be used, e.g. to get the covariance matrix.

@@ -3,7 +3,10 @@ module AlgebraPDF
 # using Base: NamedTuple
 using Parameters
 using QuadGK
+# 
+using PyCall
 using Optim
+# 
 using Random
 using RecipesBase
 using StaticArrays
@@ -66,13 +69,13 @@ include("pdf.jl")
 const pdf = Normalized
 export pdf
 
-
-export fit_llh, llh
-export fit_llh_with_constraints
-export hessian, covmat, invH, invexacthessian
-export errors, measurements
-export minimizer, minimum
+export fit
+export OptimHesseApprox
+export MigradAndHesse
+export minussum
 include("fit.jl")
+include("minuit_interface.jl")
+include("optim_interface.jl")
 
 export MixedModel
 export fractions, fractionvalues

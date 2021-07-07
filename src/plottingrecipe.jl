@@ -1,6 +1,6 @@
 
-@recipe function f(d::Union{AbstractPDF,MixedModel}, norm::T where T<:Real=1.0, Nbins::Int=100)
-    xv = range(lims(d)..., length=Nbins+1)
+@recipe function f(d::Union{AbstractPDF,MixedModel}, norm::T where T<:Real=1.0, bins::Int=100)
+    xv = range(lims(d)..., length=bins+1)
     return (xv, norm .* d(xv))
 end
 
@@ -16,11 +16,14 @@ yerror(y) = sqrt.(y)
 bindiffs(x) = x[2:end]- x[1:end-1]
 
 
-@recipe function f(data::AbstractArray, d::AbstractFunctionWithParameters, Nbins::Integer=60; datalabel="data")
-    bins = range(lims(d)..., length=Nbins)
+@recipe function f(data::AbstractArray, d::Union{AbstractPDF,MixedModel}; bins=60, datalabel="data")
+    binning = range(lims(d)..., length=bins+1)
     @series begin
-        centers = bincenters(bins)
-        bincontent = [sum(x->l<x<r, data) for (l,r) in zip(bins[1:end-1], bins[2:end])]
+        (d, scaletobinneddata(length(data), binning))
+    end
+    @series begin
+        centers = bincenters(binning)
+        bincontent = [sum(x->l<x<r, data) for (l,r) in zip(binning[1:end-1], binning[2:end])]
         # 
         x := centers
         y := bincontent
@@ -29,11 +32,8 @@ bindiffs(x) = x[2:end]- x[1:end-1]
         seriestype := :scatter
         seriescolor --> :black
         markersize --> 3
-        label --> datalabel
+        label := datalabel
         ()
-    end
-    @series begin
-        (d, scaletobinneddata(length(data), bins))
     end
 end
 
