@@ -2,25 +2,25 @@
 const iminuit = PyNULL()
 
 function load_python_deps!()
-    copy!(iminuit, pyimport("iminuit"))
+    copy!(iminuit, pyimport_conda("iminuit", "iminuit", "conda-forge"))
     return nothing
 end
 
 function __init__()
-    try
-        load_python_deps!()
-    catch ee
-        if PyCall.conda
-            Conda.add("iminuit")
-            load_python_deps!()
-        else
-            typeof(ee) <: PyCall.PyError || rethrow(ee)
-            @warn("""
-                 Python Dependencies not installed!
-                 """)
-        end
-    end
-    return nothing
+    load_python_deps!()
+    # try
+    # catch ee
+    #     if PyCall.conda
+    #         Conda.add("iminuit")
+    #         load_python_deps!()
+    #     else
+    #         typeof(ee) <: PyCall.PyError || rethrow(ee)
+    #         @warn("""
+    #              Python Dependencies not installed!
+    #              """)
+    #     end
+    # end
+    # return nothing
 end
 
 #######################################################################
