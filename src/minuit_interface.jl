@@ -80,7 +80,7 @@ end
 function minimize(fcn, init_pars, optimizer::MigradAndHesse; kws...)
     # 
     o = iminuit.Minuit(fcn, collect(init_pars))
-    o.errordef = errordef
+    o.errordef = optimizer.errordef
     println("Minuit object is created: fit with $(length(init_pars)) parameters")
     # 
     migrad_result = pycall(o.migrad, PyObject)
