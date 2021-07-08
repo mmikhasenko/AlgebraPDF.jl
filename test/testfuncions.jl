@@ -119,32 +119,38 @@ end
     @test nll(0.0; p=(μ=1, σ=2)) == nll(0.0, [1,2])
 end
 
-@testset "SumFunc" begin
+@testset "SumFunc and ProdFunc" begin
     a1 = FunctionWithParameters(
         (x;p)->p.a+cos(x)*p.b; p=Ext(a=2,b=1))
     a2 = FunctionWithParameters(
         (x;p)->p.a+sin(x)*p.b; p=Ext(a=2,b=1))
     #
     sum1 = a1+a2
-    sum2 = +(a1,a2,(c=1.0,))
-    sum3 = +(a1,a2,Ext(d=1.0))
+    sum2 = +(a1,a2,(c1=1.0,c2=1.0))
+    sum3 = +(a1,a2,Ext(d1=1.0, d2=1.0))
 
     @test func(sum1,2) == func(sum2,2)
     @test func(sum1,2) == func(sum3,2)
 
-    @test freepars(sum1) == (a=2, b=1, α2=1.0)
-    @test freepars(sum2) == (a=2, b=1, c=1.0)
-    @test freepars(sum3) == (a=2, b=1, d=1.0)
+    @test freepars(sum1) == (a=2, b=1, α1=1.0, α2=1.0)
+    @test freepars(sum2) == (a=2, b=1, c1=1.0, c2=1.0)
+    @test freepars(sum3) == (a=2, b=1, d1=1.0, d2=1.0)
     # 
-    @test freepars(fixpar(sum3,:a)) == (b=1, d=1.0)
+    @test freepars(fixpar(sum3,:a)) == (b=1, d1=1.0, d2=1.0)
     # 
-    sum4 = fixpar(sum3,:a, 3)
+    sum4 = fixpar(sum3, :a, 3)
     @test fixedpars(sum4) == (a=3,)
     @test fixedpars(sum4.f1) == (a=3,)
     @test fixedpars(sum4.f2) == (a=3,)
-    # 
-    sum5 = fixpar(sum3,:d, 2)
+    #
+    sum5 = fixpar(sum3,:d2, 2)
     @test func(sum5,3.3) == func(a1,3.3) + 2* func(a2,3.3)
+    # 
+    sum6 = a1-a2
+    @test sum6(1.1) == a1(1.1)-a2(1.1)
+    # 
+    prd = a1*a2
+    @test prd(1.1) == a1(1.1)*a2(1.1)
 end
 
 
