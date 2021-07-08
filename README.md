@@ -14,6 +14,7 @@ Basic functionality:
  * plotting recipes
 
 Current implementation is limited to immutable operations.
+
 ## Call the function
 The object behave similar to a regular function with a keyword argument `p` set to `freepars(d)` by default.
 Once `p` is used a full set of parameters needs to be provided. 
@@ -69,6 +70,35 @@ fit_results = fit(data, f; init)
 The method returns a named tuple with the named tuple of optimized parameters,
 parameters with uncertainties, and best-estimation function.
 
+# Algebra of functions
+
+Several operations on a function are implemented, as `abs2` and `log`.
+```
+# an example of complex-valued function
+f = FunctionWithParameters((x;p)->1/(p.m^2-x^2-1im*p.m*p.Γ), (m=0.77,Γ=0.15))
+
+fabs2 = abs2(f1)
+flog = log(fabs2)
+```
+
+A simple arithmetics on a pair of function also works.
+```julia
+# operations with two functions
+f1 = FunctionWithParameters((x;p)->abs(x)<1 ? 1-(2x)^2 : -3, ∅)
+f2 = FunctionWithParameters((x;p)->p.a*exp(-x)+p.b, (a=0.1,b=0.1))
+#
+fprod = f1*f2
+# 
+fsum = f1+f2
+fsub = f1-f2
+```
+The summation and subtraction adds a new parameter for the coefficient of the functions, `p.α1*f1+p.α2*f2`.
+The parameter can be passed with 
+```julia
++(f1,f2,(c1=1.1,c2=1.1))
++(f1,f2,Ext(c1=1.1,c2=1.1)) # the coefficients can be fixed 
+f1-f2 == +(f1,f2,Ext(α1=1.0,α2=-1.0)) # true
+``` 
 
 ## Create/implement the functions with parameters
 It is just a function to which a container with parameters (default values) is attached.

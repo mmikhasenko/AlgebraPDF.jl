@@ -22,7 +22,7 @@ export ∅
 const NumberOrTuple = Union{Number,Tuple{Vararg{Number}}}
 export NumberOrTuple
 
-import Base:+,-,==
+import Base:+,-,*,==
 import Base: getproperty
 import Base: abs2, log
 import Base: keys
