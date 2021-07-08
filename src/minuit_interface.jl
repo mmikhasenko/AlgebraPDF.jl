@@ -1,8 +1,32 @@
 # IMinuit initialization
 const iminuit = PyNULL()
 
-function __init__()
+function load_python_deps!()
     copy!(iminuit, pyimport_conda("iminuit", "conda-forge"))
+    return nothing
+end
+
+function __init__()
+    try
+        load_python_deps!()
+    catch ee
+        if PyCall.conda
+            Conda.pip_interop(true)
+            Conda.pip("install", "iminuit")
+            load_python_deps!()
+        else
+            typeof(ee) <: PyCall.PyError || rethrow(ee)
+            @warn("""
+                 Python Dependencies not installed
+                 Please either:
+                 - Rebuild PyCall to use Conda, by running in the julia REPL:
+                 - `ENV["PYTHON"]=""; Pkg.build("PyCall"); Pkg.build("CatBoost")`
+                 - Or install the depencences, eg by running pip
+                 - `pip install catboost pandas`
+                 """)
+        end
+    end
+    return nothing
 end
 
 #######################################################################
