@@ -70,7 +70,7 @@ fit_results = fit(data, f; init)
 The method returns a named tuple with the named tuple of optimized parameters,
 parameters with uncertainties, and best-estimation function.
 
-# Algebra of functions
+## Algebra of functions
 
 Several operations on a function are implemented, as `abs2` and `log`.
 ```
