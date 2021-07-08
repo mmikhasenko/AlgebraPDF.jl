@@ -11,18 +11,12 @@ function __init__()
         load_python_deps!()
     catch ee
         if PyCall.conda
-            Conda.pip_interop(true)
-            Conda.pip("install", "iminuit")
+            Conda.add("iminuit")
             load_python_deps!()
         else
             typeof(ee) <: PyCall.PyError || rethrow(ee)
             @warn("""
-                 Python Dependencies not installed
-                 Please either:
-                 - Rebuild PyCall to use Conda, by running in the julia REPL:
-                 - `ENV["PYTHON"]=""; Pkg.build("PyCall"); Pkg.build("CatBoost")`
-                 - Or install the depencences, eg by running pip
-                 - `pip install catboost pandas`
+                 Python Dependencies not installed!
                  """)
         end
     end
