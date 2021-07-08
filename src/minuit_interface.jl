@@ -1,26 +1,8 @@
 # IMinuit initialization
 const iminuit = PyNULL()
 
-function load_python_deps!()
-    copy!(iminuit, pyimport_conda("iminuit", "iminuit", "conda-forge"))
-    return nothing
-end
-
 function __init__()
-    load_python_deps!()
-    # try
-    # catch ee
-    #     if PyCall.conda
-    #         Conda.add("iminuit")
-    #         load_python_deps!()
-    #     else
-    #         typeof(ee) <: PyCall.PyError || rethrow(ee)
-    #         @warn("""
-    #              Python Dependencies not installed!
-    #              """)
-    #     end
-    # end
-    # return nothing
+    copy!(iminuit, pyimport_conda("iminuit", "iminuit", "conda-forge"))
 end
 
 #######################################################################
@@ -97,8 +79,8 @@ end
 
 function minimize(fcn, init_pars, optimizer::MigradAndHesse; kws...)
     # 
-    o = iminuit.Minuit.from_array_func(fcn, collect(init_pars);
-        pedantic = false, errordef=optimizer.errordef)
+    o = iminuit.Minuit(fcn, collect(init_pars))
+    o.errordef = errordef
     println("Minuit object is created: fit with $(length(init_pars)) parameters")
     # 
     migrad_result = pycall(o.migrad, PyObject)
