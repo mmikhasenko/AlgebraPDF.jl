@@ -73,6 +73,7 @@ export fit
 export OptimHesseApprox
 export MigradAndHesse
 export minussum
+export obj2nt
 include("fit.jl")
 include("minuit_interface.jl")
 include("optim_interface.jl")

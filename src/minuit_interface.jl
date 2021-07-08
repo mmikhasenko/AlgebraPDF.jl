@@ -1,26 +1,19 @@
+# #######################################################################
+# Minuit MWE
+# o = AlgebraPDF.iminuit.Minuit(x->x[1]^2+x[2]^2, [1.0, 1.0])
+# o.errordef = 1/2
+# migrad_result = AlgebraPDF.pycall(o.migrad, AlgebraPDF.PyObject)
+# hesse_result = AlgebraPDF.pycall(o.hesse, AlgebraPDF.PyObject)
+# 
+# migrad_result.fmin
+# migrad_result.params
+# migrad_result.covariance
+
 # IMinuit initialization
 const iminuit = PyNULL()
 
-function load_python_deps!()
-    copy!(iminuit, pyimport_conda("iminuit", "iminuit", "conda-forge"))
-    return nothing
-end
-
 function __init__()
-    load_python_deps!()
-    # try
-    # catch ee
-    #     if PyCall.conda
-    #         Conda.add("iminuit")
-    #         load_python_deps!()
-    #     else
-    #         typeof(ee) <: PyCall.PyError || rethrow(ee)
-    #         @warn("""
-    #              Python Dependencies not installed!
-    #              """)
-    #     end
-    # end
-    # return nothing
+    copy!(iminuit, pyimport_conda("iminuit", "iminuit", "conda-forge"))
 end
 
 #######################################################################
@@ -31,63 +24,57 @@ struct MigradAndHesse <: AbstractMinuit
 end
 MigradAndHesse() = MigradAndHesse(0.5)  # 1/2 for likelihood
 
-#######################################################################
-
+# #######################################################################
 @with_kw struct MinuitAndHesseResults{T,N,R}
     fmin::T
     params::N
     hesse::R
 end
 #
-const keys_FMin = (:fval,
+const keys_FMin = (:algorithm,
     :edm,
-    :tolerance,
-    :nfcn,
-    :nfcn_total,
-    :up,
-    :is_valid,
-    :has_valid_parameters,
+    :edm_goal,
+    :errordef,
+    :fval,
     :has_accurate_covar,
-    :has_posdef_covar,
-    :has_made_posdef_covar,
-    :hesse_failed,
     :has_covariance,
-    :is_above_max_edm,
-    :has_reached_call_limit,
+    :has_made_posdef_covar,
     :has_parameters_at_limit,
+    :has_posdef_covar,
+    :has_reached_call_limit,
+    :has_valid_parameters,
+    :hesse_failed,
+    :is_above_max_edm,
+    :is_valid,
+    :nfcn,
     :ngrad,
-    :ngrad_total)
+    :reduced_chi2)
+# 
 
-const keys_Param = (:number,
+const keys_Param = (
+    :number,
     :name,
     :value,
     :error,
+    :merror,
     :is_const,
     :is_fixed,
-    :has_limits,
-    :has_lower_limit,
-    :has_upper_limit,
     :lower_limit,
     :upper_limit)
 #
 
-const str_class_MigradResult = "PyObject <class 'iminuit.util.MigradResult'>"
-const str_class_Params = "PyObject <class 'iminuit.util.Params'>"
+const str_class_Minuit = "PyObject <class 'iminuit.minuit.Minuit'>"
+const str_class_Params = "PyObject <class 'iminuit.util.Param'>"
 
-#
-"""
-    nt(obj::PyObject)
-
-Function to parse the Minuit output to julia named tuples
-"""
-function nt(obj::PyObject)
-    if string(obj.__class__) == str_class_MigradResult
-        fmin = NamedTuple{keys_FMin}(obj.fmin)
-        params = NamedTuple{keys_Param}.(obj.params)
+obj2nt(obj, keys) = NamedTuple{keys}(getproperty(obj, s) for s in keys)
+function obj2nt(obj::PyObject)
+    if string(obj.__class__) == str_class_Minuit
+        fmin = obj2nt(obj.fmin, AlgebraPDF.keys_FMin)
+        params = obj2nt.(obj.params)
         return (fmin = fmin, params = params)
     end
     if string(obj.__class__) == str_class_Params
-        return NamedTuple{keys_Param}.(obj)
+        return obj2nt(obj, keys_Param)
     end
     error("unknown PyObject")
 end
@@ -97,8 +84,8 @@ end
 
 function minimize(fcn, init_pars, optimizer::MigradAndHesse; kws...)
     # 
-    o = iminuit.Minuit.from_array_func(fcn, collect(init_pars);
-        pedantic = false, errordef=optimizer.errordef)
+    o = iminuit.Minuit(fcn, collect(init_pars))
+    o.errordef = optimizer.errordef
     println("Minuit object is created: fit with $(length(init_pars)) parameters")
     # 
     migrad_result = pycall(o.migrad, PyObject)
@@ -107,13 +94,12 @@ function minimize(fcn, init_pars, optimizer::MigradAndHesse; kws...)
     hesse_result = pycall(o.hesse, PyObject)
     println("HESSE is finishied")
     # 
-    # 
-    MinuitAndHesseResults(; hesse = nt(hesse_result), nt(migrad_result)...)
+    MinuitAndHesseResults(; hesse = hesse_result.covariance, obj2nt(migrad_result)...)
 end
 
 parameternames(mr::MinuitAndHesseResults) = Tuple(Symbol.(getproperty.(mr.params, :name)))
 minimizer(mr::MinuitAndHesseResults) = getproperty.(mr.params, :value)
-errors(mr::MinuitAndHesseResults) = getproperty.(mr.hesse, :error)
+errors(mr::MinuitAndHesseResults) = getproperty.(mr.params, :error)
 measurements(mr::MinuitAndHesseResults) = map(x->±(x...), zip(minimizer(mr), errors(mr)))
 minimum(mr::MinuitAndHesseResults) = mr.fmin.fval
 
