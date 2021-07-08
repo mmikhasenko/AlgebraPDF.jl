@@ -2,7 +2,7 @@
 const iminuit = PyNULL()
 
 function load_python_deps!()
-    copy!(iminuit, pyimport_conda("iminuit", "conda-forge"))
+    copy!(iminuit, pyimport("iminuit"))
     return nothing
 end
 
