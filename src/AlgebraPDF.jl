@@ -43,8 +43,6 @@ export releasepar, releasepars
 export @makefuntype
 export AbstractFunctionWithParameters
 export FunctionWithParameters
-export SumFunc, Abs2Func, LogFunc
-export NegativeLogLikelihood
 # 
 export func
 export nfreepars
@@ -53,6 +51,10 @@ export pars
 export p2v, v2p
 # 
 include("functionwithparameters.jl")
+
+export SumFunc, Abs2Func, LogFunc
+export NegativeLogLikelihood
+include("arithmetics.jl")
 
 # 
 export @makepdftype
