@@ -1,4 +1,5 @@
 using AlgebraPDF
+using Test
 
 #                  _|                            _|                                  _|  
 #  _|_|_|  _|_|        _|    _|    _|_|      _|_|_|  _|_|_|  _|_|      _|_|      _|_|_|  
@@ -18,6 +19,7 @@ mm0(1.1), func(mm0,1.1)
     @test mm0(1.1) == mm1(1.1)
     @test mm0(1.1) != func(mm0,1.1)
     @test mm0(1.1) != mm1(1.1,rand(nfreepars(mm0)))
+    @test mm0(1.1) != mm0(1.1; p=(f1=0.55, μ1= 2.1, σ1=0.7, μ2=-0.7, σ2=0.7))
 end
 
 

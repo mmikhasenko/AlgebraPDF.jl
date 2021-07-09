@@ -84,9 +84,10 @@ lims(mm::MixedModel) = lims(mm.components[1])
 
 
 # inner working
-fractionvalues(mm::MixedModel; p=∅) =
-    vcat(pars(mm.fractions)..., (1-sum(pars(mm.fractions))))
-
+function fractionvalues(mm::MixedModel; p=freepars(mm.fractions))
+    allp = NamedTuple{keys(mm.fractions)}(p+fixedpars(mm.fractions))
+    vcat(allp..., (1-sum(allp)))
+end
 # 
 """
     integrals(mm::MixedModel, lims; p=freepars(mm))
