@@ -11,18 +11,20 @@ abstract type AbstractPDF{N} <: AbstractFunctionWithParameters end  # N is the d
 
 # calls
 function (d::AbstractPDF)(x; p=freepars(d))
-    allp = p+fixedpars(d)
-    normalization = normalizationintegral(d; p=allp)
+    normalization = normalizationintegral(d; p)
     if normalization ≈ 0.0
         println("Error: normalization ≈ 0!")
         normalization = 1.0
     end
+    allp = p+fixedpars(d)
     return func(d,x; p=allp) / normalization
 end
 
 # 1 dims
-normalizationintegral(d::AbstractPDF{1}; p=freepars(d)) =
-    quadgk(x->func(d, x; p=p), lims(d)...)[1]
+function normalizationintegral(d::AbstractPDF{1}; p=freepars(d))
+    allp = p+fixedpars(d)
+    quadgk(x->func(d, x; p=allp), lims(d)...)[1]
+end
 #
 # 2 dims
 # function normalizationintegral(d::AbstractPDF{2}; p=freepars(d))
