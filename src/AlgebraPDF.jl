@@ -70,6 +70,7 @@ include("pdf.jl")
 
 export SumFunc, Abs2Func, LogFunc
 export NegativeLogLikelihood
+export Extended
 export SumFunc
 include("arithmetics.jl")
 

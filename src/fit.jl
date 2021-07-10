@@ -36,6 +36,7 @@
 # end
 
 
+
 function fit(model, data, optimizer = MigradAndHesse(), args...; kws...)
     objective = NegativeLogLikelihood(model, data)
     fit_result = minimize(x->objective(0,x), p2v(model), optimizer, args...; kws...)
