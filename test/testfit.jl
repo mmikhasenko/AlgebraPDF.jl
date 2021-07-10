@@ -22,7 +22,7 @@ end
     data = filter(x->inrange(x,lims(d)), randn(1000) .+ 0.5)
 
     fr = fit(d, data)
-    @test 0.4 < fr.parameters.μ < 0.6
+    @test 0.3 < fr.parameters.μ < 0.7
     @test 0.9 < abs(fr.parameters.σ) < 1.1
 
     s = FSum([d],(α=2.2,))
@@ -33,7 +33,7 @@ end
 
     enll = Extended(NegativeLogLikelihood(s, data))
     fr2 = fit(enll)
-    @test 0.4 < fr2.parameters.μ < 0.6
+    @test 0.3 < fr2.parameters.μ < 0.7
     @test 0.9 < abs(fr2.parameters.σ) < 1.1
     @test 900 < fr2.parameters.α < 1100
 end
