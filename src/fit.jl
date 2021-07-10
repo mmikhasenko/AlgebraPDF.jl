@@ -1,49 +1,15 @@
 
-# """
-#     nll(data::AbstractArray, d::AbstractFunctionWithParameters; nagativepenatly=-1e4)
-
-# Computes negative log likelihood of the function `d` over the `data`.
-# The negative values of the density is worked around by the replacement: `d(x)<0 -> exp(-nagativepenatly)`.
-# """
-# nll(data::AbstractArray, d::AbstractFunctionWithParameters; nagativepenatly=-1e4) =
-#     -sum((v>0) ? log(v) : nagativepenatly for v in d(data))
-
-
-#      _|_|  _|    _|      
-#    _|          _|_|_|_|  
-#  _|_|_|_|  _|    _|      
-#    _|      _|    _|      
-#    _|      _|      _|_|  
-
-
-# function fit_llh(data, f; init = error("give initial pars with a argument `init`!!"))
-#     nll(p) = -sum((v>0) ? log(v) : -1e4 for v in f(data, p))
-#     return optimize_get_state_hessian(nll, init, BFGS())
-# end
-
-
-# function fit_llh(data, d::AbstractPDF)
-#     filtered_data = filter(x->inrange(x, lims(d)), data)
-#     return fit_llh(filtered_data, d; init=p2v(d))
-# end
-
-
-# function fit_llh(data, d::AbstractFunctionWithParameters; init_pars = p2v(d), kws...)
-#     filtered_data = filter(x->inrange(x, AlgebraPDF.lims(d)), data)
-#     # 
-#     llh(p) = -sum((v>0) ? log(v) : -1e4 for v in d(filtered_data, p))
-#     return minimize(llh, init_pars; kws...) # name=string.(keys(freepars(d)))
-# end
-
-
-
-function fit(model, data, optimizer = MigradAndHesse(), args...; kws...)
-    objective = NegativeLogLikelihood(model, data)
-    fit_result = minimize(x->objective(0,x), p2v(model), optimizer, args...; kws...)
-    return fit_summary(fit_result, model)
+function fit(objective::Union{NegativeLogLikelihood, Extended},
+        optimizer = MigradAndHesse(), args...; kws...)
+    d = model(objective)
+    fit_result = minimize(x->objective(0,x), p2v(d), optimizer, args...; kws...)
+    return fit_summary(fit_result, d)
 end
 
-# the optimizer interface <: Optimizer should implement
+fit(model::Normalized, data, optimizer = MigradAndHesse(), args...; kws...) =
+    fit(NegativeLogLikelihood(model, data), optimizer, args...; kws...)
+#
+
 #  - minimize(objective, optimizer::Optimizer)
 #  - minimizer(minimizationResult)
 #  - measurement(minimizationResult)

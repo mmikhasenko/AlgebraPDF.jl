@@ -16,7 +16,28 @@ using Test
     @test pars(fs1.best_model).σ == 0.9
 end
 
-# 
+@testset "Extended Likelihood fit" begin 
+
+    d = Normalized(FGauss((μ=1.1,σ=0.1)), (-2, 3))
+    data = filter(x->inrange(x,lims(d)), randn(1000) .+ 0.5)
+
+    fr = fit(d, data)
+    @test 0.4 < fr.parameters.μ < 0.6
+    @test 0.9 < abs(fr.parameters.σ) < 1.1
+
+    s = SumFunc([d],(α=2.2,))
+
+    @test AlgebraPDF.normalizationintegral(s) == 2.2
+    @test s(1.1) == 2.2*d(1.1)
+    @test s([1,2,3]) == 2.2*d([1,2,3])
+
+    enll = Extended(NegativeLogLikelihood(s, data))
+    fr2 = fit(enll)
+    @test 0.4 < fr2.parameters.μ < 0.6
+    @test 0.9 < abs(fr2.parameters.σ) < 1.1
+    @test 900 < fr2.parameters.α < 1100
+end
+#
 # Optim often fails with `isfinite(phi_c) && isfinite(dphi_c)` 
 # removed from the tests
 # 

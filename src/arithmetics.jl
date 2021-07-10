@@ -124,9 +124,11 @@ updatevalueorflag(d::Extended, s::Symbol, isfree::Bool, v=getproperty(pars(d),s)
 # 
 function func(d::Extended, x::NumberOrTuple; p=freepars(d))
     nll = func(d.nll, x; p)
-    I = normalizationintegral(d.nll.f; p)
-    N = length(d.nll.data)
-    penalty = (I - N)^2 / N
-    return nll - penalty
+    μ = normalizationintegral(d.nll.f; p)
+    penalty = μ
+    return nll + penalty
 end
 
+# model property
+model(nll::NegativeLogLikelihood) = nll.f
+model(enll::Extended) = model(enll.nll)

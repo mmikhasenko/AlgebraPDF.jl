@@ -123,13 +123,15 @@ end
     g = Normalized(abs2(FBreitWigner((M=1.1, G=0.3))), (-3, 5))
     s = d+g
     nllsum = NegativeLogLikelihood(s, data)
+    @test nllsum(0.0; p=pars(nllsum)+(α1=0.3, α2=0.7)) ≈ nll(0.0)
+    # 
     enll = Extended(NegativeLogLikelihood(s, data))
     @test pars(enll) == pars(s)
     # 
-    @test nllsum(0.0; p=pars(nllsum)+(α1=0.3, α2=0.7)) ≈ nll(0.0)
     enll_unit = updatepars(enll, (α1=300, α2=700))
-    @test enll_unit(0.0) ≈ nll(0.0)-log(N)*N
+    @test enll_unit(0.0) ≈ nll(0.0) - log(N)*N + N
 end
+
 
 @testset "SumFunc and ProdFunc" begin
     a1 = FunctionWithParameters(
