@@ -1,10 +1,12 @@
 
-@recipe function f(d::Union{AbstractPDF,MixedModel}, norm::T where T<:Real=1.0, bins::Int=100)
+@recipe function f(d::Union{AbstractPDF,MixedModel,SumOfPDF}, norm::T where T<:Real=1.0, bins::Int=100)
     xv = range(lims(d)..., length=bins+1)
     return (xv, norm .* d(xv))
 end
 
 @recipe f(::Type{T}, d::T) where {T<:AbstractFunctionWithParameters} = x->func(d,x;p=pars(d))
+
+
 
 scaletobinneddata(Nd,lims,Nbins) = Nd * (lims[2]-lims[1]) / Nbins
 scaletobinneddata(Nd, bins) = Nd * (bins[end]-bins[1]) / (length(bins)-1)

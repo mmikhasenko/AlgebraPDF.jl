@@ -140,8 +140,8 @@ end
     # 
     sum4 = fixpar(sum3, :a, 3)
     @test fixedpars(sum4) == (a=3,)
-    @test fixedpars(sum4.f1) == (a=3,)
-    @test fixedpars(sum4.f2) == (a=3,)
+    @test fixedpars(sum4[1]) == (a=3,)
+    @test fixedpars(sum4[2]) == (a=3,)
     #
     sum5 = fixpar(sum3,:d2, 2)
     @test func(sum5,3.3) == func(a1,3.3) + 2* func(a2,3.3)

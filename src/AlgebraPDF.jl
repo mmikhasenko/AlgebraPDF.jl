@@ -1,6 +1,7 @@
 module AlgebraPDF
 #
 # using Base: NamedTuple
+using ForwardDiff: getindex
 using Parameters
 using QuadGK
 # 
@@ -22,10 +23,12 @@ export ∅
 const NumberOrTuple = Union{Number,Tuple{Vararg{Number}}}
 export NumberOrTuple
 
-import Base:+,-,*,==
+import Base: +,-,*,==
 import Base: getproperty
+import Base: getindex
 import Base: abs2, log
 import Base: keys
+import Base: length
 import Optim: minimizer, minimum
 import ForwardDiff: hessian
 # 
@@ -52,10 +55,6 @@ export p2v, v2p
 # 
 include("functionwithparameters.jl")
 
-export SumFunc, Abs2Func, LogFunc
-export NegativeLogLikelihood
-include("arithmetics.jl")
-
 # 
 export @makepdftype
 export AbstractPDF
@@ -68,6 +67,12 @@ export normalizationintegral
 # 
 include("pdf.jl")
 # 
+
+export SumFunc, Abs2Func, LogFunc
+export NegativeLogLikelihood
+export SumFunc
+include("arithmetics.jl")
+
 const pdf = Normalized
 export pdf
 
