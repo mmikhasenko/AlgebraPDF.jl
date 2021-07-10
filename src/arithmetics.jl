@@ -53,24 +53,27 @@ end
 # 
 length(d::FSum{T,N}) where {T,N} = N
 pars(d::FSum, isfree::Bool) = sum(pars.(d.fs, isfree)) + pars(d.αs, isfree)
-getindex(d::FSum, i::Number) = d.fs[i]
-
+function getindex(d::FSum, i::Number)
+    α_sym = keys(d.αs)[i]
+    α_val = getproperty(d.αs, α_sym)
+    FSum([d.fs[i]], nt(α_sym, α_val))
+end
 const FSumFunc = AlgebraPDF.FSum{T} where T<:AbstractFunctionWithParameters
 const FSumPDF = AlgebraPDF.FSum{T} where T<:AbstractPDF
 
 function func(d::FSumFunc, x::NumberOrTuple; p=freepars(d))
     allp = p+fixedpars(d)
-    αs_vals = (getproperty(allp,s) for s in keys(d.αs))
+    α_vals = (getproperty(allp,s) for s in keys(d.αs))
     f_vals = func.(d.fs, Ref(x);p)
-    return sum(αs_vals .* f_vals)   
+    return sum(α_vals .* f_vals)   
 end
 
 # 
 function func_norm(d::FSumPDF, x; p=freepars(d)) # suppose to work also for all x <: AbstractVector
     allp = p+fixedpars(d)
-    αs_vals = (getproperty(allp,s) for s in keys(d.αs))
+    α_vals = (getproperty(allp,s) for s in keys(d.αs))
     f_vals = [f(x;p) for f in d.fs]
-    return sum(αs_vals .* f_vals)    
+    return sum(α_vals .* f_vals)
 end
 func(d::FSumPDF, x::NumberOrTuple; p=freepars(d)) = func_norm(d,x;p)
 func(d::FSumPDF, x::AbstractArray; p=freepars(d)) = func_norm(d,x;p)
@@ -83,11 +86,17 @@ function updatevalueorflag(d::FSum, s::Symbol, isfree::Bool, v=getproperty(pars(
     FSum(fs, αs)
 end
 #
-function normalizationintegral(model::FSumPDF; p=freepars(model.αs))
-    allα = NamedTuple{keys(model.αs)}(p+fixedpars(model.αs))
-    return sum(allα)
+function integral(d::FSumPDF; p=freepars(d.αs))
+    allp = p+fixedpars(d.αs)
+    sum(getproperty(allp,s) for s in keys(d.αs))
 end
 
+function integral(d::FSumPDF, lims; p=freepars(d))
+    allp = p+fixedpars(d)
+    α_vals = (getproperty(allp,s) for s in keys(d.αs))
+    f_vals = integral.(d.fs, Ref(lims); p)
+    return sum(α_vals .* f_vals)
+end
 
 +(f1::AbstractFunctionWithParameters,
   f2::AbstractFunctionWithParameters, αs=(α1=1.0, α2=1.0)) = FSum([f1,f2], αs)
@@ -95,6 +104,10 @@ end
 -(f1::AbstractFunctionWithParameters,
   f2::AbstractFunctionWithParameters, αs=(α1=1.0, α2=-1.0)) = FSum([f1,f2], αs)
 
+# +(f1::FSum, f2::FSum) = FSum([f1.fs...,f2.fs...], f1.αs+f2.αs)
+
+# *(f::AbstractFunctionWithParameters, c::ParTypes) = FSum([f], c)
+# *(c::ParTypes, f::AbstractFunctionWithParameters) = FSum([f], c)
 
 ###################################################################### 
 
@@ -124,7 +137,7 @@ updatevalueorflag(d::Extended, s::Symbol, isfree::Bool, v=getproperty(pars(d),s)
 # 
 function func(d::Extended, x::NumberOrTuple; p=freepars(d))
     nll = func(d.nll, x; p)
-    μ = normalizationintegral(d.nll.f; p)
+    μ = integral(d.nll.f; p)
     penalty = μ
     return nll + penalty
 end

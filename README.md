@@ -339,32 +339,32 @@ The summary of the fit result returned by the fit function is a named tuple cont
 For the model constructed as a sum of normalized functions, an extended maximum likelihood fit (ENLL includes a Poisson term for normalization) can be performed.
 Here is an example:
 ```julia
-    signal = Normalized(abs2(FBreitWigner((m=0.77,G=0.15))), (0.28, 1.1))
-    backgr = Normalized(FExp((τ=-1.3,)), (0.28, 1.1))
+signal = Normalized(abs2(FBreitWigner((m=0.77,G=0.15))), (0.28, 1.1))
+backgr = Normalized(FExp((τ=-1.3,)), (0.28, 1.1))
 
-    model = signal + backgr # calls +([signal, backgr], (α1=1.0, α2=1.0))
+model = signal + backgr # calls +([signal, backgr], (α1=1.0, α2=1.0))
 
-    data = generate(model, 1000)
+data = generate(model, 1000)
 
-    let binning = range(lims(model)..., length=80)
-        stephist(data, bins=binning )
-        plot!(model, scaletobinneddata(1000/(1+1),binning)) # 1+1 is the current normalization of the model
-    end
+let binning = range(lims(model)..., length=80)
+    stephist(data, bins=binning )
+    plot!(model, scaletobinneddata(1000/(1+1),binning)) # 1+1 is the current normalization of the model
+end
 
-    model_init = updatepars(model, (α1=400, α2=600))
-    enll = Extended(NegativeLogLikelihood(model_init, data))
-    # 
-    fit_summary = fit(enll)
-    fit_summary.measurements
-    # returns
-    # (m = 0.7777 ± 0.0063,
-    #  G = 0.17 ± 0.026,
-    #  τ = -1.31 ± 0.36,
-    #  α1 = 540.0 ± 67.0,
-    #  α2 = 460.0 ± 66.0)
+model_init = updatepars(model, (α1=400, α2=600))
+enll = Extended(NegativeLogLikelihood(model_init, data))
+# 
+fit_summary = fit(enll)
+fit_summary.measurements
+# returns
+# (m = 0.7777 ± 0.0063,
+#  G = 0.17 ± 0.026,
+#  τ = -1.31 ± 0.36,
+#  α1 = 540.0 ± 67.0,
+#  α2 = 460.0 ± 66.0)
 
-    let binning = range(lims(model)..., length=80)
-        stephist(data, bins=binning)
-        plot!(fit_summary.best_model, scaletobinneddata(binning)) # 1+1 is the current normalization of the model
-    end
+let binning = range(lims(model)..., length=80)
+    stephist(data, bins=binning)
+    plot!(fit_summary.best_model, scaletobinneddata(binning)) # 1+1 is the current normalization of the model
+end
 ```

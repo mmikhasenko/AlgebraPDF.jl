@@ -9,10 +9,10 @@ abstract type AbstractFunctionWithParameters end
 #
 nfreepars(d::AbstractFunctionWithParameters) = length(freepars(d))
 # 
-func(d::AbstractFunctionWithParameters, x::AbstractArray; p=pars(d)) = func.(Ref(d), x; p)
-func(d::AbstractFunctionWithParameters, x::AbstractRange; p=pars(d)) = func.(Ref(d), x; p)
+func(d::AbstractFunctionWithParameters, x::AbstractArray; p=freepars(d)) = func.(Ref(d), x; p=p+fixedpars(p))
+func(d::AbstractFunctionWithParameters, x::AbstractRange; p=freepars(d)) = func.(Ref(d), x; p=p+fixedpars(p))
 # 
-(d::AbstractFunctionWithParameters)(x; p=freepars(d)) = func(d,x;p=p+fixedpars(d))
+(d::AbstractFunctionWithParameters)(x; p=freepars(d)) = func(d,x;p)
 const ArrayOrRange = Union{AbstractArray,AbstractRange}
 (d::AbstractFunctionWithParameters)(x, v::ArrayOrRange) = d(x; p=v2p(v,d))
 
@@ -84,7 +84,7 @@ end
 FunctionWithParameters(f;p) = FunctionWithParameters(;f,p)
 
 # two methods to be defined
-func(d::FunctionWithParameters, x::NumberOrTuple; p=pars(d)) = d.f(x; p)
+func(d::FunctionWithParameters, x::NumberOrTuple; p=freepars(d)) = d.f(x; p=p+fixedpars(d))
 pars(d::FunctionWithParameters, isfree::Bool) = pars(d.p, isfree)
 updatevalueorflag(d::FunctionWithParameters, s::Symbol, isfree::Bool, v=getproperty(pars(d),s)) =
     FunctionWithParameters(;f=d.f, p=updatevalueorflag(d.p,s,isfree,v))

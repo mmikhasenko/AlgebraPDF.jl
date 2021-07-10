@@ -27,7 +27,7 @@ end
 
     s = FSum([d],(α=2.2,))
 
-    @test AlgebraPDF.normalizationintegral(s) == 2.2
+    @test integral(s) == 2.2
     @test s(1.1) == 2.2*d(1.1)
     @test s([1,2,3]) == 2.2*d([1,2,3])
 

@@ -37,6 +37,21 @@ end
     d(1.1) == f(1.1)
 end
 
+@testset "integral " begin
+    d1 = Normalized((e;p)->e^2+p.a; p=(a=1.0,), lims=(-1,2))
+    @test integral(d1, (0,2)) < 1
+    d2 = Normalized((e;p)->-e^2+p.b; p=(b=4.0,), lims=(-1,2))
+    @test integral(d2, lims(d2)) ≈ 1
+    s = d1+d2
+    @test integral(s) == 2
+    @test 1.8 < integral(s, (-0.9,1.9)) < 2
+    s2 = updatepars(s,(α1=2,α2=4))
+    # 
+    @test integral(s2[1]) == 2
+    @test integral(s2[2]) == 4
+    # 
+    @test 1.7 < integral(s2[1], (-0.9,1.9)) < 2
+end
 
 # implementation with NAMES of parameters build into the funciton call
 struct nBW1{P,L} <: AbstractPDF{1}
