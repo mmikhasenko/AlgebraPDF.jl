@@ -86,11 +86,6 @@ include("fit.jl")
 include("minuit_interface.jl")
 include("optim_interface.jl")
 
-export MixedModel
-export fractions, fractionvalues
-export Ncomp
-include("mixedmodel.jl")
-
 export generate
 include("generation.jl")
 

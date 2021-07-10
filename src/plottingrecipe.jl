@@ -1,5 +1,5 @@
 
-@recipe function f(d::Union{AbstractPDF,MixedModel,FSumPDF}, norm::T where T<:Real=1.0, bins::Int=100)
+@recipe function f(d::Union{AbstractPDF,FSumPDF}, norm::T where T<:Real=1.0, bins::Int=100)
     xv = range(lims(d)..., length=bins+1)
     return (xv, norm .* d(xv))
 end
@@ -18,7 +18,7 @@ yerror(y) = sqrt.(y)
 bindiffs(x) = x[2:end]- x[1:end-1]
 
 
-@recipe function f(data::AbstractArray, d::Union{AbstractPDF,MixedModel}; bins=60, datalabel="data")
+@recipe function f(data::AbstractArray, d::Union{AbstractPDF}; bins=60, datalabel="data")
     binning = range(lims(d)..., length=bins+1)
     @series begin
         (d, scaletobinneddata(length(data), binning))

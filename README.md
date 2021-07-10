@@ -9,8 +9,8 @@ Basic functionality:
  * constructing a complex model object from set of function:
      - algebra of functions with parameters, e.g. `f₁ + f₂`, or `abs2(f)`.
  * On-fly normalization
- * construction of mixed models in the form `f₁ PDF₁ + f₂ PDF₂ + (1-f₁-f₂) PDF₃`.
- * fitting data distribution using the maximum likelihood (`Optim.jl`)
+ * construction of mixed models in the form `f₁ PDF₁ + f₂ PDF₂ + f₃ PDF₃`.
+ * fitting data distribution using the maximum likelihood (`iminuit.py` or `Optim.jl`)
  * plotting recipes
 
 Current implementation is limited to immutable operations.
@@ -60,15 +60,6 @@ g′′ = updatepar(g′, :μ, 1.2) # however, the update fill do
 g′′′ = releasepar(g′′, :μ)
 g′′′ == g # true
 ```
-
-## Fit free parameters
-The function can be subjected to the unbinned fit.
-```julia
-fit_results = fit(data, f; init)
-@unpack best_model = fit_results
-```
-The method returns a named tuple with the named tuple of optimized parameters,
-parameters with uncertainties, and best-estimation function.
 
 ## Algebra of functions
 
