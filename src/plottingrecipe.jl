@@ -10,6 +10,7 @@ end
 
 scaletobinneddata(Nd,lims,Nbins) = Nd * (lims[2]-lims[1]) / Nbins
 scaletobinneddata(Nd, bins) = Nd * (bins[end]-bins[1]) / (length(bins)-1)
+scaletobinneddata(bins) = (bins[end]-bins[1]) / (length(bins)-1)
 
 
 # plotting curve on top of the data
