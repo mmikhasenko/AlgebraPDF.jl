@@ -5,8 +5,8 @@ using Test
 g1 = FGauss((μ1=1.1,σ1=0.1))
 g2 = FGauss((μ2=2.2,σ2=0.2))
 g3 = FGauss((μ3=3.3,σ3=0.3))
-d = AlgebraPDF.SumFunc([g1,g2,g3], (α1=0.1,α2=0.2,α3=0.3))
-d2 = AlgebraPDF.SumFunc([g1,g2,g3], Ext(α1=0.1,α2=0.2,α3=0.3)) |> x->fixpar(x, :α1)
+d = AlgebraPDF.FSum([g1,g2,g3], (α1=0.1,α2=0.2,α3=0.3))
+d2 = AlgebraPDF.FSum([g1,g2,g3], Ext(α1=0.1,α2=0.2,α3=0.3)) |> x->fixpar(x, :α1)
 
 @testset "Sum of regular functions" begin 
     @test length(d) == 3
@@ -25,12 +25,12 @@ end
 ng1 = Normalized(g1, (1,4))
 ng2 = Normalized(g2, (1,4))
 ng3 = Normalized(g3, (1,4))
-nd = AlgebraPDF.SumFunc([ng1,ng2,ng3], (α1=0.1,α2=0.2,α3=0.3))
+nd = AlgebraPDF.FSum([ng1,ng2,ng3], (α1=0.1,α2=0.2,α3=0.3))
 # 
 @testset "Sum of normalized functions" begin 
 
-    @test typeof(d) <: AlgebraPDF.SumFunc{T} where T<:AbstractFunctionWithParameters
-    @test typeof(nd) <: AlgebraPDF.SumFunc{T} where T<:AbstractPDF
+    @test typeof(d) <: AlgebraPDF.FSum{T} where T<:AbstractFunctionWithParameters
+    @test typeof(nd) <: AlgebraPDF.FSum{T} where T<:AbstractPDF
 
     @test func(nd, 1.1) isa Number
     @test func(nd, [1.1,1,1])  isa Vector

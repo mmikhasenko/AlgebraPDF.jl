@@ -84,7 +84,7 @@ end
 end
 
 
-@testset "Abs2Func" begin
+@testset "FAbs2" begin
     m0 = FunctionWithParameters(
         (x;p)->p.a+cos(x)*p.b;
         p=Ext(a=2,b=1))
@@ -96,7 +96,7 @@ end
     @test freepars(am0) == freepars(m0)
 end
 
-@testset "LogFunc" begin
+@testset "FLog" begin
     m0 = FunctionWithParameters(
         (x;p)->exp(p.b*x);
         p=Ext(b=2,))
@@ -133,7 +133,7 @@ end
 end
 
 
-@testset "SumFunc and ProdFunc" begin
+@testset "FSum and FProd" begin
     a1 = FunctionWithParameters(
         (x;p)->p.a+cos(x)*p.b; p=Ext(a=2,b=1))
     a2 = FunctionWithParameters(

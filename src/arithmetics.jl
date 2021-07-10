@@ -1,62 +1,62 @@
 
 ###################################################################### 
 
-struct Abs2Func{T<:AbstractFunctionWithParameters} <: AbstractFunctionWithParameters
+struct FAbs2{T<:AbstractFunctionWithParameters} <: AbstractFunctionWithParameters
     f::T
 end
-func(d::Abs2Func, x::NumberOrTuple; p=freepars(d)) = abs2(func(d.f,x;p))
-pars(d::Abs2Func, isfree::Bool) = pars(d.f, isfree)
-updatevalueorflag(d::Abs2Func, s::Symbol, isfree::Bool, v=getproperty(pars(d),s)) =
-    Abs2Func(updatevalueorflag(d.f,s,isfree,v))
+func(d::FAbs2, x::NumberOrTuple; p=freepars(d)) = abs2(func(d.f,x;p))
+pars(d::FAbs2, isfree::Bool) = pars(d.f, isfree)
+updatevalueorflag(d::FAbs2, s::Symbol, isfree::Bool, v=getproperty(pars(d),s)) =
+    FAbs2(updatevalueorflag(d.f,s,isfree,v))
 # 
-abs2(f::AbstractFunctionWithParameters) = Abs2Func(f)
+abs2(f::AbstractFunctionWithParameters) = FAbs2(f)
 
 ###################################################################### 
 
-struct LogFunc{T<:AbstractFunctionWithParameters} <: AbstractFunctionWithParameters
+struct FLog{T<:AbstractFunctionWithParameters} <: AbstractFunctionWithParameters
     f::T
 end
-func(d::LogFunc, x::NumberOrTuple; p=freepars(d)) = log(func(d.f,x;p))
-pars(d::LogFunc, isfree::Bool) = pars(d.f, isfree)
-updatevalueorflag(d::LogFunc, s::Symbol, isfree::Bool, v=getproperty(pars(d),s)) =
-    LogFunc(updatevalueorflag(d.f,s,isfree,v))
+func(d::FLog, x::NumberOrTuple; p=freepars(d)) = log(func(d.f,x;p))
+pars(d::FLog, isfree::Bool) = pars(d.f, isfree)
+updatevalueorflag(d::FLog, s::Symbol, isfree::Bool, v=getproperty(pars(d),s)) =
+    FLog(updatevalueorflag(d.f,s,isfree,v))
 # 
-log(f::AbstractFunctionWithParameters) = LogFunc(f)
+log(f::AbstractFunctionWithParameters) = FLog(f)
 
 ###################################################################### 
 
-struct ProdFunc{
+struct FProd{
         T1<:AbstractFunctionWithParameters,
         T2<:AbstractFunctionWithParameters} <: AbstractFunctionWithParameters
     f1::T1
     f2::T2
 end
-func(d::ProdFunc, x::NumberOrTuple; p=freepars(d)) = func(d.f1,x;p) * func(d.f2,x;p)
-pars(d::ProdFunc, isfree::Bool) = pars(d.f1, isfree) + pars(d.f2, isfree)
-updatevalueorflag(d::ProdFunc, s::Symbol, isfree::Bool, v=getproperty(pars(d),s)) =
-    ProdFunc(
+func(d::FProd, x::NumberOrTuple; p=freepars(d)) = func(d.f1,x;p) * func(d.f2,x;p)
+pars(d::FProd, isfree::Bool) = pars(d.f1, isfree) + pars(d.f2, isfree)
+updatevalueorflag(d::FProd, s::Symbol, isfree::Bool, v=getproperty(pars(d),s)) =
+    FProd(
         ispar(d.f1,s) ? updatevalueorflag(d.f1,s,isfree,v) : d.f1,
         ispar(d.f2,s) ? updatevalueorflag(d.f2,s,isfree,v) : d.f2)
 # 
-*(f1::AbstractFunctionWithParameters, f2::AbstractFunctionWithParameters) = ProdFunc(f1,f2)
+*(f1::AbstractFunctionWithParameters, f2::AbstractFunctionWithParameters) = FProd(f1,f2)
 
 ###################################################################### 
 
-struct SumFunc{T<:AbstractFunctionWithParameters,N,V}  <: AbstractFunctionWithParameters
+struct FSum{T<:AbstractFunctionWithParameters,N,V}  <: AbstractFunctionWithParameters
     fs::StaticVector{N,T}
     αs::V
 end
-function SumFunc(fs::Union{Tuple,AbstractVector}, αs)
+function FSum(fs::Union{Tuple,AbstractVector}, αs)
     N = length(fs)
-    SumFunc(SVector{N}(collect(fs)), αs)
+    FSum(SVector{N}(collect(fs)), αs)
 end
 # 
-length(d::SumFunc{T,N}) where {T,N} = N
-pars(d::SumFunc, isfree::Bool) = sum(pars.(d.fs, isfree)) + pars(d.αs, isfree)
-getindex(d::SumFunc, i::Number) = d.fs[i]
+length(d::FSum{T,N}) where {T,N} = N
+pars(d::FSum, isfree::Bool) = sum(pars.(d.fs, isfree)) + pars(d.αs, isfree)
+getindex(d::FSum, i::Number) = d.fs[i]
 
-const SumOfFunc = AlgebraPDF.SumFunc{T} where T<:AbstractFunctionWithParameters
-const SumOfPDF = AlgebraPDF.SumFunc{T} where T<:AbstractPDF
+const SumOfFunc = AlgebraPDF.FSum{T} where T<:AbstractFunctionWithParameters
+const SumOfPDF = AlgebraPDF.FSum{T} where T<:AbstractPDF
 
 function func(d::SumOfFunc, x::NumberOrTuple; p=freepars(d))
     allp = p+fixedpars(d)
@@ -77,10 +77,10 @@ func(d::SumOfPDF, x::AbstractArray; p=freepars(d)) = func_norm(d,x;p)
 func(d::SumOfPDF, x::AbstractRange; p=freepars(d)) = func_norm(d,x;p)
 lims(d::SumOfPDF) = lims(d.fs[1])
 
-function updatevalueorflag(d::SumFunc, s::Symbol, isfree::Bool, v=getproperty(pars(d),s))
+function updatevalueorflag(d::FSum, s::Symbol, isfree::Bool, v=getproperty(pars(d),s))
     fs = [ispar(f,s) ? updatevalueorflag(f,s,isfree,v) : f for f in d.fs]
     αs = ispar(d.αs,s) ? updatevalueorflag(d.αs,s,isfree,v) : d.αs
-    SumFunc(fs, αs)
+    FSum(fs, αs)
 end
 #
 function normalizationintegral(model::SumOfPDF; p=freepars(model.αs))
@@ -90,10 +90,10 @@ end
 
 
 +(f1::AbstractFunctionWithParameters,
-  f2::AbstractFunctionWithParameters, αs=(α1=1.0, α2=1.0)) = SumFunc([f1,f2], αs)
+  f2::AbstractFunctionWithParameters, αs=(α1=1.0, α2=1.0)) = FSum([f1,f2], αs)
 
 -(f1::AbstractFunctionWithParameters,
-  f2::AbstractFunctionWithParameters, αs=(α1=1.0, α2=-1.0)) = SumFunc([f1,f2], αs)
+  f2::AbstractFunctionWithParameters, αs=(α1=1.0, α2=-1.0)) = FSum([f1,f2], αs)
 
 
 ###################################################################### 
@@ -109,7 +109,7 @@ updatevalueorflag(d::NegativeLogLikelihood, s::Symbol, isfree::Bool, v=getproper
     NegativeLogLikelihood(updatevalueorflag(d.f,s,isfree,v), d.data, d.nagativepenatly)
 #
 NegativeLogLikelihood(d, data::AbstractArray) = NegativeLogLikelihood(d, data, -1e4)
-minussum(d::LogFunc, data::AbstractArray) = NegativeLogLikelihood(d.f, data)
+minussum(d::FLog, data::AbstractArray) = NegativeLogLikelihood(d.f, data)
 
 
 ###################################################################### 

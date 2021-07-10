@@ -68,10 +68,10 @@ export normalizationintegral
 include("pdf.jl")
 # 
 
-export SumFunc, Abs2Func, LogFunc
+export FSum, FAbs2, FLog
 export NegativeLogLikelihood
 export Extended
-export SumFunc
+export FSum
 include("arithmetics.jl")
 
 const pdf = Normalized

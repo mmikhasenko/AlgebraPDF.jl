@@ -10,6 +10,7 @@ fit(model::Normalized, data, optimizer = MigradAndHesse(), args...; kws...) =
     fit(NegativeLogLikelihood(model, data), optimizer, args...; kws...)
 #
 
+# the optimizer interface <: Optimizer should implement
 #  - minimize(objective, optimizer::Optimizer)
 #  - minimizer(minimizationResult)
 #  - measurement(minimizationResult)

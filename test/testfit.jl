@@ -25,7 +25,7 @@ end
     @test 0.4 < fr.parameters.μ < 0.6
     @test 0.9 < abs(fr.parameters.σ) < 1.1
 
-    s = SumFunc([d],(α=2.2,))
+    s = FSum([d],(α=2.2,))
 
     @test AlgebraPDF.normalizationintegral(s) == 2.2
     @test s(1.1) == 2.2*d(1.1)
