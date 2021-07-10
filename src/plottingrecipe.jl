@@ -1,5 +1,5 @@
 
-@recipe function f(d::Union{AbstractPDF,MixedModel,SumOfPDF}, norm::T where T<:Real=1.0, bins::Int=100)
+@recipe function f(d::Union{AbstractPDF,MixedModel,FSumPDF}, norm::T where T<:Real=1.0, bins::Int=100)
     xv = range(lims(d)..., length=bins+1)
     return (xv, norm .* d(xv))
 end

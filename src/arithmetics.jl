@@ -55,10 +55,10 @@ length(d::FSum{T,N}) where {T,N} = N
 pars(d::FSum, isfree::Bool) = sum(pars.(d.fs, isfree)) + pars(d.αs, isfree)
 getindex(d::FSum, i::Number) = d.fs[i]
 
-const SumOfFunc = AlgebraPDF.FSum{T} where T<:AbstractFunctionWithParameters
-const SumOfPDF = AlgebraPDF.FSum{T} where T<:AbstractPDF
+const FSumFunc = AlgebraPDF.FSum{T} where T<:AbstractFunctionWithParameters
+const FSumPDF = AlgebraPDF.FSum{T} where T<:AbstractPDF
 
-function func(d::SumOfFunc, x::NumberOrTuple; p=freepars(d))
+function func(d::FSumFunc, x::NumberOrTuple; p=freepars(d))
     allp = p+fixedpars(d)
     αs_vals = (getproperty(allp,s) for s in keys(d.αs))
     f_vals = func.(d.fs, Ref(x);p)
@@ -66,16 +66,16 @@ function func(d::SumOfFunc, x::NumberOrTuple; p=freepars(d))
 end
 
 # 
-function func_norm(d::SumOfPDF, x; p=freepars(d)) # suppose to work also for all x <: AbstractVector
+function func_norm(d::FSumPDF, x; p=freepars(d)) # suppose to work also for all x <: AbstractVector
     allp = p+fixedpars(d)
     αs_vals = (getproperty(allp,s) for s in keys(d.αs))
     f_vals = [f(x;p) for f in d.fs]
     return sum(αs_vals .* f_vals)    
 end
-func(d::SumOfPDF, x::NumberOrTuple; p=freepars(d)) = func_norm(d,x;p)
-func(d::SumOfPDF, x::AbstractArray; p=freepars(d)) = func_norm(d,x;p)
-func(d::SumOfPDF, x::AbstractRange; p=freepars(d)) = func_norm(d,x;p)
-lims(d::SumOfPDF) = lims(d.fs[1])
+func(d::FSumPDF, x::NumberOrTuple; p=freepars(d)) = func_norm(d,x;p)
+func(d::FSumPDF, x::AbstractArray; p=freepars(d)) = func_norm(d,x;p)
+func(d::FSumPDF, x::AbstractRange; p=freepars(d)) = func_norm(d,x;p)
+lims(d::FSumPDF) = lims(d.fs[1])
 
 function updatevalueorflag(d::FSum, s::Symbol, isfree::Bool, v=getproperty(pars(d),s))
     fs = [ispar(f,s) ? updatevalueorflag(f,s,isfree,v) : f for f in d.fs]
@@ -83,7 +83,7 @@ function updatevalueorflag(d::FSum, s::Symbol, isfree::Bool, v=getproperty(pars(
     FSum(fs, αs)
 end
 #
-function normalizationintegral(model::SumOfPDF; p=freepars(model.αs))
+function normalizationintegral(model::FSumPDF; p=freepars(model.αs))
     allα = NamedTuple{keys(model.αs)}(p+fixedpars(model.αs))
     return sum(allα)
 end
@@ -114,7 +114,7 @@ minussum(d::FLog, data::AbstractArray) = NegativeLogLikelihood(d.f, data)
 
 ###################################################################### 
 
-struct Extended{T <: AlgebraPDF.SumOfPDF} <: AbstractFunctionWithParameters
+struct Extended{T <: AlgebraPDF.FSumPDF} <: AbstractFunctionWithParameters
     nll::NegativeLogLikelihood{T}
 end
 
