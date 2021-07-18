@@ -87,10 +87,20 @@ fsub = f1-f2
 The summation and subtraction adds a new parameter for the coefficient of the functions, `p.α1*f1+p.α2*f2`.
 The parameter can be passed with 
 ```julia
-+(f1,f2,(c1=1.1,c2=1.1))
-+(f1,f2,Ext(c1=1.1,c2=1.1)) # the coefficients can be fixed 
-f1-f2 == +(f1,f2,Ext(α1=1.0,α2=-1.0)) # true
++(f1,f2; p=(c1=1.1,c2=2.2))
++(f1,f2; p=Ext(c1=1.1,c2=2.2)) # the coefficients can be fixed 
+# using explicit constructor:
+FSum([f1,f2], (c1=1.1,c2=2.2))
+FSum([f1,f2], Ext(c1=1.1,c2=2.2))
+# subtraction is an addition
+f1-f2 == +(f1,f2; p=(α1=1.0,α2=-1.0)) # true
 ``` 
+Perhaps, a more transparent constuction of the same sum can be done using a linear decomposition:
+```
+(c1=1.1,) * f1 + (c2=2.2,) * f2
+```
+Where a multiplication of a function to a parameter type returns a sum with a single term.
+A special method on the addition on the sum is called.
 
 ## Create/implement the functions with parameters
 It is just a function to which a container with parameters (default values) is attached.
