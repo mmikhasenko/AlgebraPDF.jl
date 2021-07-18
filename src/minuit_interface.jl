@@ -13,7 +13,22 @@
 const iminuit = PyNULL()
 
 function __init__()
-    copy!(iminuit, pyimport_conda("iminuit", "iminuit", "conda-forge"))
+    copy!(iminuit, pyimport_conda("iminuit", "iminuit=2.7.0", "conda-forge"))
+    iminuit.__version__ < "2.7.0" && println("""
+    Version of iminuit >= v2.7.0 is required, try to install it manually using `PyCall.Conda`:
+
+    julia> using PyCall
+    julia> PyCall.Conda.add("iminuit=2.7.0")
+
+    check the version with
+
+    julia> iminuit = pyimport_conda("iminuit", "iminuit=2.7.0", "conda-forge")
+    julia> iminuit.__version__
+
+    or 
+
+    julia> iminuit.__version__
+    """)
 end
 
 #######################################################################
