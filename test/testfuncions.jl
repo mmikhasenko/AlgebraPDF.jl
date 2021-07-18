@@ -140,8 +140,8 @@ end
         (x;p)->p.a+sin(x)*p.b; p=Ext(a=2,b=1))
     #
     sum1 = a1+a2
-    sum2 = +(a1,a2,(c1=1.0,c2=1.0))
-    sum3 = +(a1,a2,Ext(d1=1.0, d2=1.0))
+    sum2 = +(a1,a2;p=(c1=1.0,c2=1.0))
+    sum3 = +(a1,a2;p=Ext(d1=1.0, d2=1.0))
 
     @test func(sum1,2) == func(sum2,2)
     @test func(sum1,2) == func(sum3,2)

@@ -99,15 +99,15 @@ function integral(d::FSumPDF, lims; p=freepars(d))
 end
 
 +(f1::AbstractFunctionWithParameters,
-  f2::AbstractFunctionWithParameters, αs=(α1=1.0, α2=1.0)) = FSum([f1,f2], αs)
+  f2::AbstractFunctionWithParameters; p=(α1=1.0, α2=1.0)) = FSum([f1,f2], p)
 
 -(f1::AbstractFunctionWithParameters,
-  f2::AbstractFunctionWithParameters, αs=(α1=1.0, α2=-1.0)) = FSum([f1,f2], αs)
+  f2::AbstractFunctionWithParameters; p=(α1=1.0, α2=-1.0)) = FSum([f1,f2], p)
 
-# +(f1::FSum, f2::FSum) = FSum([f1.fs...,f2.fs...], f1.αs+f2.αs)
++(f1::FSum, f2::FSum) = FSum([f1.fs...,f2.fs...], f1.αs+f2.αs)
 
-# *(f::AbstractFunctionWithParameters, c::ParTypes) = FSum([f], c)
-# *(c::ParTypes, f::AbstractFunctionWithParameters) = FSum([f], c)
+*(f::AbstractFunctionWithParameters, c::ParTypes) = FSum([f], c)
+*(c::ParTypes, f::AbstractFunctionWithParameters) = FSum([f], c)
 
 ###################################################################### 
 
