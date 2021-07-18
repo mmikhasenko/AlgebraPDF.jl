@@ -59,7 +59,11 @@ function updatevalueorflag(p::FlaggedNamedTuple, s::Symbol, isfree::Bool, v=getp
         updatednamedtuple(allpars(p),s,v),
         updateflag(whichfixed(p), s, isfree))
 end
-
++(s1::FlaggedNamedTuple, s2::FlaggedNamedTuple) =
+    FlaggedNamedTuple(allpars(s1)+allpars(s2), (whichfixed(s1)...,whichfixed(s2)...))
++(s1::FlaggedNamedTuple, s2::NamedTuple) = s1+FlaggedNamedTuple(s2)
++(s1::NamedTuple, s2::FlaggedNamedTuple) = FlaggedNamedTuple(s1)+s2
+# 
 FlaggedNamedTuple(t::NamedTuple) = FlaggedNamedTuple(t,())
 FlaggedNamedTuple(ps::FlaggedNamedTuple) = FlaggedNamedTuple(allpars(ps),whichfixed(ps))
 FlaggedNamedTuple(; kw...) = FlaggedNamedTuple((;kw...))
@@ -69,3 +73,4 @@ const ParTypes = Union{NamedTuple,FlaggedNamedTuple}
 pars(ps::ParTypes) = NamedTuple{keys(ps)}(pars(ps, true) + pars(ps, false))
 freepars(d::ParTypes) = pars(d, true)
 fixedpars(d::ParTypes) = pars(d, false)
+#

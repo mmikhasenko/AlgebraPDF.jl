@@ -26,7 +26,7 @@ end
 end
 
 
-@testset "Parameter structure: NamedTuple" begin
+@testset "Parameter structure: FlaggedNamedTuple" begin
     #
     p0 = FlaggedNamedTuple(a=1,b=2)
     @test p0.a == 1
@@ -46,4 +46,21 @@ end
     @test keys(p1) == keys(p2)
     @test keys(p2, true) == (:b,)
     @test keys(p2, false) == (:a,)
+end
+
+@testset "Addind parameter sets: FNT+FNT, FNT+NT, NT+FNT" begin 
+    p1 = FlaggedNamedTuple(a1=1,b1=2)
+    p2 = FlaggedNamedTuple(a2=1,b2=2)
+    p12 = p1 + p2
+    @test pars(p12) == pars(p1) + pars(p2)
+
+    p2′ = AlgebraPDF.updatevalueorflag(p2, :a2, false)
+    p12′ = p1 + p2′
+    @test pars(p12′, true) == pars(p1, true) + pars(p2′, true)
+    @test pars(p12′, false) == pars(p1, false) + pars(p2′, false)
+
+    pd1′′ = p12′ + (d4=2.2, )
+    pd2′′ = (d4=2.2, ) + p12′
+    @test :d4 ∈ keys(freepars(pd1′′))
+    @test :d4 ∈ keys(freepars(pd2′′))
 end
