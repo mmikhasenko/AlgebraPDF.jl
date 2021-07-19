@@ -78,7 +78,7 @@ const pdf = Normalized
 export pdf
 
 export fit
-export OptimHesseApprox
+export BFGSApproxHesse
 export MigradAndHesse
 export minussum
 export obj2nt

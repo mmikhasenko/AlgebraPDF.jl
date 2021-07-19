@@ -328,7 +328,7 @@ The second method does the same, but perhaps more intuitive.
 There are two options to pass to the fitting faction for minimization algorithm.
 ```julia
 fs1 = fit(model, data, MigradAndHesse(errordef=1/2)) # calls Minuit from iminuit 
-fs2 = fit(model, data, OptimHesseApprox()) # calls BFGS of Optim package
+fs2 = fit(model, data, BFGSApproxHesse()) # calls BFGS of Optim package
 ``` 
 The first method is found to be extremely stable and fast (despite finite-diff derivatives),
 therefore, used by default. The minimization algorithm is a predecessor of `BFGS` but equipped

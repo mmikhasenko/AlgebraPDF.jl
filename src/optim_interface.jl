@@ -9,9 +9,9 @@ end
 #  - minimizer(minimizationResult)
 #  - measurement(minimizationResult)
 #  - minimum(minimizationResult)
-struct OptimHesseApprox end
+struct BFGSApproxHesse end
 
-function minimize(func, init, optimizer::OptimHesseApprox;
+function minimize(func, init, optimizer::BFGSApproxHesse;
         algorithm = BFGS(), autodiff = :forwarddiff, show_trace::Bool = true, kws...)
     obj = OnceDifferentiable(func, init; autodiff)
     # 
