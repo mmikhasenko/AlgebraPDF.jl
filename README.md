@@ -16,6 +16,109 @@ Basic functionality:
 
 Current implementation is limited to immutable operations.
 
+## An example 
+### Model construction and Extended MLE fit
+```julia
+using AlgebraPDF
+using DelimitedFiles
+
+using Plots
+using LaTeXStrings
+theme(:wong2, grid=false, frame=:box,
+    guidefontvalign=:top, guidefonthalign=:right,
+    foreground_color_legend = nothing,
+    xlim=(:auto,:auto), ylim=(:auto,:auto),
+    xlab=L"m(\Xi_c^+K^-)\,\,[\mathrm{GeV}]", ylab=L"\mathrm{Candidates}")
+# 
+# 
+const xth = 2.96
+const fitrange = (2.960, 3.180)
+
+##############################################
+
+data = readdlm("data.txt")[:,1]
+Nev = size(data,1)
+
+# amplitude for the signal
+Φ2(x) = sqrt(x-xth)
+Γ(x,m,Γ₀) = Γ₀*Φ2(x)/Φ2(m)
+breitwigner(x,m,Γ₀) = 1/(m^2-x^2-1im*m*Γ(x,m,Γ₀)) # complex function
+
+##############################################
+# I) First way to create a FunctionWithParameters
+phasespace = FunctionWithParameters((x;p)->Φ2(x), ∅) # pass λ-function
+plot(phasespace, phasespace...) # can plot, needs range
+# 
+backgrpdf = Normalized(phasespace, phasespace) # get PDF
+plot(backgrpdf) # can plot
+
+# II) define a type SimpleBW and the method `func` for dispatch
+struct SimpleBW{P} <: AbstractFunctionWithParameters
+    p::P
+end
+import AlgebraPDF:func
+function func(bw::SimpleBW, x::NumberOrTuple; p=pars(bw))
+    m,Γ = (getproperty(p,s) for s in keys(bw.p))
+    breitwigner(x, m, Γ)
+end
+
+# create four instances of the same Function with different names
+signalamps = []
+push!(signalamps, SimpleBW(( m1=3.00, Γ1=6.5e-3 )))
+push!(signalamps, SimpleBW(( m2=3.05, Γ2=2.3e-3 )))
+push!(signalamps, SimpleBW(( m3=3.06, Γ3=4.0e-3 )))
+push!(signalamps, SimpleBW(( m4=3.09, Γ4=9.9e-3 )))
+@time plot(); plot!.(abs2.(signalamps), fitrange...); plot!()
+
+# |A|^2 * phase_space
+signalpdfs = 
+    [Normalized(abs2(A)*phasespace, fitrange)
+        for A in signalamps]
+@time plot(); plot!.(signalpdfs, fill=0, α=0.3); plot!()
+
+# III) define a type and the `func` with macro
+@makefuntype SimpleBWg(x;p) =
+    1/(p.m0^2 - x^2 - 1im*p.g^2*Φ2(x))
+#
+signalpdf0 = Normalized(
+        abs2(SimpleBWg((m0=2.95, g=0.01)))*phasespace,
+        fitrange)
+plot!(signalpdf0, fill=0, α=0.3)
+# 
+##############################################
+# the full model - sum of components
+model0 = 
+    signalpdf0 * (f0=0.05Nev,) +
+    signalpdfs[1] * (f1=0.25Nev,) + signalpdfs[2] * (f2=0.15Nev,) + 
+    signalpdfs[3] * (f3=0.15Nev,) + signalpdfs[4] * (f4=0.55Nev,) +
+    backgrpdf * Ext(fb=0.3Nev,) # Ext - to be able to fix
+# 
+model1 = fixpar(model0, :fb, 17.2)
+# 
+@time fit_summary = fit(
+    Extended(NegativeLogLikelihood(model1, data)))
+# 
+# plot
+let bins = range(fitrange..., length=80)
+    Ns = scaletobinneddata(bins)
+    stephist(data; bins, lc=:black, lab="Data")
+    for i in 1:5
+        plot!(fit_summary.best_model[i], Ns, 300,
+            fillto=0.0, α=0.4, lab="Signal$(i)")
+    end
+    plot!(fit_summary.best_model, Ns, 300, lc=:red, lab="Total fit")
+    # 
+    m = fit_summary.measurements
+    for (i,(k,v)) in enumerate(zip(keys(m), m))
+        annotate!(xth+0.01,30-1.2i,text("$k=$(string(v))",:left, 6))
+    end
+    plot!()
+end
+```
+![plots/sixcompfit.png](plots/sixcompfit.png)
+
+Detailed description of the methods follows.
+
 ## Call the function
 The object behave similar to a regular function with a keyword argument `p` set to `freepars(d)` by default.
 Once `p` is used a full set of parameters needs to be provided. 
@@ -65,7 +168,7 @@ g′′′ == g # true
 ## Algebra of functions
 
 Several operations on a function are implemented, as `abs2` and `log`.
-```
+```julia
 # an example of complex-valued function
 f = FunctionWithParameters((x;p)->1/(p.m^2-x^2-1im*p.m*p.Γ), (m=0.77,Γ=0.15))
 
@@ -96,7 +199,7 @@ FSum([f1,f2], Ext(c1=1.1,c2=2.2))
 f1-f2 == +(f1,f2; p=(α1=1.0,α2=-1.0)) # true
 ``` 
 Perhaps, a more transparent constuction of the same sum can be done using a linear decomposition:
-```
+```julia
 (c1=1.1,) * f1 + (c2=2.2,) * f2
 ```
 Where a multiplication of a function to a parameter type returns a sum with a single term.
@@ -161,11 +264,8 @@ Creating a function or pdf can be conveniently done with macro
 ```julia
 # for BW1 <: AbstractPDF{1}
 @makepdftype BW1(x, p) = p.m*p.Γ/(p.m^2-x^2-1im*p.m*p.Γ)
-
-# for BW1 <: AbstractFunctionWithParameters
-@makefuntype BW1(x, p) = p.m*p.Γ/(p.m^2-x^2-1im*p.m*p.Γ)
 ```
-The latter expands into
+which expands into
 ```julia
 # implementation with NAMES of parameters build into the funciton call
 struct BW1{P} <: AbstractFunctionWithParameters
