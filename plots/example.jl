@@ -107,7 +107,7 @@ let bins = range(fitrange..., length=80)
     # 
     m = fit_summary.measurements
     for (i,(k,v)) in enumerate(zip(keys(m), m))
-        annotate!(xth+0.01,30-1.2i,text("$k=$(string(v))",:left, 6))
+        annotate!(xth+0.01,25-1.2i,text("$k=$(string(v))",:left, 6))
     end
     plot!()
 end
