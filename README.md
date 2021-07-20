@@ -17,24 +17,11 @@ Basic functionality:
 Current implementation is limited to immutable operations.
 
 ## An example 
+![plots/sixcompfit.png](plots/sixcompfit.png)
 ### Model construction and Extended MLE fit
 ```julia
 using AlgebraPDF
 using DelimitedFiles
-
-using Plots
-using LaTeXStrings
-theme(:wong2, grid=false, frame=:box,
-    guidefontvalign=:top, guidefonthalign=:right,
-    foreground_color_legend = nothing,
-    xlim=(:auto,:auto), ylim=(:auto,:auto),
-    xlab=L"m(\Xi_c^+K^-)\,\,[\mathrm{GeV}]", ylab=L"\mathrm{Candidates}")
-# 
-# 
-const xth = 2.96
-const fitrange = (2.960, 3.180)
-
-##############################################
 
 data = readdlm("data.txt")[:,1]
 Nev = size(data,1)
@@ -42,15 +29,11 @@ Nev = size(data,1)
 # amplitude for the signal
 Φ2(x) = sqrt(x-xth)
 Γ(x,m,Γ₀) = Γ₀*Φ2(x)/Φ2(m)
-breitwigner(x,m,Γ₀) = 1/(m^2-x^2-1im*m*Γ(x,m,Γ₀)) # complex function
+breitwigner(x,m,Γ₀) = 1/(m^2-x^2-1im*m*Γ(x,m,Γ₀)) 
 
-##############################################
-# I) First way to create a FunctionWithParameters
+# I) phase space function, also the background
 phasespace = FunctionWithParameters((x;p)->Φ2(x), ∅) # pass λ-function
-plot(phasespace, phasespace...) # can plot, needs range
-# 
 backgrpdf = Normalized(phasespace, phasespace) # get PDF
-plot(backgrpdf) # can plot
 
 # II) define a type SimpleBW and the method `func` for dispatch
 struct SimpleBW{P} <: AbstractFunctionWithParameters
@@ -62,30 +45,24 @@ function func(bw::SimpleBW, x::NumberOrTuple; p=pars(bw))
     breitwigner(x, m, Γ)
 end
 
-# create four instances of the same Function with different names
-signalamps = []
-push!(signalamps, SimpleBW(( m1=3.00, Γ1=6.5e-3 )))
-push!(signalamps, SimpleBW(( m2=3.05, Γ2=2.3e-3 )))
-push!(signalamps, SimpleBW(( m3=3.06, Γ3=4.0e-3 )))
-push!(signalamps, SimpleBW(( m4=3.09, Γ4=9.9e-3 )))
-@time plot(); plot!.(abs2.(signalamps), fitrange...); plot!()
-
-# |A|^2 * phase_space
+# Signal1-4: |A|^2 * phase_space
 signalpdfs = 
     [Normalized(abs2(A)*phasespace, fitrange)
-        for A in signalamps]
-@time plot(); plot!.(signalpdfs, fill=0, α=0.3); plot!()
+        for A in [
+            SimpleBW((m1=3.00, Γ1=6.5e-3)
+            SimpleBW((m2=3.05, Γ2=2.3e-3)
+            SimpleBW((m3=3.06, Γ3=4.0e-3)
+            SimpleBW((m4=3.09, Γ4=9.9e-3)]
+        ]
 
-# III) define a type and the `func` with macro
+# III) The threshold function, also |Ath|^2 * phase_space
 @makefuntype SimpleBWg(x;p) =
     1/(p.m0^2 - x^2 - 1im*p.g^2*Φ2(x))
 #
 signalpdf0 = Normalized(
         abs2(SimpleBWg((m0=2.95, g=0.01)))*phasespace,
         fitrange)
-plot!(signalpdf0, fill=0, α=0.3)
-# 
-##############################################
+
 # the full model - sum of components
 model0 = 
     signalpdf0 * (f0=0.05Nev,) +
@@ -94,30 +71,11 @@ model0 =
     backgrpdf * Ext(fb=0.3Nev,) # Ext - to be able to fix
 # 
 model1 = fixpar(model0, :fb, 17.2)
-# 
+# fit
 @time fit_summary = fit(
     Extended(NegativeLogLikelihood(model1, data)))
-# 
-# plot
-let bins = range(fitrange..., length=80)
-    Ns = scaletobinneddata(bins)
-    stephist(data; bins, lc=:black, lab="Data")
-    for i in 1:5
-        plot!(fit_summary.best_model[i], Ns, 300,
-            fillto=0.0, α=0.4, lab="Signal$(i)")
-    end
-    plot!(fit_summary.best_model, Ns, 300, lc=:red, lab="Total fit")
-    # 
-    m = fit_summary.measurements
-    for (i,(k,v)) in enumerate(zip(keys(m), m))
-        annotate!(xth+0.01,30-1.2i,text("$k=$(string(v))",:left, 6))
-    end
-    plot!()
-end
 ```
-![plots/sixcompfit.png](plots/sixcompfit.png)
-
-Detailed description of the methods follows.
+The plotting commands see in [plots/example.jl](plots/example.jl). Detailed description of the methods follows.
 
 ## Call the function
 The object behave similar to a regular function with a keyword argument `p` set to `freepars(d)` by default.
