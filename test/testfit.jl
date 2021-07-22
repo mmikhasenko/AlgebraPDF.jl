@@ -26,6 +26,8 @@ end
     data = filter(x->inrange(x,lims(d)), randn(1000) .+ 0.5)
 
     fr = fit(d, data)
+    @show fr.parameters.μ
+    @show abs(fr.parameters.σ)
     @test 0.3 < fr.parameters.μ < 0.7
     @test 0.7 < abs(fr.parameters.σ) < 1.3
 
