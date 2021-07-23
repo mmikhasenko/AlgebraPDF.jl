@@ -97,7 +97,6 @@ function obj2nt(obj::PyObject)
 end
 
 #######################################################################
-funct
 
 function minimize(fcn, init_pars, optimizer::MigradAndHesse; kws...)
     # 
