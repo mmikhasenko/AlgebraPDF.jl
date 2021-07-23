@@ -3,6 +3,11 @@ using Test
 using Random
 using Measurements
 
+@testset "iminuit should be imported and have :Minuit" begin 
+    @test isiminuitimported()
+    @test hasproperty(AlgebraPDF.iminuit, :Minuit)
+end
+
 @testset "Fit gauss with Minuit" begin 
     d0 = Normalized(FGauss((μ=1.1, σ=0.3)), (-3, 5))
     Random.seed!(1234)
