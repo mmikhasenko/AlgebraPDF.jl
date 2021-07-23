@@ -18,6 +18,15 @@ StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 
 [compat]
 julia = "1.6"
+ForwardDiff = "0.10.0"
+Interpolations = "0.13.0"
+Measurements = "2.3.0"
+Optim = "0.21.0"
+Parameters = "0.12.0"
+PyCall = "1.92.3"
+QuadGK = "2.3.0"
+RecipesBase = "1.1.0"
+StaticArrays = "0.12.4"
 
 [extras]
 SpecialFunctions = "276daf66-3868-5448-9aa4-cd146d93841b"
