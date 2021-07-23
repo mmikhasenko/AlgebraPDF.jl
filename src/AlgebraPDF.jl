@@ -80,6 +80,7 @@ export pdf
 export fit
 export BFGSApproxHesse
 export MigradAndHesse
+export isiminuitimported
 export minussum
 export obj2nt
 include("fit.jl")

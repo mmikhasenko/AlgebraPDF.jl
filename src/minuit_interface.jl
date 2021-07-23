@@ -31,6 +31,8 @@ function __init__()
     """)
 end
 
+isiminuitimported() = (AlgebraPDF.iminuit != AlgebraPDF.PyNULL())
+
 #######################################################################
 
 abstract type AbstractMinuit end
@@ -95,7 +97,6 @@ function obj2nt(obj::PyObject)
 end
 
 #######################################################################
-
 
 function minimize(fcn, init_pars, optimizer::MigradAndHesse; kws...)
     # 
