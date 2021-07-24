@@ -1,7 +1,6 @@
 module AlgebraPDF
 #
 # using Base: NamedTuple
-using ForwardDiff: getindex
 using Parameters
 using QuadGK
 # 

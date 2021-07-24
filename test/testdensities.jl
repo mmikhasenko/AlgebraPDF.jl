@@ -1,4 +1,5 @@
-
+using AlgebraPDF
+using Test
 
 #              _|_|_|                                
 #    _|_|_|  _|          _|_|_|  _|    _|    _|_|_|  
@@ -27,7 +28,6 @@ end
     exp_gauss_at_zero = 1/sqrt(2π)/pars(dGauss).σ1
     @test abs(dGauss(1.0) - exp_gauss_at_zero) / exp_gauss_at_zero < 1e-3
 end
-
 
 @testset "Precodded pdfs" begin
     d2 = FBreitWigner((mΩb = 6030, Γ=17.0))
