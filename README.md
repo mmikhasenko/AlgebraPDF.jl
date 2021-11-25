@@ -23,8 +23,12 @@ Current implementation is limited to immutable operations.
 using AlgebraPDF
 using DelimitedFiles
 
+
+const xth = 2.95
+const fitrange = xth .+ (0, 0.22)
+
 data = readdlm("data.txt")[:,1]
-Nev = size(data,1)
+# Nev = size(data,1)
 
 # amplitude for the signal
 Φ2(x) = sqrt(x-xth)
@@ -49,10 +53,10 @@ end
 signalpdfs = 
     [Normalized(abs2(A)*phasespace, fitrange)
         for A in [
-            SimpleBW((m1=3.00, Γ1=6.5e-3)
-            SimpleBW((m2=3.05, Γ2=2.3e-3)
-            SimpleBW((m3=3.06, Γ3=4.0e-3)
-            SimpleBW((m4=3.09, Γ4=9.9e-3)]
+            SimpleBW((m1=3.00, Γ1=6.5e-3)),
+            SimpleBW((m2=3.05, Γ2=2.3e-3)),
+            SimpleBW((m3=3.06, Γ3=4.0e-3)),
+            SimpleBW((m4=3.09, Γ4=9.9e-3))]
         ]
 
 # III) The threshold function, also |Ath|^2 * phase_space
