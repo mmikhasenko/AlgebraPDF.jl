@@ -133,6 +133,20 @@ end
 end
 
 
+@testset "ChiSq construction" begin
+    μ₀, σ = 1.1, 1.3
+    Δμ = 1.2
+    # 
+    g = FGauss((;μ=μ₀,σ))
+    xv = range(-3, 6, length=40)
+    yv = g(xv)
+    # 
+    χ² = ChiSq(g,collect(xv) .+ Δμ,yv)
+    # 
+    @test χ²(1.1) ≈ χ²(2.2)
+    @test χ²(1.1; p=(;μ=μ₀+Δμ,σ))+5.5 ≈ 5.5
+end
+
 @testset "FSum and FProd" begin
     a1 = FunctionWithParameters(
         (x;p)->p.a+cos(x)*p.b; p=Ext(a=2,b=1))
@@ -222,3 +236,4 @@ g = SuperF(p=(a=0.5,))
     @test keys(pars(g)) == (:a,)
     @test g(1) == 1.5
 end
+# 

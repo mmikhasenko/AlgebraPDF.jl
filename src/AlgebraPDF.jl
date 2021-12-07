@@ -66,10 +66,10 @@ export normalizationintegral
 # 
 include("pdf.jl")
 # 
-
 export FSum, FAbs2, FLog
 export NegativeLogLikelihood
 export Extended
+export ChiSq
 export FSum
 include("arithmetics.jl")
 
