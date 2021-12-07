@@ -110,8 +110,10 @@ macro makefuntype(ex)
             p::T
         end
         $(esc(name))(;p) = $(esc(name))(p)
-        import AlgebraPDF: func
-        $(esc(:func))(d::$(esc(name)), $(esc(x))::NumberOrTuple; p=$(esc(:pars))(d)) = $(esc(body))
+        # 
+        $(esc(:(AlgebraPDF.func)))(d::$(esc(name)), $(esc(x))::NumberOrTuple;
+            p=$(esc(:(AlgebraPDF.pars)))(d)) =
+                $(esc(body))
     end
 end
 

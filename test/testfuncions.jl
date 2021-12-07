@@ -196,8 +196,7 @@ end
 struct BW2{P} <: AbstractFunctionWithParameters
     p::P
 end
-import AlgebraPDF:func
-function func(bw::BW2, x::NumberOrTuple; p=pars(bw))
+function AlgebraPDF.func(bw::BW2, x::NumberOrTuple; p=AlgebraPDF.pars(bw))
     m,Γ = (getproperty(p,s) for s in keys(bw.p))
     m*Γ/(m^2-x^2-1im*m*Γ)
 end

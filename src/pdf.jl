@@ -109,8 +109,8 @@ macro makepdftype(ex)
         end
         $(esc(name))(;p,lims) = $(esc(name))(p, lims)
 
-        import AlgebraPDF: func, pars, updatevalueorflag
-        #
-        $(esc(:func))(d::$(esc(name)), $(esc(x))::NumberOrTuple; p=$(esc(:pars))(d)) = $(esc(body))
+        $(esc(:(AlgebraPDF.func)))(d::$(esc(name)), $(esc(x))::NumberOrTuple;
+            p=$(esc(:(AlgebraPDF.pars)))(d)) =
+                $(esc(body))
     end
 end
