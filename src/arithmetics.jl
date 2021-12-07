@@ -145,3 +145,24 @@ end
 # model property
 model(nll::NegativeLogLikelihood) = nll.f
 model(enll::Extended) = model(enll.nll)
+
+###################################################################### 
+
+struct ChiSq{M,T<:NumberOrTuple,V<:Number} <: AbstractFunctionWithParameters
+    f::M
+    xv::Vector{T}
+    yv::Vector{V}
+    dyv::Vector{V}
+end
+func(d::ChiSq, x::NumberOrTuple; p=pars(d)) =
+    sum((d.yv - d.f(d.xv; p)) .^ 2 ./ d.dyv .^ 2)
+# 
+pars(d::ChiSq, isfree::Bool) = pars(d.f, isfree)
+updatevalueorflag(d::ChiSq, s::Symbol, isfree::Bool, v=getproperty(pars(d),s)) =
+    ChiSq(updatevalueorflag(d.f,s,isfree,v), d.xv, d.yv)
+#
+ChiSq(f, xv::Vector{<:NumberOrTuple}, yv::Vector{V}) where V<:Number =
+    ChiSq(f, xv, yv, ones(V,length(yv)))
+# 
+model(χ²::ChiSq) = χ².f
+
