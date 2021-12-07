@@ -142,10 +142,17 @@ end
     yv = g(xv)
     # 
     χ² = ChiSq(g,collect(xv) .+ Δμ,yv)
-    # 
+    #
     @test pars(χ²) == pars(g)
     @test χ²(1.1) ≈ χ²(2.2)
     @test χ²(1.1; p=(;μ=μ₀+Δμ,σ))+5.5 ≈ 5.5
+    # 
+    @show AlgebraPDF.model(χ²) == g
+    # 
+    χ²′ = updatepar(χ², :μ, μ₀+Δμ)
+    @test χ²′(1.1)+5.5 ≈ χ²′(2.2)+5.5
+    @test χ²′(1.1)+5.5 ≈ 5.5
+    # 
 end
 
 @testset "FSum and FProd" begin
