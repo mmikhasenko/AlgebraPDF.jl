@@ -1,5 +1,5 @@
 
-function fit(objective::Union{NegativeLogLikelihood, Extended},
+function fit(objective::Union{NegativeLogLikelihood, Extended, ChiSq},
         optimizer = MigradAndHesse(), args...; kws...)
     d = model(objective)
     fit_result = minimize(x->objective(0,x), p2v(d), optimizer, args...; kws...)
