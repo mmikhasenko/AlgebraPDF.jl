@@ -1,7 +1,7 @@
 name = "AlgebraPDF"
 uuid = "e09e93a3-870c-4c75-9b71-3eefe58c6e5b"
 authors = ["Misha Mikhasenko"]
-version = "0.3.5"
+version = "0.3.6"
 
 [deps]
 ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210"
