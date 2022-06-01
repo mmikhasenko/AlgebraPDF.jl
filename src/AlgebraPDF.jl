@@ -4,14 +4,10 @@ module AlgebraPDF
 using Parameters
 using QuadGK
 # 
-using PyCall
-using Optim
-# 
 using Random
 using RecipesBase
 using StaticArrays
 using Interpolations
-using ForwardDiff
 using LinearAlgebra
 using Measurements
 
@@ -28,8 +24,6 @@ import Base: getindex
 import Base: abs2, log
 import Base: keys
 import Base: length
-import Optim: minimizer, minimum
-import ForwardDiff: hessian
 # 
 # 
 export ParTypes
@@ -67,7 +61,7 @@ export normalizationintegral
 include("pdf.jl")
 # 
 export FSum, FAbs2, FLog
-export NegativeLogLikelihood
+export NegativeLogLikelihood, minussum
 export Extended
 export ChiSq
 export FSum
@@ -75,16 +69,6 @@ include("arithmetics.jl")
 
 const pdf = Normalized
 export pdf
-
-export fit
-export BFGSApproxHesse
-export MigradAndHesse
-export isiminuitimported
-export minussum
-export obj2nt
-include("fit.jl")
-include("minuit_interface.jl")
-include("optim_interface.jl")
 
 export generate
 include("generation.jl")
