@@ -1,5 +1,6 @@
 using AlgebraPDF
 using Test
+using QuadGK
 
 
 @testset "FunctionWithParameters{NamedTuples}" begin
@@ -81,6 +82,39 @@ end
     Function_function = sin
     @test func(Function_function, 0.0) ≈ 0.0
     @test pars(Function_function, rand([true,false])) == ∅
+end
+
+@testset "lambda constructors" begin
+    g = FGauss(Ext(;μ=1.1,σ=2.2))
+    # 
+    g′ = g |> updatepar(:μ, 1.2)
+    @test pars(g′).μ == 1.2
+    #
+    g′ = g |> fixpar(:μ)
+    @test :μ ∈ keys(fixedpars(g′))
+    @test !(:μ ∈ keys(fixedpars(g′ |> releasepar(:μ))))
+    # 
+    g′ = g |> fixpar(:μ, 1.2)
+    @test pars(g′).μ == 1.2
+    # 
+    g′ = g |> updatepars((μ=2.2,σ=3.3))
+    @test pars(g′).μ == 2.2
+    @test pars(g′).σ == 3.3
+    # 
+    g′ = g |> fixpars((μ=2.2,σ=3.3))
+    @test fixedpars(g′).μ == 2.2
+    @test fixedpars(g′).σ == 3.3
+end
+
+@testset "Divide Norm" begin
+    g = FGauss((μ=0.0, σ=2.2))
+    # 
+    gn = dividenorm(g, :N, (-2,2))
+    @test :N ∈ keys(pars(gn))
+    @test quadgk(gn, -2, 2)[1] ≈ 1.0
+    # 
+    gn′ = g |> dividenorm(:N, (-2,2))
+    @test gn′ == gn
 end
 
 

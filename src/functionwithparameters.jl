@@ -28,6 +28,12 @@ updatepar( d::AbstractFunctionWithParameters, s::Symbol, v) = updatevalue(d, s, 
 releasepar(d::AbstractFunctionWithParameters, s::Symbol) = updateisfree(d, s, true )
 fixpar(    d::AbstractFunctionWithParameters, s::Symbol) = updateisfree(d, s, false)
 fixpar(    d::AbstractFunctionWithParameters, s::Symbol, v) = updateisfree(updatepar(d, s, v), s, false)
+# lambda versions
+updatepar(s::Symbol, v) = d->updatepar(d, s, v) 
+releasepar(s::Symbol) = d->releasepar(d, s) 
+fixpar(    s::Symbol) = d->fixpar(d, s) 
+fixpar(    s::Symbol, v) = d->fixpar(d, s, v) 
+
 
 # plural
 const SymbolSequenceType = Union{AbstractVector{Symbol}, Tuple{Vararg{Symbol}}}
@@ -56,7 +62,10 @@ function updatepars(d::AbstractFunctionWithParameters, sequence::NamedTuple)
 end
 fixpars(d::AbstractFunctionWithParameters, sequence::NamedTuple) = 
     fixpars(updatepars(d, sequence), keys(sequence))
-
+# 
+updatepars(sequence::NamedTuple) = d->updatepars(d, sequence)
+fixpars(sequence::NamedTuple) = d->fixpars(d, sequence)
+# 
 # Number <: AbstractFunctionWithParameters
 pars(d::Number, isfree::Bool) = ∅
 func(d::Number, x::NumberOrTuple; p=∅) = d
