@@ -116,3 +116,35 @@ end
 pars(d::FTabulated, isfree::Bool) = ∅
 
 ###############################################################
+###############################################################
+
+struct FCrystalBall{P} <: AbstractFunctionWithParameters
+    p::P
+end
+function func(d::FCrystalBall, x; p=pars(d))
+    μS, σS, αS, nS = keys(d.p)
+    μ, σ, α, n = getproperty.(Ref(d.p), (μS, σS, αS, nS))
+    # 
+    absα = abs(α)
+    C = n/absα / (n-1) * exp(-absα^2/2)
+    D = sqrt(π/2)*(1+erf(absα/sqrt(2)))
+    N = 1/(σ*(C+D))
+    # 
+    x̂ = (x-μ) / σ
+    x̂ > -α && return exp(-x̂^2/2) / N
+    # 
+    A = (n/absα)^(n) * exp(-absα^2/2)
+    B = n/absα-absα
+    return A*(B-x̂)^(-n) / N
+end
+import Base:show
+function show(io::IO, d::FCrystalBall)
+    μS, σS, αS, nS = keys(d.p)
+    μ, σ, α, n = getproperty.(Ref(d.p), (μS, σS, αS, nS))
+    # 
+    println(io, "FCrystalBall((")
+    println(io, "    $(μS)=$(μ), # mode")
+    println(io, "    $(σS)=$(σ), # sigma")
+    println(io, "    $(αS)=$(α), # alpha")
+    println(io, "    $(nS)=$(n))) # n")
+end
