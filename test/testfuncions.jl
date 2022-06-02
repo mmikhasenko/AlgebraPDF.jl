@@ -83,6 +83,27 @@ end
     @test pars(Function_function, rand([true,false])) == ∅
 end
 
+@testset "lambda constructors" begin
+    g = FGauss(Ext(;μ=1.1,σ=2.2))
+    # 
+    g′ = g |> updatepar(:μ, 1.2)
+    @test pars(g′).μ == 1.2
+    #
+    g′ = g |> fixpar(:μ)
+    @test :μ ∈ keys(fixedpars(g′))
+    @test !(:μ ∈ keys(fixedpars(g′ |> releasepar(:μ))))
+    # 
+    g′ = g |> fixpar(:μ, 1.2)
+    @test pars(g′).μ == 1.2
+    # 
+    g′ = g |> updatepars((μ=2.2,σ=3.3))
+    @test pars(g′).μ == 2.2
+    @test pars(g′).σ == 3.3
+    # 
+    g′ = g |> fixpars((μ=2.2,σ=3.3))
+    @test fixedpars(g′).μ == 2.2
+    @test fixedpars(g′).σ == 3.3
+end
 
 @testset "FAbs2" begin
     m0 = FunctionWithParameters(
