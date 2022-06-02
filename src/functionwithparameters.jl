@@ -70,10 +70,6 @@ fixpars(sequence::NamedTuple) = d->fixpars(d, sequence)
 pars(d::Number, isfree::Bool) = ∅
 func(d::Number, x::NumberOrTuple; p=∅) = d
 
-# Vector <: AbstractFunctionWithParameters
-pars(v::Vector{Number}, isfree::Bool) = ∅
-func(v::Vector{Number}, x::NumberOrTuple; p=∅) = v
-
 # Function <: AbstractFunctionWithParameters
 pars(f::Function, isfree::Bool) = ∅
 func(f::Function, x::NumberOrTuple; p=∅) = f(x)
