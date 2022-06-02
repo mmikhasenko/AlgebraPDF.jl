@@ -10,6 +10,7 @@ using StaticArrays
 using Interpolations
 using LinearAlgebra
 using Measurements
+using SpecialFunctions
 
 #
 const ∅ = NamedTuple()
@@ -61,10 +62,10 @@ export normalizationintegral
 include("pdf.jl")
 # 
 export FSum, FAbs2, FLog
+export dividenorm
 export NegativeLogLikelihood, minussum
 export Extended
 export ChiSq
-export FSum
 include("arithmetics.jl")
 
 const pdf = Normalized
@@ -81,6 +82,7 @@ include("plottingrecipe.jl")
 
 export FGauss, FBreitWigner, FExp
 export FPowExp, FPol
+export FCrystalBall
 export FDoubleGaussFixedRatio
 export FBreitWignerConvGauss
 export FTabulated

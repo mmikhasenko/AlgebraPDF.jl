@@ -60,6 +60,11 @@ end
     @test d8( 3π) == 0.0
     @test d8( -π) != 0.0
     @test d8( 2π) != 0.0
+    # 
+    d9 = (μ=0.0, σ=1, α=2.0, n=2) |> FCrystalBall
+    a, b = d9.(-d9.p.α .+ 1e-5 .* [-1,1])
+	isapprox(a,b; rtol = 1e-4)
+    # 
 end
 
 # here is MWE of the normalization problem
