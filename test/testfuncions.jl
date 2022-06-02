@@ -1,5 +1,6 @@
 using AlgebraPDF
 using Test
+using QuadGK
 
 
 @testset "FunctionWithParameters{NamedTuples}" begin
@@ -104,6 +105,18 @@ end
     @test fixedpars(g′).μ == 2.2
     @test fixedpars(g′).σ == 3.3
 end
+
+@testset "Divide Norm" begin
+    g = FGauss((μ=0.0, σ=2.2))
+    # 
+    gn = dividenorm(g, :N, (-2,2))
+    @test :N ∈ keys(pars(gn))
+    @test quadgk(gn, -2, 2)[1] ≈ 1.0
+    # 
+    gn′ = g |> dividenorm(:N, (-2,2))
+    @test gn′ == gn
+end
+
 
 @testset "FAbs2" begin
     m0 = FunctionWithParameters(

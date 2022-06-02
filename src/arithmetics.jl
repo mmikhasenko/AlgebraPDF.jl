@@ -68,6 +68,13 @@ function func(d::FSumFunc, x::NumberOrTuple; p=freepars(d))
     return sum(α_vals .* f_vals)   
 end
 
+function dividenorm(d::AbstractFunctionWithParameters, Nsymb::Symbol, lims)
+    I = quadgk(x->func(d, x), lims...)[1]
+    FSum([d], NamedTuple{(Nsymb,)}(1/I))
+end
+# lambda version
+dividenorm(Nsymb::Symbol, lims) = d->dividenorm(d, Nsymb, lims)
+
 # 
 function func_norm(d::FSumPDF, x; p=freepars(d)) # suppose to work also for all x <: AbstractVector
     allp = p+fixedpars(d)
