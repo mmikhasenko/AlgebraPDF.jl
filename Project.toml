@@ -1,7 +1,7 @@
 name = "AlgebraPDF"
 uuid = "e09e93a3-870c-4c75-9b71-3eefe58c6e5b"
 authors = ["Misha Mikhasenko"]
-version = "0.3.6"
+version = "0.3.7"
 
 [deps]
 Interpolations = "a98d9a8b-a2ab-59e6-89dd-64a1c18fca59"
