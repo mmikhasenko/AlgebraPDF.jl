@@ -118,10 +118,11 @@ pars(d::FTabulated, isfree::Bool) = ∅
 ###############################################################
 ###############################################################
 
-struct FCrystalBall{P} <: AbstractFunctionWithParameters
+abstract type AbstractCrystalBall <: AbstractFunctionWithParameters end
+struct FLeftSideCrystalBall{P} <: AbstractCrystalBall
     p::P
 end
-function func(d::FCrystalBall, x; p=pars(d))
+function func(d::FLeftSideCrystalBall, x; p=pars(d))
     μS, σS, αS, nS = keys(d.p)
     μ, σ, α, n = getproperty.(Ref(d.p), (μS, σS, αS, nS))
     # 
@@ -131,18 +132,60 @@ function func(d::FCrystalBall, x; p=pars(d))
     N = 1/(σ*(C+D))
     # 
     x̂ = (x-μ) / σ
-    x̂ > -α && return exp(-x̂^2/2) / N
+    x̂ > -α && return exp(-x̂^2/2) * N
     # 
     A = (n/absα)^(n) * exp(-absα^2/2)
     B = n/absα-absα
-    return A*(B-x̂)^(-n) / N
+    return A*(B-x̂)^(-n) * N
 end
-import Base:show
-function show(io::IO, d::FCrystalBall)
+
+struct FRightSideCrystalBall{P} <: AbstractCrystalBall
+    p::P
+end
+function func(d::FRightSideCrystalBall, x; p=pars(d))
     μS, σS, αS, nS = keys(d.p)
     μ, σ, α, n = getproperty.(Ref(d.p), (μS, σS, αS, nS))
     # 
-    println(io, "FCrystalBall((")
+    absα = abs(α)
+    C = n/absα / (n-1) * exp(-absα^2/2)
+    D = sqrt(π/2)*(1+erf(absα/sqrt(2)))
+    N = 1/(σ*(C+D))
+    # 
+    x̂ = (x-μ) / σ
+    x̂ < α && return exp(-x̂^2/2) * N
+    # 
+    A = (n/absα)^(n) * exp(-absα^2/2)
+    B = n/absα-absα
+    return A*(B+x̂)^(-n) * N
+end
+
+
+struct FDoubleSideCrystalBall{P} <: AbstractCrystalBall
+    p::P
+end
+function func(d::FDoubleSideCrystalBall, x; p=pars(d))
+    μS, σS, αS, nS = keys(d.p)
+    μ, σ, α, n = getproperty.(Ref(d.p), (μS, σS, αS, nS))
+    # 
+    absα = abs(α)
+    C = n/absα / (n-1) * exp(-absα^2/2)
+    D = sqrt(π/2)*erf(absα/sqrt(2))
+    N = 1/(σ*2*(C+D))
+    # 
+    x̂ = (x-μ) / σ
+    abs(x̂) < α && return exp(-x̂^2/2) * N
+    # 
+    A = (n/absα)^(n) * exp(-absα^2/2)
+    B = n/absα-absα
+    return A*(B+abs(x̂))^(-n) * N
+end
+
+import Base:show
+function show(io::IO, d::AbstractCrystalBall)
+    μS, σS, αS, nS = keys(d.p)
+    μ, σ, α, n = getproperty.(Ref(d.p), (μS, σS, αS, nS))
+    # 
+    println(io, "$(typeof(d)[1])((")
     println(io, "    $(μS)=$(μ), # mode")
     println(io, "    $(σS)=$(σ), # sigma")
     println(io, "    $(αS)=$(α), # alpha")
