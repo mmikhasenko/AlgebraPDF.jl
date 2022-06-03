@@ -1,5 +1,6 @@
 using AlgebraPDF
 using Test
+using QuadGK
 
 #              _|_|_|                                
 #    _|_|_|  _|          _|_|_|  _|    _|    _|_|_|  
@@ -61,15 +62,28 @@ end
     @test d8( -π) != 0.0
     @test d8( 2π) != 0.0
     # 
-    d9 = (μ=0.0, σ=1, α=2.0, n=2) |> FCrystalBall
-    a, b = d9.(-d9.p.α .+ 1e-5 .* [-1,1])
-	isapprox(a,b; rtol = 1e-4)
-    # 
 end
 
-# here is MWE of the normalization problem
-# let 
-#     d = aGauss((a=0.01,b = 1.1), (-3,3))
-#     d(1.1, [36.1,0.1])
-# end
+# @testset "Crystal Ball" begin
+let
+    cb1 = (μ=0.0, σ=1, α=2.0, n=2) |> FLeftSideCrystalBall
+    a, b = cb1.(-cb1.p.α .+ 1e-5 .* [-1,1])
+    # match on the connection point
+	@test isapprox(a,b; rtol = 1e-4)
 
+    cb2 = (μ=0.0, σ=1, α=2.0, n=2) |> FRightSideCrystalBall
+    a, b = cb2.(cb2.p.α .+ 1e-5 .* [1,-1])
+    # match on the connection point
+	@test isapprox(a,b; rtol = 1e-4)
+
+    cb3 = (μ=0.0, σ=1, α=2.0, n=2) |> FDoubleSideCrystalBall
+    a, b = cb3.(-cb3.p.α .+ 1e-5 .* [-1,1])
+    # match on the connection point
+	@test isapprox(a,b; rtol = 1e-4)
+    # symmetric
+    @test  prod((a, b) .≈ cb3.(cb3.p.α .+ 1e-5 .* [1,-1]))
+    # 
+    @test quadgk(cb1, -Inf, Inf)[1] ≈ 1.0
+    @test quadgk(cb2, -Inf, Inf)[1] ≈ 1.0
+    @test quadgk(cb3, -Inf, Inf)[1] ≈ 1.0
+end

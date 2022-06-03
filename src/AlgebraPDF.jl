@@ -98,7 +98,7 @@ include("plottingrecipe.jl")
 
 export FGauss, FBreitWigner, FExp
 export FPowExp, FPol
-export FCrystalBall
+export FLeftSideCrystalBall, FRightSideCrystalBall, FDoubleSideCrystalBall
 export FDoubleGaussFixedRatio
 export FBreitWignerConvGauss
 export FTabulated
