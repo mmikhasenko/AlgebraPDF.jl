@@ -37,7 +37,7 @@ breitwigner(x,m,Γ₀) = 1/(m^2-x^2-1im*m*Γ(x,m,Γ₀))
 
 # I) phase space function, also the background
 phasespace = FunctionWithParameters((x;p)->Φ2(x), ∅) # pass λ-function
-backgrpdf = Normalized(phasespace, phasespace) # get PDF
+backgrpdf = Normalized(phasespace, fitrange) # get PDF
 
 # II) define a type SimpleBW and the method `func` for dispatch
 struct SimpleBW{P} <: AbstractFunctionWithParameters
