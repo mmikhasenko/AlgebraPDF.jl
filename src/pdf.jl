@@ -71,7 +71,7 @@ updatevalueorflag(d::Normalized, s::Symbol, isfree::Bool, v=getproperty(pars(d),
 
 # short cuts
 # 1 argument
-Normalized(f;p,lims) = Normalized(FunctionWithParameters(f; p), lims)
+Normalized(lims::L) where L = f->Normalized(f, lims)
 
 ###################################################################### 
 
