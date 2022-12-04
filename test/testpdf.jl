@@ -9,12 +9,14 @@ using Test
     func(d1, 3) == 12
 end
 
-@testset "short cut: Normalized(function), fixedshapepdf" begin
-    d = Normalized((e;p)->e^2+p.a; lims=(-1,2), p=(a=1.0,))
+@testset "short cut: |> Normalized(lims)" begin
+    d = FunctionWithParameters((e;p)->e^2+p.a; p=(a=1.0,)) |> Normalized((-1,2))
     @test typeof(pars(d)) <: NamedTuple
     @test length(freepars(d)) == 1
     @test length(fixedpars(d)) == 0
-    # 
+end
+
+@testset "Fixed shape PDF" begin
     d1 = fixedshapepdf(x->exp(-(4x)^2), (-1, 2))
     @test length(freepars(d1)) == 0
 end
