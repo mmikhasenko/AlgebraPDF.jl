@@ -24,7 +24,7 @@ using DelimitedFiles
 
 
 const xth = 2.95
-const fitrange = xth .+ (0, 0.22)
+const support = xth .+ (0, 0.22)
 
 data = readdlm("data.txt")[:,1]
 # Nev = size(data,1)
@@ -36,7 +36,7 @@ breitwigner(x,m,Γ₀) = 1/(m^2-x^2-1im*m*Γ(x,m,Γ₀))
 
 # I) phase space function, also the background
 phasespace = FunctionWithParameters((x;p)->Φ2(x), ∅) # pass λ-function
-backgrpdf = Normalized(phasespace, fitrange) # get PDF
+backgrpdf = Normalized(phasespace, support) # get PDF
 
 # II) define a type SimpleBW and the method `func` for dispatch
 struct SimpleBW{P} <: AbstractFunctionWithParameters
@@ -50,7 +50,7 @@ end
 
 # Signal1-4: |A|^2 * phase_space
 signalpdfs = 
-    [Normalized(abs2(A)*phasespace, fitrange)
+    [Normalized(abs2(A)*phasespace, support)
         for A in [
             SimpleBW((m1=3.00, Γ1=6.5e-3)),
             SimpleBW((m2=3.05, Γ2=2.3e-3)),
@@ -64,7 +64,7 @@ signalpdfs =
 #
 signalpdf0 = Normalized(
         abs2(SimpleBWg((m0=2.95, g=0.01)))*phasespace,
-        fitrange)
+        support)
 
 # the full model - sum of components
 model0 = 
@@ -74,9 +74,8 @@ model0 =
     backgrpdf * Ext(fb=0.3Nev,) # Ext - to be able to fix
 # 
 model1 = fixpar(model0, :fb, 17.2)
-# fit
-@time fit_summary = fit(
-    Extended(NegativeLogLikelihood(model1, data)))
+# 
+# fit with your favorite package
 ```
 The plotting commands see in [plots/example.jl](plots/example.jl). Detailed description of the methods follows.
 
