@@ -75,7 +75,7 @@ Normalized(lims::L) where L = f->Normalized(f, lims)
 
 ###################################################################### 
 
-fixedshapepdf(f, lims) = Normalized((x;p)->f(x); lims=lims, p=∅)
+fixedshapepdf(f, lims) = Normalized(FunctionWithParameters((x;p)->f(x); p=∅), lims)
 
 ###################################################################### 
 

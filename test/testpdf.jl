@@ -22,7 +22,7 @@ end
 end
 
 @testset "fix parameters example" begin
-    d0 = Normalized((e;p)->e^2+p.a; p=Ext(a=1.0), lims=(-1,2))
+    d0 = FunctionWithParameters((e;p)->e^2+p.a; p=Ext(a=1.0)) |> Normalized((-1,2))
     @test d0(1.0) ≈ 2.0/(9/3+3*pars(d0).a)
     #
     d1 = fixpar(d0, :a, 2.9)
@@ -34,15 +34,15 @@ end
 end
 
 @testset "noparsnormf " begin
-    d = Normalized((e;p)->e^2+p.a; p=Ext(a=1.0), lims=(-1,2))
+    d = FunctionWithParameters((e;p)->e^2+p.a; p=Ext(a=1.0)) |> Normalized((-1,2))
     f = noparsnormf(d)
     d(1.1) == f(1.1)
 end
 
 @testset "integral " begin
-    d1 = Normalized((e;p)->e^2+p.a; p=(a=1.0,), lims=(-1,2))
+    d1 = FunctionWithParameters((e;p)->e^2+p.a; p=(a=1.0,)) |> Normalized((-1,2))
     @test integral(d1, (0,2)) < 1
-    d2 = Normalized((e;p)->-e^2+p.b; p=(b=4.0,), lims=(-1,2))
+    d2 = FunctionWithParameters((e;p)->-e^2+p.b; p=(b=4.0,)) |> Normalized((-1,2))
     @test integral(d2, lims(d2)) ≈ 1
     s = d1+d2
     @test integral(s) == 2
