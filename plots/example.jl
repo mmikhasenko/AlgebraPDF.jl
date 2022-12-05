@@ -40,11 +40,6 @@ plot(bwsq, fitrange...) # can plot, range is needed
 bwsq_norm = Normalized(bwsq, fitrange) # needs limits (ranges, support)
 plot(bwsq_norm) # can plot
 
-# fit would work already
-testfit_summary = fit(bwsq_norm, data)
-# same as
-# fit(NegativeLogLikelihood(bwsq_norm, data))
-
 
 # define a type SimpleBW and method `func` for dispatch
 struct SimpleBW{P} <: AbstractFunctionWithParameters
