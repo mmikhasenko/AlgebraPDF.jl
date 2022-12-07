@@ -42,27 +42,6 @@ minussum(d::FLog, data::AbstractArray) = NegativeLogLikelihood(d.f, data)
 
 ###################################################################### 
 
-struct Extended{T <: AlgebraPDF.FSumPDF} <: AbstractFunctionWithParameters
-    nll::NegativeLogLikelihood{T}
-end
-
-pars(d::Extended, isfree::Bool) = pars(d.nll, isfree)
-updatevalueorflag(d::Extended, s::Symbol, isfree::Bool, v=getproperty(pars(d),s)) =
-    Extended(updatevalueorflag(d.nll,s,isfree,v))
-# 
-function func(d::Extended, x::NumberOrTuple; p=freepars(d))
-    nll = func(d.nll, x; p)
-    μ = integral(d.nll.f; p)
-    penalty = μ
-    return nll + penalty
-end
-
-# model property
-model(nll::NegativeLogLikelihood) = nll.f
-model(enll::Extended) = model(enll.nll)
-
-###################################################################### 
-
 struct ChiSq{M,T<:NumberOrTuple,V<:Number} <: AbstractFunctionWithParameters
     f::M
     xv::Vector{T}

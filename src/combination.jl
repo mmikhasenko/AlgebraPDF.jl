@@ -81,13 +81,40 @@ function integral(d::FSumPDF, lims; p=freepars(d))
     return sum(α_vals .* f_vals)
 end
 
+==(d1::FSum, d2::FSum) = prod(d1.fs .== d2.fs) * (d1.αs == d2.αs)
+syncpars(d::AbstractFunctionWithParameters) = updatepars(d, pars(d))
+
 +(f1::AbstractFunctionWithParameters,
-f2::AbstractFunctionWithParameters; p=(α1=1.0, α2=1.0)) = FSum([f1,f2], p)
+    f2::AbstractFunctionWithParameters; p=(α1=1.0, α2=1.0)) =
+        FSum([f1,f2], p) |> syncpars
 
 -(f1::AbstractFunctionWithParameters,
-f2::AbstractFunctionWithParameters; p=(α1=1.0, α2=-1.0)) = FSum([f1,f2], p)
+    f2::AbstractFunctionWithParameters; p=(α1=1.0, α2=-1.0)) =
+        FSum([f1,f2], p) |> syncpars
 
-+(f1::FSum, f2::FSum) = FSum([f1.fs...,f2.fs...], f1.αs+f2.αs)
++(f1::FSum, f2::FSum) = FSum([f1.fs...,f2.fs...], f1.αs+f2.αs) |> syncpars
 
-*(f::AbstractFunctionWithParameters, c::ParTypes) = FSum([f], c)
-*(c::ParTypes, f::AbstractFunctionWithParameters) = FSum([f], c)
+*(f::AbstractFunctionWithParameters, c::ParTypes) = FSum([f], c) |> syncpars
+*(c::ParTypes, f::AbstractFunctionWithParameters) = FSum([f], c) |> syncpars
+
+
+###################################################################### 
+
+struct Extended{T <: AlgebraPDF.FSumPDF} <: AbstractFunctionWithParameters
+    nll::NegativeLogLikelihood{T}
+end
+
+pars(d::Extended, isfree::Bool) = pars(d.nll, isfree)
+updatevalueorflag(d::Extended, s::Symbol, isfree::Bool, v=getproperty(pars(d),s)) =
+    Extended(updatevalueorflag(d.nll,s,isfree,v))
+# 
+function func(d::Extended, x::NumberOrTuple; p=freepars(d))
+    nll = func(d.nll, x; p)
+    μ = integral(d.nll.f; p)
+    penalty = μ
+    return nll + penalty
+end
+
+# model property
+model(nll::NegativeLogLikelihood) = nll.f
+model(enll::Extended) = model(enll.nll)

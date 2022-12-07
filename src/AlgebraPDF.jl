@@ -70,6 +70,8 @@ include("arithmetics.jl")
 
 export FSum, FProd
 export FSumFunc, FSumPDF
+export Extended
+export syncpars
 include("combination.jl")
 
 const pdf = Normalized
