@@ -61,12 +61,16 @@ export normalizationintegral
 # 
 include("pdf.jl")
 # 
-export FSum, FAbs2, FLog
+export FAbs2, FLog
 export dividenorm
 export NegativeLogLikelihood, minussum
 export Extended
 export ChiSq
 include("arithmetics.jl")
+
+export FSum, FProd
+export FSumFunc, FSumPDF
+include("combination.jl")
 
 const pdf = Normalized
 export pdf
