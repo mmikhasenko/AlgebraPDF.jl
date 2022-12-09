@@ -15,6 +15,9 @@ func(d::AbstractFunctionWithParameters, x::ArrayOrRange; p=freepars(d)) = func.(
 (d::AbstractFunctionWithParameters)(x; p=freepars(d)) = func(d,x;p)
 (d::AbstractFunctionWithParameters)(x, v::ArrayOrRange) = d(x; p=v2p(v,d))
 
+# 0-dims function (NLL)
+(d::AbstractFunctionWithParameters)(; p=freepars(d)) = func(d,();p)
+
 # methods that call `updatevalueorflag`
 
 updateisfree(d::AbstractFunctionWithParameters, s::Symbol, isfree::Bool) =

@@ -366,3 +366,25 @@ data3 = rand(model, 1000) # same as generate(model, 1000)
 however, a call for a single number in inefficient (the integral is not stored but computed every time),
 the call with a set size does the same `generate` and does not take key arguments.
 Currently, `generate` works only in one dimension.
+
+
+## Likelihood function
+The negative log-likelihood function is a subtype of `AbstactFunctionWithParameters`. It does not depend on `x` (zero-dimensional)
+```julia
+model = FGauss((μ=0.2, σ=1.1)) |> Normalized((-Inf, Inf))
+data = randn(10_000)
+# 
+nll = NegativeLogLikelihood(model, data)
+# Alternatively,
+# nll = minussum(log(model), data)
+# 
+nll() # default parameters
+nll(()) # x has 0-dims
+nll(; p=(μ=0.4, σ=1.2))
+nll((), [0.4, 1.2]) # does the same
+```
+In case the density under logarithm is calculated to be negative (might happen during the minimization process),
+a penalty value is used instead of logarithm. 
+```julia
+NegativeLogLikelihood(model, data, nagativepenatly=1e-4)
+```
