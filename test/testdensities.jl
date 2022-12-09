@@ -30,6 +30,19 @@ end
     @test abs(dGauss(1.0) - exp_gauss_at_zero) / exp_gauss_at_zero < 1e-3
 end
 
+@testset "Analytic cumulativefunc" begin
+    # gauss with analytic intrgral
+    gauss = FGauss((μ=2.4, σ=1.3)) |> Normalized((-10.0, 10.0))
+
+    # gauss with numeric integral
+    @makefuntype NGauss(x;p) = exp(-(x-p.μ)^2/(2*p.σ^2)) / sqrt(2π) / p.σ
+    gauss′ = NGauss((μ=2.4, σ=1.3)) |> Normalized((-10.0, 10.0))
+
+    @test cumulativefunc(gauss, 1.1, 2.1) ≈ cumulativefunc(gauss′, 1.1, 2.1)
+    # the factor in the speed is `~100`
+    @test gauss(1.1) ≈ gauss′(1.1)
+end
+
 @testset "Precodded pdfs" begin
     d2 = FBreitWigner((mΩb = 6030, Γ=17.0))
     @test freepars(d2) == (mΩb = 6030, Γ=17.0)

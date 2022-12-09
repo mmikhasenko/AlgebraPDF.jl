@@ -21,16 +21,8 @@ function (d::AbstractPDF)(x; p=freepars(d))
 end
 
 # 1 dims
-function normalizationintegral(d::AbstractPDF{1}; p=freepars(d))
-    allp = p+fixedpars(d)
-    quadgk(x->func(d, x; p=allp), lims(d)...)[1]
-end
-#
-# 2 dims
-# function normalizationintegral(d::AbstractPDF{2}; p=freepars(d))
-#     xmap = x->mapx_to_unit(x,lims(d))
-#     curhe((x,f)->f[1]=func(d, xmap(x); p=p), lims(d)...)[1]
-# end
+normalizationintegral(d::AbstractPDF; p=freepars(d)) =
+    cumulativefunc(d, lims(d)...; p)
 
 
 """
@@ -48,8 +40,7 @@ updatevalueorflag(d::AbstractPDF, s::Symbol, isfree::Bool, v=getproperty(pars(d)
 
 # other methods
 function integral(d::AbstractPDF{1}, lims; p=freepars(d))
-    allpars = p+fixedpars(d)
-    quadgk(x->func(d,x; p=allpars), lims...)[1] / normalizationintegral(d; p=allpars)
+    return cumulativefunc(d, lims...; p) / normalizationintegral(d; p)
 end
 
 #################################################################### 
@@ -67,7 +58,10 @@ func(d::Normalized, x::NumberOrTuple; p=pars(d)) = func(lineshape(d), x; p)
 pars(d::Normalized, isfree::Bool) = pars(lineshape(d), isfree)
 updatevalueorflag(d::Normalized, s::Symbol, isfree::Bool, v=getproperty(pars(d),s)) =
     Normalized(updatevalueorflag(lineshape(d), s, isfree, v), d.lims)
-
+# 
+function normalizationintegral(d::Normalized; p=freepars(d))
+    return cumulativefunc(lineshape(d), lims(d)...; p)
+end
 
 # short cuts
 # 1 argument

@@ -218,6 +218,15 @@ func(d::Pol1SinSq, x::NumberOrTuple; p=pars(d)) = p.a*sin(x+p.b)^2+1  # an examp
 ```
 The limits can be checked with `lims(d)`.
 
+## Analytic integration
+Numerical integration is used by default.
+The analytic expression for the integral can be specified by defining the `cumulativefunc` function:
+```
+cumulativefunc(d::myAmazingType, x1::NumberOrTuple, x2::NumberOrTuple; p=pars(d))
+```
+See example of `FGauss` in [src/densities.jl](src/densities.jl#L15-L18).
+
+
 ## Defined parameter names or defined parameter order
 
 Creating a function or pdf can be conveniently done with macro

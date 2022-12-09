@@ -42,6 +42,7 @@ export AbstractFunctionWithParameters
 export FunctionWithParameters
 # 
 export func
+export cumulativefunc
 export nfreepars
 export freepars, fixedpars
 export pars

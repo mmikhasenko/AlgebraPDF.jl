@@ -1,5 +1,8 @@
 
-@recipe function f(d::Union{AbstractPDF,FSumPDF}, norm::T where T<:Real=1.0, bins::Int=100)
+@recipe function f(d::Union{AbstractPDF,FSumPDF})
+    @show keys(plotattributes)
+    norm = plotattributes[:normalize] == :auto ? 1.0 : Float64(plotattributes[:normalize])
+    bins = plotattributes[:bins] == :auto ? 100 : Int(plotattributes[:bins])
     xv = range(lims(d)..., length=bins+1)
     return (xv, norm .* d(xv))
 end

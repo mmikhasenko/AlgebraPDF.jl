@@ -2,7 +2,7 @@
 standardgauss(x,σ) = exp(-x^2/(2*σ^2)) / sqrt(2π) / σ
 # 
 # shortcut with fixed parameter names
-# @makefuntype FGauss(x;p) = exp(-(x-p.μ)^2/(2*p.σ^2))
+# @makefuntype FGauss(x;p) = exp(-(x-p.μ)^2/(2*p.σ^2)) / sqrt(2π) / σ
 # 
 # better: just order of parameters is fixed
 struct FGauss{P} <: AbstractFunctionWithParameters
@@ -11,6 +11,10 @@ end
 function func(d::FGauss, x::NumberOrTuple; p=pars(d))
     μ,σ = (getproperty(p,s) for s in keys(d.p))
     standardgauss(x-μ,σ)
+end
+function cumulativefunc(d::FGauss, x1::NumberOrTuple, x2::NumberOrTuple; p=pars(d))
+    μ,σ = (getproperty(p,s) for s in keys(d.p))
+    return erf((x1-μ)/(sqrt(2)*σ), (x2-μ)/(sqrt(2)*σ)) / 2
 end
 
 ###############################################################

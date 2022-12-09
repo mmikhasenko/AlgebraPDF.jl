@@ -67,6 +67,7 @@ func(bw::nBW1, x::NumberOrTuple; p=pars(bw)) = abs2(p.m*p.Γ/(p.m^2-x^2-1im*p.m*
     bw = nBW1((m=3.1,Γ=0.1), (0,4))
     @test pars(bw).m == 3.1
     @test pars(bw).Γ == 0.1
+    @test func(bw, 3.1) ≈ 1.0
     @test bw(3.1) != 1.0 # because of normalization
     @test lims(bw) == (0,4)
 end
