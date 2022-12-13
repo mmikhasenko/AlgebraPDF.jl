@@ -2,11 +2,37 @@
 using AlgebraPDF
 using Test
 
+
 g1 = FGauss((μ1=1.1,σ1=0.1))
 g2 = FGauss((μ2=2.2,σ2=0.2))
 g3 = FGauss((μ3=3.3,σ3=0.3))
 d = AlgebraPDF.FSum([g1,g2,g3], (α1=0.1,α2=0.2,α3=0.3))
 d2 = AlgebraPDF.FSum([g1,g2,g3], Ext(α1=0.1,α2=0.2,α3=0.3)) |> x->fixpar(x, :α1)
+
+
+@testset "== for simple function" begin
+    @test g1 == FGauss(pars(g1))
+    @test g1 == updatepar(g1, :μ1, pars(g1).μ1)
+end
+
+@testset "== for FSum" begin
+    d′ = FSum([FGauss((μ=2,σ=3))], (α=1,))
+    @test d′ == FGauss((μ=2,σ=3)) * (α=1,) # sync pars is called
+    # 
+    @test d′ == updatepar(d′, :α, 1)
+    @test d′ == updatepar(d′, :μ, 2)
+end
+
+
+@testset "components with distinged parameters are preseved" begin
+    @test d.fs[1] == g1
+    @test d.fs[2] == g2
+    @test d.fs[3] == g3
+    # 
+    @test d2.fs[1] == g1
+    @test d2.fs[2] == g2
+    @test d2.fs[3] == g3
+end
 
 @testset "Sum of regular functions" begin 
     @test length(d) == 3
@@ -62,4 +88,13 @@ end
     x2 = (Ext(α1=0.1,) * g1 + (α2=0.2,) * g2 + (α3=0.3,) * g3) |> d->fixpar(d,:α1)
     @test typeof(d2) == typeof(x2) && d2.fs == x2.fs && d2.αs == x2.αs
     @test nd == (α1=0.1,) * ng1 + (α2=0.2,) * ng2 + (α3=0.3,) * ng3    
+end
+
+
+gauss1 = FGauss((μ=2.4, σ1=1.3)) |> Normalized((-10.0, 10.0))
+gauss2 = FGauss((μ=1.2, σ2=2.3)) |> Normalized((-10.0, 10.0))
+DG = gauss1 * (f1 = 0.3,) + gauss2 * (f2 = 0.7,)
+
+@testset "Shared parameters are updated" begin
+    pars(DG[1]).μ == pars(DG[2]).μ
 end

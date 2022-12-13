@@ -9,12 +9,14 @@ abstract type AbstractFunctionWithParameters end
 #
 nfreepars(d::AbstractFunctionWithParameters) = length(freepars(d))
 # 
-func(d::AbstractFunctionWithParameters, x::AbstractArray; p=freepars(d)) = func.(Ref(d), x; p=p+fixedpars(p))
-func(d::AbstractFunctionWithParameters, x::AbstractRange; p=freepars(d)) = func.(Ref(d), x; p=p+fixedpars(p))
+const ArrayOrRange = Union{AbstractArray,AbstractRange}
+func(d::AbstractFunctionWithParameters, x::ArrayOrRange; p=freepars(d)) = func.(Ref(d), x; p=p+fixedpars(p))
 # 
 (d::AbstractFunctionWithParameters)(x; p=freepars(d)) = func(d,x;p)
-const ArrayOrRange = Union{AbstractArray,AbstractRange}
 (d::AbstractFunctionWithParameters)(x, v::ArrayOrRange) = d(x; p=v2p(v,d))
+
+# 0-dims function (NLL)
+(d::AbstractFunctionWithParameters)(; p=freepars(d)) = func(d,();p)
 
 # methods that call `updatevalueorflag`
 
@@ -133,3 +135,10 @@ p2v(  d::AbstractFunctionWithParameters) = p2v(freepars(d), d)
 
 # single-argument lambda-function with fixed parameters
 noparsf(d::AbstractFunctionWithParameters; p=pars(d)) = (x;kw...)->func(d,x;p=p)
+
+
+# numerical normalization
+function cumulativefunc(d::AbstractFunctionWithParameters, x1::NumberOrTuple, x2::NumberOrTuple; p=freepars(d))
+    allp = p+fixedpars(d)
+    return quadgk(x->func(d, x; p=allp), x1, x2)[1]
+end

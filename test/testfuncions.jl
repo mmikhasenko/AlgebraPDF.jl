@@ -149,9 +149,9 @@ end
     nll = NegativeLogLikelihood(d, data)
     # 
     @test nll == minussum(log(d), data)
-    @test nll(0.0) != 0.0
-    @test nll(0.0) == nll(10.0)
-    @test nll(0.0; p=(m=1, Γ=2)) == nll(0.0, [1,2])
+    @test nll() != 0.0
+    @test nll() == nll(()) == nll(1.0) == nll(10.0)
+    @test nll((); p=(m=1, Γ=2)) == nll((), [1,2])
     @test pars(nll) == pars(d)
     #
     g = Normalized(abs2(FBreitWigner((M=1.1, G=0.3))), (-3, 5))
