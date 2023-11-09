@@ -5,7 +5,7 @@ theme(:wong, frame=:box, xlab="x", lab="", minorticks=true,
 	guidefontvalign=:top, guidefonthalign=:right,
 	xlim=(:auto,:auto), ylim=(0,:auto), grid=false)
 
-myf(x; p=(a=1.1,b=2.2)) = x*p.a + p.b/x
+myf(x; p=(a=1.1,b=2.2)) = x*p.a + p.b/x ;
 
 gaussian = FGauss((μ=1.1, σ=0.9))
 
@@ -17,7 +17,7 @@ pars(gaussian)
 
 gaussian(0.0; p=(; μ = 1.1, σ = 0.9))
 
-gaussian(0.0; p=(; μ = 1.1, σ = 0.9))
+gaussian(0.0; p=(; μ = 0.0, σ = 1.9))
 
 plot(gaussian, -4, 7, fill=0, α=0.8)
 savefig("gaussian.pdf")

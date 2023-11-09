@@ -20,7 +20,7 @@ theme(:wong, frame=:box, xlab="x", lab="", minorticks=true,
 # with their names. The simplest and the most common case is where `x` would be a number, 
 # and `p` is a named tuple. For example,
 
-myf(x; p=(a=1.1,b=2.2)) = x*p.a + p.b/x
+myf(x; p=(a=1.1,b=2.2)) = x*p.a + p.b/x ;
 
 # The modele introduces a type `FunctionWithParameters`,
 # which intends to behave like the `myf` from the user prospective.
@@ -52,7 +52,7 @@ gaussian(0.0; p=(; μ = 1.1, σ = 0.9))
 
 # The parameters can be adjusted
 
-gaussian(0.0; p=(; μ = 1.1, σ = 0.9))
+gaussian(0.0; p=(; μ = 0.0, σ = 1.9))
 
 # Similar to the regular fuction, the object can be plotted.
 
