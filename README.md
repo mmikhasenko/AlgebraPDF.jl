@@ -1,9 +1,26 @@
 # AlgebraPDF
 
-[![Build Status](https://github.com/mmikhasenko/AlgebraPDF.jl/workflows/CI/badge.svg)](https://github.com/mmikhasenko/AlgebraPDF.jl/actions)
-[![Codecov](https://codecov.io/gh/mmikhasenko/AlgebraPDF.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/mmikhasenko/AlgebraPDF.jl)
 
-Basic functionality:
+| **Documentation**                                                               | **Build Status**                                                                                |
+|:-------------------------------------------------------------------------------:|:-----------------------------------------------------------------------------------------------:|
+| [![][docs-stable-img]][docs-stable-url] [![][docs-dev-img]][docs-dev-url] | [![][GHA-img]][GHA-url] [![][codecov-img]][codecov-url] |
+
+
+
+[docs-dev-img]: https://img.shields.io/badge/docs-dev-blue.svg
+[docs-stable-img]: https://img.shields.io/badge/docs-stable-blue.svg
+[GHA-img]: https://github.com/JuliaDocs/Documenter.jl/workflows/CI/badge.svg
+[codecov-img]: https://codecov.io/gh/mmikhasenko/AlgebraPDF.jl/branch/master/graph/badge.svg
+
+
+[docs-dev-url]: https://mmikhasenko.github.io/AlgebraPDF.jl/dev/
+[docs-stable-url]: https://mmikhasenko.github.io/AlgebraPDF.jl/stable/
+[GHA-url]: https://github.com/mmikhasenko/AlgebraPDF.jl/actions?query=workflows/CI
+[codecov-url]: https://codecov.io/gh/mmikhasenko/AlgebraPDF.jl
+
+
+
+## Basic functionality:
  * Attach default values of parameters to a function
  * Update, fix, release parameters
  * constructing a complex model object from set of function:

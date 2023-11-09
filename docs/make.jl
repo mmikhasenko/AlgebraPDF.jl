@@ -40,6 +40,5 @@ makedocs(
 
 deploydocs(
     repo="github.com/mmikhasenko/AlgebraPDF.jl.git",
-    target="site",
     push_preview = true,
 )
