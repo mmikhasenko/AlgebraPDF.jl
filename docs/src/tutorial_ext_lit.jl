@@ -1,37 +1,7 @@
-```julia
-using Markdown
-using InteractiveUtils
+using Optim
+using Random
+Random.seed!(100)
 
-begin
-	using Parameters
-	using AlgebraPDF
-	using AlgebraPDF.QuadGK
-    #    
-    using Optim
-	using Plots
-	# 
-	using Random
-	Random.seed!(100)
-end
-
-md"""
-# AlgebraPDF tutorial
-"""
-
-theme(:wong, frame=:box, lab="",
-	xlim=(:auto,:auto), ylim=(0,:auto), grid=false)
-
-md"""
-## Gaussian
-"""
-
-gaussian = FGauss((μ=1.1, σ=0.9))
-
-plot(gaussian, -4, 7, fill=0, α=0.2)
-
-nGaussian = Normalized(gaussian, (-4, 7))
-
-plot(nGaussian, fill=0, α=0.2)
 
 md"""
 ## Exponent
@@ -67,25 +37,6 @@ Here are the default values of the parameters
 
 pars(model)
 
-model(0.0)
-
-md"""
-when array is passed, the function is broadcasted
-"""
-
-model(-1.8:0.9:1)
-
-md"""
-One can call it parameters
-"""
-
-model(0.0; p=(; α = -0.2, μ = 1.1, σ = 0.9, N1 = 0.85, N2 = 0.15))
-
-md"""
-The parameters can be adjusted
-"""
-
-model(0.0; p=(; α = -0.5, μ = 1.1, σ = 0.9, N1 = 0.85, N2 = 0.15))
 
 md"""
 The model is immutable, but we can create a new model with different parameters
