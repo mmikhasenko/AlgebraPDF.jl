@@ -1,6 +1,5 @@
 module AlgebraPDF
 #
-# using Base: NamedTuple
 using Parameters
 using QuadGK
 # 

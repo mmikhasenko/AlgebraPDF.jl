@@ -34,7 +34,7 @@ end
 
 
 """
-noparsnormf(d::AbstractPDF; p=pars(d))
+    noparsnormf(d::AbstractPDF; p=pars(d))
 
 Returns a single-argument lambda-function with parameters fixed to `p` and normalization computed.
 """ 
@@ -91,7 +91,7 @@ fixedshapepdf(f, lims) = Normalized(FunctionWithParameters((x;p)->f(x); p=∅), 
 """
     @makepdftype MyPDF(x;p) = unnormdensity(x, p.a, p.b)
 
-    Expected form of the expression is `f(x;p)` on the left
+Expected form of the expression is `f(x;p)` on the left
 """
 macro makepdftype(ex)
     # 

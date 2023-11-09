@@ -3,9 +3,11 @@
 *.jl.mem
 .DS_Store
 
-Manifest.toml
-
 /dev/
 miscellaneous/ComponentArraysProt.jl
 test_struct.jl
 data_true.txt
+
+.vscode/settings.json
+
+Manifest.toml

@@ -1,0 +1,6 @@
+build/
+site/
+
+src/algebrapdf_tutorial.ipynb
+src/algebrapdf_tutorial.jl
+src/tutorial.md

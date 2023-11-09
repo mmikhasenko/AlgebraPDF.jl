@@ -1,7 +1,7 @@
-name: CI
+name: RunTests
 on:
-  - push
   - pull_request
+
 jobs:
   test:
     name: Julia ${{ matrix.version }} - ${{ matrix.os }} - ${{ matrix.arch }} - ${{ github.event_name }}
@@ -11,7 +11,6 @@ jobs:
       matrix:
         version:
           - '1.7'
-          - '1.6'
           - 'nightly'
         os:
           - ubuntu-latest
