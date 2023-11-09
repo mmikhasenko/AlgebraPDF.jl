@@ -25,8 +25,8 @@ makedocs(
     sitename="AlgebraPDF",
     modules=[AlgebraPDF],
     format = Documenter.HTML(
-        prettyurls = false,
-        canonical = "https://mmikhasenko.github.io/algebrapdf.jl/stable/"
+        prettyurls = true,
+        canonical = "https://mmikhasenko.github.io/AlgebraPDF.jl/stable/"
     ),
     authors = "Mikhail Mikhasenko",
     pages=[
