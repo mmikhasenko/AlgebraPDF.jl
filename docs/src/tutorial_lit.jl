@@ -6,7 +6,7 @@
 # creating a density function which is a sum of a gaussian signal peak,
 # and exponential background.
 
-using AlgebraPDF, Parameters
+using AlgebraPDF, AlgebraPDF.Parameters
 
 using Plots
 theme(:wong, frame=:box, xlab="x", lab="", minorticks=true, 
