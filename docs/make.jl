@@ -1,10 +1,12 @@
 using Pkg
 cd(joinpath(@__DIR__, ".."))
 Pkg.activate("docs")
+Pkg.instantiate()
 Pkg.develop(path=".")
 
 using Documenter
 using AlgebraPDF
+using Literate
 
 function fix_literate_output(content)
     content = replace(content, "EditURL = \"@__REPO_ROOT_URL__/\"" => "")

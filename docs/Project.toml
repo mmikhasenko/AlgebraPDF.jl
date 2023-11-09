@@ -1,6 +1,7 @@
 [deps]
 AlgebraPDF = "e09e93a3-870c-4c75-9b71-3eefe58c6e5b"
 Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
+Literate = "98b081ad-f1c9-55d3-8b20-4c87d4299306"
 Optim = "429524aa-4258-5aef-a3af-852621145aeb"
 Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
 
