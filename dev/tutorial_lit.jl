@@ -10,6 +10,9 @@
 using AlgebraPDF, AlgebraPDF.Parameters
 using LinearAlgebra, Optim
 
+using Random
+Random.seed!(100)
+
 using Plots
 theme(:wong, frame=:box, xlab="x", lab="", minorticks=true, 
 	guidefontvalign=:top, guidefonthalign=:right,
@@ -206,7 +209,7 @@ starting_values = let
     default_values = pars(ext)
     @unpack N1, N2 = default_values
     Nsum = N1+N2
-    default_values + (N1 = N1/Nsum*Nd, N2 = N2/Nsum*Nd)
+    merge(default_values, (N1 = N1/Nsum*Nd, N2 = N2/Nsum*Nd))
 end
 
 # When the optimization to fit the model to the data,
