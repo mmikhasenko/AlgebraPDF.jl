@@ -4,9 +4,11 @@
 
 # This tutorial guides the user through the basic example of
 # creating a density function which is a sum of a gaussian signal peak,
-# and exponential background.
+# and exponential background, sampling from the distribution,
+# and optimizating its parameters with an unbinned fit.
 
 using AlgebraPDF, AlgebraPDF.Parameters
+using LinearAlgebra, Optim
 
 using Plots
 theme(:wong, frame=:box, xlab="x", lab="", minorticks=true, 
@@ -170,7 +172,9 @@ stephist(data, bins=100)
 #md savefig("sampled_data_histogram.svg"); nothing # hide
 #md # [![Sampled Data Histogram](sampled_data_histogram.svg)](sampled_data_histogram.pdf)
 
-# An equidistant grid is used. Adjusting the grid size for sampling can impact the sampling process.
+# An equidistant grid is used.
+# Adjusting the grid size for sampling can impact the sampling process,
+# check `generate` method for details.
 
 
 
@@ -202,7 +206,6 @@ starting_values = let
     default_values = pars(ext)
     @unpack N1, N2 = default_values
     Nsum = N1+N2
-    # Adjusting the parameters
     default_values + (N1 = N1/Nsum*Nd, N2 = N2/Nsum*Nd)
 end
 
@@ -227,11 +230,11 @@ best_model = updatepars(model, NamedTuple{keys(pars(model))}(fit.minimizer))
 let
     bins = range(lims(model)..., 100)
     Nd = length(data)
-    # Plotting
+
     stephist(data; bins)
     plot!(model, scaletobinneddata(Nd, bins), lab="original")
     plot!(best_model, scaletobinneddata(bins), lab="fit")
-    # 
+
     plot!(best_model[2], scaletobinneddata(bins), fill=0, lab="signal")
     plot!(best_model[1], scaletobinneddata(bins), ls=:dash, lab="background")
 end
