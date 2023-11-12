@@ -12,6 +12,16 @@ implemented as a struct that holds tuple of parameters
 
 
 ### Functions
+
+
+Several common function are defined
+```@docs
+FGauss
+FExp
+FPol
+FDoubleGaussFixedRatio
+```
+
 ```@docs
 AlgebraPDF.noparsnormf
 AlgebraPDF.nt
