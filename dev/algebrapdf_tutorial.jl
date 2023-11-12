@@ -26,6 +26,8 @@ gaussian(0.0; p=(; μ = 0.0, σ = 1.9))
 plot(gaussian, -4, 7, fill=0, α=0.8)
 savefig("gaussian.pdf")
 
+exponential = FExp((; α=-0.2))
+
 nGaussian = Normalized(gaussian, (-4, 7))
 
 @assert nGaussian == gaussian |> Normalized((-4, 7))
@@ -39,12 +41,7 @@ nGaussian(0.0; p=(; μ = 1.1, σ = 0.9))
 plot(nGaussian, fill=0, α=0.7)
 savefig("nGaussian.pdf")
 
-exponential = FExp((; α=-0.2))
-
 nExponent = exponential |> Normalized((-4, 7))
-
-plot(nExponent)
-savefig("nExponential.pdf")
 
 model = FSum([nExponent, nGaussian], (N1=0.85, N2=0.15))
 

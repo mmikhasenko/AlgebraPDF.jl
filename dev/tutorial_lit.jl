@@ -27,10 +27,10 @@ theme(:wong, frame=:box, xlab="x", lab="", minorticks=true,
 
 myf(x; p=(a=1.1,b=2.2)) = x*p.a + p.b/x ;
 
-# The modele introduces a type `FunctionWithParameters`,
+# The module introduces a type `FunctionWithParameters`,
 # which intends to behave like the `myf` from the user prospective.
 
-# ## A Gaussian function
+# ## Predefined function
 
 # The gaussian function is constructed calling a specific type `FGauss`,
 # and giving a tuple of parameters with their default values 
@@ -67,6 +67,11 @@ plot(gaussian, -4, 7, fill=0, α=0.8)
 #md savefig("gaussian.svg"); nothing # hide
 #md # [![gaussian](gaussian.svg)](gaussian.pdf)
 
+
+# Exponential function is another lineshape defined in the package.
+# We are using the expnential distribution with a slope `α` to define the background to our gaussian signal.
+
+exponential = FExp((; α=-0.2))
 
 
 
@@ -105,28 +110,10 @@ plot(nGaussian, fill=0, α=0.7)
 #md # [![nGaussian](nGaussian.svg)](nGaussian.pdf)
 
 
-# This section introduces the exponential function in `AlgebraPDF.jl` and demonstrates how to normalize it.
-# Understanding how to work with different types of functions and their normalization 
-# is crucial in creating complex distributions.
-
-# Exponential function is another lineshape defined in the package.
-# We are using the expnential distribution with a slope `α` to define the background to our gaussian signal.
-
-exponential = FExp((; α=-0.2))
-
-# Next, we normalize this function over a specific range in the same way we did with the Gaussian function in the previous sections.
-# Normalization is essential to ensure that the function behaves as a probability density function
-# and we can countably measure the background fraction
+# Analogously,
 
 nExponent = exponential |> Normalized((-4, 7))
 
-# Let's plot the normalized exponential function to visualize it.
-
-plot(nExponent)
-#jl savefig("nExponential.pdf")
-#md savefig("nExponential.pdf")
-#md savefig("nExponential.svg"); nothing # hide
-#md # [![nExponential](nExponential.svg)](nExponential.pdf)
 
 # ## Summation of Functions
 
@@ -245,3 +232,4 @@ end
 #md savefig("model_fitting.pdf")
 #md savefig("model_fitting.svg"); nothing # hide
 #md # [![Model Fitting](model_fitting.svg)](model_fitting.pdf)
+
