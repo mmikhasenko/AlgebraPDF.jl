@@ -61,10 +61,38 @@ updatevalueorflag(p::NamedTuple, s::Symbol, isfree::Bool, v=getproperty(pars(p),
 #      _|_|    _|      _|        _|    _|  _|          _|      
 #  _|_|_|        _|_|  _|          _|_|_|    _|_|_|      _|_|  
 
+"""
+    FlaggedNamedTuple(t::NamedTuple) = FlaggedNamedTuple(t, ())
+    FlaggedNamedTuple(ps::FlaggedNamedTuple) = FlaggedNamedTuple(allpars(ps), whichfixed(ps))
+    FlaggedNamedTuple(; kw...) = FlaggedNamedTuple((; kw...))
+    
+immutable type that holds a NamedTuple of parameters and a tuple of symbols that indicates which parameters are fixed.
+The short alias for the `FlaggedNamedTuple` is `Ext`.
+
+# Examples
+```jldoctest
+julia> ps = FlaggedNamedTuple((a=1,b=2,c=3), (:a, :b))  # a and b are fixed 
+FlaggedNamedTuple{(:a, :b)}((a = 1, b = 2, c = 3), (:a, :b))
+
+julia> freepars(ps)
+(c = 3,)
+
+julia> fixedpars(ps)
+(a = 1, b = 2)
+
+julia> ps == Ext((a = 1, b = 2, c = 3), (:a, :b))
+true
+```
+"""
 struct FlaggedNamedTuple{R}
     allpars::NamedTuple{R}
     whichfixed::Tuple{Vararg{Symbol}}
 end
+
+FlaggedNamedTuple(t::NamedTuple) = FlaggedNamedTuple(t, ())
+FlaggedNamedTuple(ps::FlaggedNamedTuple) = FlaggedNamedTuple(allpars(ps), whichfixed(ps))
+FlaggedNamedTuple(; kw...) = FlaggedNamedTuple((; kw...))
+
 allpars(ps::FlaggedNamedTuple) = getfield(ps, :allpars)
 whichfixed(ps::FlaggedNamedTuple) = getfield(ps, :whichfixed)
 
@@ -97,10 +125,6 @@ merge(s1::FlaggedNamedTuple, s2::FlaggedNamedTuple) =
     FlaggedNamedTuple(merge(allpars(s1), allpars(s2)), (whichfixed(s1)..., whichfixed(s2)...))
 merge(s1::FlaggedNamedTuple, s2::NamedTuple) = merge(s1, FlaggedNamedTuple(s2))
 merge(s1::NamedTuple, s2::FlaggedNamedTuple) = merge(FlaggedNamedTuple(s1), s2)
-# 
-FlaggedNamedTuple(t::NamedTuple) = FlaggedNamedTuple(t, ())
-FlaggedNamedTuple(ps::FlaggedNamedTuple) = FlaggedNamedTuple(allpars(ps), whichfixed(ps))
-FlaggedNamedTuple(; kw...) = FlaggedNamedTuple((; kw...))
 #
 const ParTypes = Union{NamedTuple,FlaggedNamedTuple}
 # 

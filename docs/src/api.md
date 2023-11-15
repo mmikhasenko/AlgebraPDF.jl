@@ -10,9 +10,23 @@ There is a range of predefined functions
 implemented as a struct that holds tuple of parameters
 
 
+### Parameters
+
+The default parameter type is the `NamedTuple`. It holds parameter values and names and can update their value.
+The additional type `FlaggedNamedTuple` allows to group parameters to `freed` and `fixed`
+```@docs
+FlaggedNamedTuple
+```
+
+The package introduces two operations on parameter types.
+
+```@docs
+merge
+subtract
+```
+
 
 ### Functions
-
 
 Several common function are defined
 ```@docs
