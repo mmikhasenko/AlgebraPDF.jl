@@ -8,27 +8,17 @@ The function is used to remove the parameters from the NamedTuple that are given
 It can be a single symbol, a vector of symbols or a tuple of symbols.
 
 # Examples
-```julia-repl
+```jldoctest
 julia> (a=1,b=2,d=1,c=2) - (d=1,)
-
 (a=1,b=2,c=2)
-```
 
-```julia-repl
 julia> (a=1,b=2,d=1,c=2) - :d
-
 (a=1,b=2,c=2)
-```
 
-```julia-repl
 julia> (a=1,b=2,d=1,c=2) - [:d, :a]
-
 (b=2,c=2)
-```
 
-```julia-repl
 julia> (a=1,b=2,d=1,c=2) - (:d, :a)
-
 (b=2,c=2)
 ```
 """
