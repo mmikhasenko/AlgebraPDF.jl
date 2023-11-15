@@ -9,16 +9,16 @@ It can be a single symbol, a vector of symbols or a tuple of symbols.
 
 # Examples
 ```jldoctest
-julia> (a=1,b=2,d=1,c=2) - (d=1,)
+julia> subtract((a=1,b=2,d=1,c=2), (d=1,))
 (a=1,b=2,c=2)
 
-julia> (a=1,b=2,d=1,c=2) - :d
+julia> subtract((a=1,b=2,d=1,c=2), :d)
 (a=1,b=2,c=2)
 
-julia> (a=1,b=2,d=1,c=2) - [:d, :a]
+julia> subtract((a=1,b=2,d=1,c=2), [:d, :a])
 (b=2,c=2)
 
-julia> (a=1,b=2,d=1,c=2) - (:d, :a)
+julia> subtract((a=1,b=2,d=1,c=2), (:d, :a))
 (b=2,c=2)
 ```
 """
