@@ -70,8 +70,8 @@ julia> freepars(ps)
 julia> fixedpars(ps)
 (a = 1, b = 2)
 
-julia> ps == Ext((a = 1, b = 2, c = 3), (:a, :b))
-true
+julia> Ext((a = 2.2,)).a
+2.2
 ```
 """
 struct FlaggedNamedTuple{R}
