@@ -18,7 +18,7 @@ export ∅
 const NumberOrTuple = Union{Number,Tuple{Vararg{Number}}}
 export NumberOrTuple
 
-import Base: +,-,*,==
+import Base: +, -, *, ==, merge
 import Base: getproperty
 import Base: getindex
 import Base: abs2, log
@@ -27,6 +27,7 @@ import Base: length
 # 
 # 
 export ParTypes
+export subtract
 include("parameters.jl")
 const Ext = FlaggedNamedTuple
 export Ext, FlaggedNamedTuple
