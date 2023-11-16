@@ -18,13 +18,12 @@ The additional type `FlaggedNamedTuple` allows to group parameters to `freed` an
 FlaggedNamedTuple
 ```
 
-The package introduces two operations on parameter types.
+The package introduces two operations on parameter types, `merge` and `subtract`.
+The `merge(nt1::NamedTuple, nt1::NamedTuple)` is defined in `Base`.
 
 ```@docs
-merge
 subtract
 ```
-
 
 ### Functions
 

@@ -4,7 +4,7 @@
     subtract(t1::NamedTuple, ss::AbstractVector{Symbol})
     subtract(t1::NamedTuple, ss::Tuple{Vararg{Symbol}}) 
 
-The function is used to remove the parameters from the NamedTuple that are given by the second argument.
+Remove parameters from the NamedTuple that are given by the second argument.
 It can be a single symbol, a vector of symbols or a tuple of symbols.
 
 # Examples
