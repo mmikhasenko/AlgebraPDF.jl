@@ -11,3 +11,5 @@ data_true.txt
 .vscode/settings.json
 
 Manifest.toml
+
+*.pdf

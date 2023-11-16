@@ -1,6 +1,11 @@
 name: Documentation
 on:
-  - pull_request
+  push:
+    branches:
+      - main
+      - dev
+  pull_request:
+
 
 jobs:
   documenter:
@@ -19,4 +24,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # For authentication with GitHub Actions token
           DOCUMENTER_KEY: ${{ secrets.DOCUMENTER_KEY }} # For authentication with SSH deploy key
+          GKSwstype: 'nul' # Plots.jl issue: `qt.qpa.xcb: could not connect to display`
+          # https://discourse.julialang.org/t/failed-build-of-documentation-on-ci-due-to-missing-qt-plugin/71389
         run: julia --project=docs/ docs/make.jl
