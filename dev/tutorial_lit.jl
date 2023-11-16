@@ -14,9 +14,9 @@ using Random
 Random.seed!(100)
 
 using Plots
-theme(:wong, frame=:box, xlab="x", lab="", minorticks=true, 
-	guidefontvalign=:top, guidefonthalign=:right,
-	xlim=(:auto,:auto), ylim=(0,:auto), grid=false)
+theme(:wong, frame=:box, xlab="x", lab="", minorticks=true,
+    guidefontvalign=:top, guidefonthalign=:right,
+    xlim=(:auto, :auto), ylim=(0, :auto), grid=false)
 
 # ## Function With Parameters
 
@@ -25,7 +25,7 @@ theme(:wong, frame=:box, xlab="x", lab="", minorticks=true,
 # with their names. The simplest and the most common case is where `x` would be a number, 
 # and `p` is a named tuple. For example,
 
-myf(x; p=(a=1.1,b=2.2)) = x*p.a + p.b/x ;
+myf(x; p=(a=1.1, b=2.2)) = x * p.a + p.b / x;
 
 # The module introduces a type `FunctionWithParameters`,
 # which intends to behave like the `myf` from the user prospective.
@@ -53,11 +53,11 @@ pars(gaussian)
 # One can provide the key argument `p` with the named tuple of parameters.
 # These tuple is always used instread of the default values.
 
-gaussian(0.0; p=(; μ = 1.1, σ = 0.9))
+gaussian(0.0; p=(; μ=1.1, σ=0.9))
 
 # The parameters can be adjusted
 
-gaussian(0.0; p=(; μ = 0.0, σ = 1.9))
+gaussian(0.0; p=(; μ=0.0, σ=1.9))
 
 # Similar to the regular fuction, the object can be plotted.
 
@@ -99,7 +99,7 @@ nGaussian(-1.8:0.9:1)
 
 # As before, the parameters can be updates by passing a named tuple
 
-nGaussian(0.0; p=(; μ = 1.1, σ = 0.9))
+nGaussian(0.0; p=(; μ=1.1, σ=0.9))
 
 # For plotting of the normalized function, one does not need to specify the range.
 
@@ -127,7 +127,7 @@ model = FSum([nExponent, nGaussian], (N1=0.85, N2=0.15))
 # The sum of functions, is an object of type `FSum`, that hold a list of functions and their weights in static vectors of equal sizes.
 # There is an alternative way to formulate an equivalent model
 
-@assert model == nExponent * (N1=0.85, ) + nGaussian * (N2=0.15,)
+@assert model == nExponent * (N1=0.85,) + nGaussian * (N2=0.15,)
 
 # where the product of the function with a named tuple return `FSum` object. The summation between two `FSum` objects is defined.
 # Complementary, individual components with their weight can be accessed by indexing the `FSum` object as in the following protting code.
@@ -195,8 +195,8 @@ starting_values = let
     Nd = length(data)
     default_values = pars(ext)
     @unpack N1, N2 = default_values
-    Nsum = N1+N2
-    merge(default_values, (N1 = N1/Nsum*Nd, N2 = N2/Nsum*Nd))
+    Nsum = N1 + N2
+    merge(default_values, (N1=N1 / Nsum * Nd, N2=N2 / Nsum * Nd))
 end
 
 # When the optimization to fit the model to the data,
@@ -205,10 +205,10 @@ end
 # The parameter uncertainties in the minimum are often taken as square root of the diagonal elements. 
 
 @time fit = let
-    initial_invH = Diagonal([0.001,0.01,0.01,100,100]) .+ eps()
-    
-    optimize(x->ext(1.1, x), starting_values |> collect,
-	    BFGS(; initial_invH = x -> initial_invH,))
+    initial_invH = Diagonal([0.001, 0.01, 0.01, 100, 100]) .+ eps()
+
+    optimize(x -> ext(1.1, x), starting_values |> collect,
+        BFGS(; initial_invH=x -> initial_invH,))
 end
 
 # Once we have the best-fit parameters, we can update our model and compare it to the original data.
