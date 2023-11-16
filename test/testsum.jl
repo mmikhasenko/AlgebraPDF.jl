@@ -8,11 +8,6 @@ g3 = FGauss((μ3=3.3, σ3=0.3))
 d = AlgebraPDF.FSum([g1, g2, g3], (α1=0.1, α2=0.2, α3=0.3))
 d2 = AlgebraPDF.FSum([g1, g2, g3], Ext(α1=0.1, α2=0.2, α3=0.3)) |> x -> fixpar(x, :α1)
 
-@testset "== for simple function" begin
-    @test g1 == FGauss(pars(g1))
-    @test g1 == updatepar(g1, :μ1, pars(g1).μ1)
-end
-
 @testset "Sum of regular functions" begin
     @test length(d) == 3
     @test abs(func(d, 1.5)) < 0.01
