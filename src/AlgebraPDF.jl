@@ -53,7 +53,7 @@ include("functionwithparameters.jl")
 export @makepdftype
 export AbstractPDF
 export Normalized
-export integral, integrals
+export integral
 export fixedshapepdf
 export noparsf, noparsnormf
 export lims
