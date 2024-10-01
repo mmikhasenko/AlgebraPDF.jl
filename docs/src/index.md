@@ -18,7 +18,6 @@ Basic functionality:
 * plotting recipes
 
 !!! note
-
     `AlgebraPDF.jl` is experimental, feel free to share experience working with the package. Submit an issue with suggestions.
 
 ## Table of contents
