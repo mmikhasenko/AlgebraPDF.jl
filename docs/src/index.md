@@ -1,6 +1,10 @@
-# AlgebraPDF.jl
+```@meta
+CurrentModule = AlgebraPDF
+```
 
-AlgebraPDF.jl is a tool to construct and operate with complex parametric probability density functions (PDFs). 
+# AlgebraPDF
+
+Documentation for [AlgebraPDF](https://github.com/mmikhasenko/AlgebraPDF.jl). AlgebraPDF.jl is a tool to construct and operate with complex parametric probability density functions (PDFs).
 
 Basic functionality:
  * Attach default values of parameters to a function
@@ -33,7 +37,7 @@ Depth = 1
 
 ## Citing AlgebraPDF.jl
 
-When using `AlgebraPDF.jl` for research, teaching or similar, 
+When using `AlgebraPDF.jl` for research, teaching or similar,
 please drop a link for your research to the issues.
 It would give me encouragement to create a citable link on Zenodo, write a JOSS paper. I would also be happy to mention your research in the Documentation website.
 

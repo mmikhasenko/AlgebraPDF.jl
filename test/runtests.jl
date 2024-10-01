@@ -1,9 +1,5 @@
 using AlgebraPDF
-using StaticArrays
 using Test
-using SpecialFunctions
-using LinearAlgebra
-using Measurements
 
 include("testparameters.jl")
 include("testfuncions.jl")

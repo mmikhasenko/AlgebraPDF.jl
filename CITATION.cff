@@ -1,0 +1,21 @@
+cff-version: 1.2.0
+title: AlgebraPDF.jl
+message: >-
+    If you use this software, please cite it using the
+    metadata from this file.
+type: software
+authors:
+    - given-names: Mikhail
+      family-names: Mikhasenko
+      email: mikhail.mikhasenko@cern.ch
+      orcid: "https://orcid.org/0000-0002-6969-2063"
+      affiliation: Ruhr University Bochum
+repository-code: "https://github.com/mmikhasenko/AlgebraPDF.jl"
+abstract: >-
+    AlgebraPDF.jl is a Julia package to construct and operate
+    with complex parametric probability density functions
+    (PDFs).
+keywords:
+    - probability distribution
+    - arithmetics
+license: MIT
