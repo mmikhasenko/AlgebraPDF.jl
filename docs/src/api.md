@@ -1,19 +1,17 @@
 # API Documentation
 
-The API for the package 
-
-
+The API for the package
 
 ## Standard functions
 
-There is a range of predefined functions 
+There is a range of predefined functions
 implemented as a struct that holds tuple of parameters
-
 
 ### Parameters
 
 The default parameter type is the `NamedTuple`. It holds parameter values and names and can update their value.
 The additional type `FlaggedNamedTuple` allows to group parameters to `freed` and `fixed`
+
 ```@docs
 FlaggedNamedTuple
 ```
@@ -28,6 +26,7 @@ subtract
 ### Functions
 
 Several common function are defined
+
 ```@docs
 FGauss
 FExp
@@ -41,12 +40,14 @@ AlgebraPDF.nt
 ```
 
 ### Macros
+
 ```@docs
 AlgebraPDF.@makepdftype
 AlgebraPDF.@makefuntype
 ```
 
 ### Other Functions
+
 ```@docs
 AlgebraPDF.updatevalueorflag
 ```

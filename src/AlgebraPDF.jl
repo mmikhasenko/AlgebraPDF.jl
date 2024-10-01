@@ -2,7 +2,7 @@ module AlgebraPDF
 #
 using Parameters
 using QuadGK
-# 
+#
 using Random
 using RecipesBase
 using StaticArrays
@@ -14,7 +14,7 @@ using SpecialFunctions
 #
 const ∅ = NamedTuple()
 export ∅
-# 
+#
 const NumberOrTuple = Union{Number,Tuple{Vararg{Number}}}
 export NumberOrTuple
 
@@ -24,32 +24,32 @@ import Base: getindex
 import Base: abs2, log
 import Base: keys
 import Base: length
-# 
-# 
+#
+#
 export ParTypes
 export subtract
 include("parameters.jl")
 const Ext = FlaggedNamedTuple
 export Ext, FlaggedNamedTuple
 
-# 
+#
 export updatepar, updatepars
 export fixpar, fixpars
 export releasepar, releasepars
-# 
+#
 export @makefuntype
 export AbstractFunctionWithParameters
 export FunctionWithParameters
-# 
+#
 export func
 export nfreepars
 export freepars, fixedpars
 export pars
 export p2v, v2p
-# 
+#
 include("functionwithparameters.jl")
 
-# 
+#
 export @makepdftype
 export AbstractPDF
 export Normalized
@@ -58,9 +58,9 @@ export fixedshapepdf
 export noparsf, noparsnormf
 export lims
 export normalizationintegral
-# 
+#
 include("pdf.jl")
-# 
+#
 export FSum, FAbs2, FLog
 export dividenorm
 export NegativeLogLikelihood, minussum
