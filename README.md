@@ -11,6 +11,17 @@
 [![DOI](https://zenodo.org/badge/DOI/FIXME)](https://doi.org/FIXME)
 
 
+## Basic functionality:
+
+ * Attach default values of parameters to a function
+ * Update, fix, release parameters
+ * constructing a complex model object from set of function, e.g. `f₁ + f₂`, `abs2(f)`, or `log(f)`.
+ * On-fly normalization
+ * construction of mixed models in the form `f₁ PDF₁ + f₂ PDF₂ + f₃ PDF₃`.
+ * construction of likelihood function and extended likelihood function
+ * plotting recipes
+
+Current implementation is limited to immutable objects.
 
 ## How to Cite
 
