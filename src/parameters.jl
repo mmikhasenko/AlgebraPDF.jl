@@ -10,16 +10,16 @@ It can be a single symbol, a vector of symbols or a tuple of symbols.
 # Examples
 ```jldoctest
 julia> subtract((a=1,b=2,d=1,c=2), (d=1,))
-(a=1,b=2,c=2)
+(a = 1, b = 2, c = 2)
 
 julia> subtract((a=1,b=2,d=1,c=2), :d)
-(a=1,b=2,c=2)
+(a = 1, b = 2, c = 2)
 
 julia> subtract((a=1,b=2,d=1,c=2), [:d, :a])
-(b=2,c=2)
+(b = 2, c = 2)
 
 julia> subtract((a=1,b=2,d=1,c=2), (:d, :a))
-(b=2,c=2)
+(b = 2, c = 2)
 ```
 """
 subtract(t1::NamedTuple, t2::NamedTuple) = Base.structdiff(t1, t2)
@@ -69,7 +69,7 @@ The short alias for the `FlaggedNamedTuple` is `Ext`.
 # Examples
 ```jldoctest
 julia> ps = FlaggedNamedTuple((a=1,b=2,c=3), (:a, :b))  # a and b are fixed
-FlaggedNamedTuple{(:a, :b)}((a = 1, b = 2, c = 3), (:a, :b))
+FlaggedNamedTuple{(:a, :b, :c)}((a = 1, b = 2, c = 3), (:a, :b))
 
 julia> freepars(ps)
 (c = 3,)
