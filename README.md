@@ -8,7 +8,7 @@
 [![Docs workflow Status](https://github.com/mmikhasenko/AlgebraPDF.jl/actions/workflows/Docs.yml/badge.svg?branch=main)](https://github.com/mmikhasenko/AlgebraPDF.jl/actions/workflows/Docs.yml?query=branch%3Amain)
 
 [![Coverage](https://codecov.io/gh/mmikhasenko/AlgebraPDF.jl/branch/main/graph/badge.svg)](https://codecov.io/gh/mmikhasenko/AlgebraPDF.jl)
-[![DOI](https://zenodo.org/badge/DOI/FIXME)](https://doi.org/FIXME)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.13872004.svg)](https://doi.org/10.5281/zenodo.13872004)
 
 ## Basic functionality
 
