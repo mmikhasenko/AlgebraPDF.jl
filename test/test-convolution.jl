@@ -1,9 +1,9 @@
-using SpecialFunctions
+using AlgebraPDF.SpecialFunctions
 
-#    _|_|_|    _|_|    _|_|_|    _|      _|  
-#  _|        _|    _|  _|    _|  _|      _|  
-#  _|        _|    _|  _|    _|    _|  _|    
-#    _|_|_|    _|_|    _|    _|      _|      
+#    _|_|_|    _|_|    _|_|_|    _|      _|
+#  _|        _|    _|  _|    _|  _|      _|
+#  _|        _|    _|  _|    _|    _|  _|
+#    _|_|_|    _|_|    _|    _|      _|
 
 @makepdftype myBW(x;p) = let xth = 2.961477
     AlgebraPDF.amplitudeBWsq(x+xth, p.Δm+xth, p.Γ)
