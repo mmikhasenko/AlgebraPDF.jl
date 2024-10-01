@@ -4,13 +4,11 @@ using AlgebraPDF.QuadGK
 
 
 @testset "FunctionWithParameters{NamedTuples}" begin
-    d0 = FunctionWithParameters(
-        (x; p) -> p.a + cos(x) * p.b;
-        p=(a=2, b=1))
+    d0 = FunctionWithParameters((x; p) -> p.a + cos(x) * p.b; p = (a = 2, b = 1))
     #
-    @test freepars(d0) == (a=2, b=1)
+    @test freepars(d0) == (a = 2, b = 1)
     @test fixedpars(d0) == ∅
-    @test pars(d0) == (a=2, b=1)
+    @test pars(d0) == (a = 2, b = 1)
 
     @test nfreepars(d0) == 2
 
@@ -19,30 +17,31 @@ using AlgebraPDF.QuadGK
     @test func(d0, 1:10) == func(d0, collect(1:10))
 
     d1 = updatepar(d0, :a, 4)
-    @test freepars(d1) == (a=4, b=1)
+    @test freepars(d1) == (a = 4, b = 1)
     @test releasepar(d0, :b) == d0
     @test_throws ArgumentError fixpar(d0, :b)
     #
-    @test v2p([1, 2], d0) == (a=1, b=2)
+    @test v2p([1, 2], d0) == (a = 1, b = 2)
     @test p2v(d0) == [2, 1]
-    @test p2v((b=6, a=5, c=33), d0) == [5, 6]
+    @test p2v((b = 6, a = 5, c = 33), d0) == [5, 6]
 end
 
 @testset "FunctionWithParameters{FlaggedNamedTuple}" begin
     g = FunctionWithParameters(
         (x; p) -> exp((x - p.μ)^3 / (2 * p.σ^2));
-        p=Ext(μ=1.2, σ=0.1))
+        p = Ext(μ = 1.2, σ = 0.1),
+    )
     #
     g′ = fixpar(g, :μ)
     @test fixedpars(g′).μ == 1.2
     g′ = fixpar(g, :μ, 1.3)
     @test fixedpars(g′).μ == 1.3
     #
-    @test freepars(g′) == (σ=0.1,)
-    @test fixedpars(g′) == (μ=1.3,)
+    @test freepars(g′) == (σ = 0.1,)
+    @test fixedpars(g′) == (μ = 1.3,)
     #
-    @test g′(1.3; p=(σ=0.2,)) == 1.0 # now works since μ is fixed
-    @test g′(1.3; p=(σ=0.2, μ=1.6)) == 1.0 # will use the fixed value of μ=1.2
+    @test g′(1.3; p = (σ = 0.2,)) == 1.0 # now works since μ is fixed
+    @test g′(1.3; p = (σ = 0.2, μ = 1.6)) == 1.0 # will use the fixed value of μ=1.2
     g′′ = updatepar(g′, :μ, 1.2) # however, the update fill do
     @test g′′(1.2) == 1.0
     #
@@ -51,16 +50,14 @@ end
 end
 
 @testset "FunctionWithParameters{FlaggedNamedTuple}" begin
-    m0 = FunctionWithParameters(
-        (x; p) -> p.a + cos(x) * p.b;
-        p=Ext(a=2, b=1))
+    m0 = FunctionWithParameters((x; p) -> p.a + cos(x) * p.b; p = Ext(a = 2, b = 1))
     #
     m1 = updatepar(m0, :a, 4)
-    @test freepars(m1) == (a=4, b=1)
+    @test freepars(m1) == (a = 4, b = 1)
 
     m2 = fixpar(m1, :a)
-    @test freepars(m2) == (b=1,)
-    @test fixedpars(m2) == (a=4,)
+    @test freepars(m2) == (b = 1,)
+    @test fixedpars(m2) == (a = 4,)
     #
     m3 = releasepar(m0, :a)
     @test m3 == m0
@@ -70,8 +67,8 @@ end
     @test m1 == releasepars(m2, (:a,))
     @test m1 == releasepars(m2, [:a])
     #
-    m4 = updatepars(m0, (a=4, b=5))
-    @test freepars(m4) == (a=4, b=5)
+    m4 = updatepars(m0, (a = 4, b = 5))
+    @test freepars(m4) == (a = 4, b = 5)
 end
 
 @testset "func on scalars" begin
@@ -85,7 +82,7 @@ end
 end
 
 @testset "lambda constructors" begin
-    g = FGauss(Ext(; μ=1.1, σ=2.2))
+    g = FGauss(Ext(; μ = 1.1, σ = 2.2))
     #
     g′ = g |> updatepar(:μ, 1.2)
     @test pars(g′).μ == 1.2
@@ -97,17 +94,17 @@ end
     g′ = g |> fixpar(:μ, 1.2)
     @test pars(g′).μ == 1.2
     #
-    g′ = g |> updatepars((μ=2.2, σ=3.3))
+    g′ = g |> updatepars((μ = 2.2, σ = 3.3))
     @test pars(g′).μ == 2.2
     @test pars(g′).σ == 3.3
     #
-    g′ = g |> fixpars((μ=2.2, σ=3.3))
+    g′ = g |> fixpars((μ = 2.2, σ = 3.3))
     @test fixedpars(g′).μ == 2.2
     @test fixedpars(g′).σ == 3.3
 end
 
 @testset "Divide Norm" begin
-    g = FGauss((μ=0.0, σ=2.2))
+    g = FGauss((μ = 0.0, σ = 2.2))
     #
     gn = dividenorm(g, :N, (-2, 2))
     @test :N ∈ keys(pars(gn))
@@ -119,9 +116,7 @@ end
 
 
 @testset "FAbs2" begin
-    m0 = FunctionWithParameters(
-        (x; p) -> p.a + cos(x) * p.b;
-        p=Ext(a=2, b=1))
+    m0 = FunctionWithParameters((x; p) -> p.a + cos(x) * p.b; p = Ext(a = 2, b = 1))
     #
     am0 = abs2(m0)
     @test func(am0, π / 2) == 4
@@ -131,9 +126,7 @@ end
 end
 
 @testset "FLog" begin
-    m0 = FunctionWithParameters(
-        (x; p) -> exp(p.b * x);
-        p=Ext(b=2,))
+    m0 = FunctionWithParameters((x; p) -> exp(p.b * x); p = Ext(b = 2))
     #
     am0 = log(m0)
     @test am0(1) == 2
@@ -143,7 +136,7 @@ end
 end
 
 @testset "NegativeLogLikelihood" begin
-    d = Normalized(abs2(FBreitWigner((m=1.1, Γ=0.3))), (-3, 5))
+    d = Normalized(abs2(FBreitWigner((m = 1.1, Γ = 0.3))), (-3, 5))
     N = 1000
     data = randn(N)
     nll = NegativeLogLikelihood(d, data)
@@ -151,18 +144,18 @@ end
     @test nll == minussum(log(d), data)
     @test nll(0.0) != 0.0
     @test nll(0.0) == nll(10.0)
-    @test nll(0.0; p=(m=1, Γ=2)) == nll(0.0, [1, 2])
+    @test nll(0.0; p = (m = 1, Γ = 2)) == nll(0.0, [1, 2])
     @test pars(nll) == pars(d)
     #
-    g = Normalized(abs2(FBreitWigner((M=1.1, G=0.3))), (-3, 5))
+    g = Normalized(abs2(FBreitWigner((M = 1.1, G = 0.3))), (-3, 5))
     s = d + g
     nllsum = NegativeLogLikelihood(s, data)
-    @test nllsum(0.0; p=merge(pars(nllsum), (α1=0.3, α2=0.7))) ≈ nll(0.0)
+    @test nllsum(0.0; p = merge(pars(nllsum), (α1 = 0.3, α2 = 0.7))) ≈ nll(0.0)
     #
     enll = Extended(NegativeLogLikelihood(s, data))
     @test pars(enll) == pars(s)
     #
-    enll_unit = updatepars(enll, (α1=300, α2=700))
+    enll_unit = updatepars(enll, (α1 = 300, α2 = 700))
     @test enll_unit(0.0) ≈ nll(0.0) - log(N) * N + N
 end
 
@@ -171,15 +164,15 @@ end
     μ₀, σ = 1.1, 1.3
     Δμ = 1.2
     #
-    g = FGauss((; μ=μ₀, σ))
-    xv = range(-3, 6, length=40)
+    g = FGauss((; μ = μ₀, σ))
+    xv = range(-3, 6, length = 40)
     yv = g(xv)
     #
     χ² = ChiSq(g, collect(xv) .+ Δμ, yv)
     #
     @test pars(χ²) == pars(g)
     @test χ²(1.1) ≈ χ²(2.2)
-    @test χ²(1.1; p=(; μ=μ₀ + Δμ, σ)) + 5.5 ≈ 5.5
+    @test χ²(1.1; p = (; μ = μ₀ + Δμ, σ)) + 5.5 ≈ 5.5
     #
     @show AlgebraPDF.model(χ²) == g
     #
@@ -190,28 +183,26 @@ end
 end
 
 @testset "FSum and FProd" begin
-    a1 = FunctionWithParameters(
-        (x; p) -> p.a + cos(x) * p.b; p=Ext(a=2, b=1))
-    a2 = FunctionWithParameters(
-        (x; p) -> p.a + sin(x) * p.b; p=Ext(a=2, b=1))
+    a1 = FunctionWithParameters((x; p) -> p.a + cos(x) * p.b; p = Ext(a = 2, b = 1))
+    a2 = FunctionWithParameters((x; p) -> p.a + sin(x) * p.b; p = Ext(a = 2, b = 1))
     #
     sum1 = a1 + a2
-    sum2 = +(a1, a2; p=(c1=1.0, c2=1.0))
-    sum3 = +(a1, a2; p=Ext(d1=1.0, d2=1.0))
+    sum2 = +(a1, a2; p = (c1 = 1.0, c2 = 1.0))
+    sum3 = +(a1, a2; p = Ext(d1 = 1.0, d2 = 1.0))
 
     @test func(sum1, 2) == func(sum2, 2)
     @test func(sum1, 2) == func(sum3, 2)
 
-    @test freepars(sum1) == (a=2, b=1, α1=1.0, α2=1.0)
-    @test freepars(sum2) == (a=2, b=1, c1=1.0, c2=1.0)
-    @test freepars(sum3) == (a=2, b=1, d1=1.0, d2=1.0)
+    @test freepars(sum1) == (a = 2, b = 1, α1 = 1.0, α2 = 1.0)
+    @test freepars(sum2) == (a = 2, b = 1, c1 = 1.0, c2 = 1.0)
+    @test freepars(sum3) == (a = 2, b = 1, d1 = 1.0, d2 = 1.0)
     #
-    @test freepars(fixpar(sum3, :a)) == (b=1, d1=1.0, d2=1.0)
+    @test freepars(fixpar(sum3, :a)) == (b = 1, d1 = 1.0, d2 = 1.0)
     #
     sum4 = fixpar(sum3, :a, 3)
-    @test fixedpars(sum4) == (a=3,)
-    @test fixedpars(sum4[1]) == (a=3,)
-    @test fixedpars(sum4[2]) == (a=3,)
+    @test fixedpars(sum4) == (a = 3,)
+    @test fixedpars(sum4[1]) == (a = 3,)
+    @test fixedpars(sum4[2]) == (a = 3,)
     #
     sum5 = fixpar(sum3, :d2, 2)
     @test func(sum5, 3.3) == func(a1, 3.3) + 2 * func(a2, 3.3)
@@ -225,10 +216,10 @@ end
 
 
 @testset "no-parameters f and no-parameters normalized f" begin
-    d0 = FunctionWithParameters((e; p) -> e^2 + p.a; p=(a=1.0,))
+    d0 = FunctionWithParameters((e; p) -> e^2 + p.a; p = (a = 1.0,))
     f0 = noparsf(d0)
     xv = -1:10
-    @test func(d0, xv; p=freepars(d0)) ≈ f0(xv)
+    @test func(d0, xv; p = freepars(d0)) ≈ f0(xv)
 end
 
 
@@ -237,11 +228,11 @@ struct BW1{P} <: AbstractFunctionWithParameters
     p::P
 end
 import AlgebraPDF: func
-func(bw::BW1, x::NumberOrTuple; p=pars(bw)) = p.m * p.Γ / (p.m^2 - x^2 - 1im * p.m * p.Γ)
+func(bw::BW1, x::NumberOrTuple; p = pars(bw)) = p.m * p.Γ / (p.m^2 - x^2 - 1im * p.m * p.Γ)
 
 
 @testset "User-def type with fixed name" begin
-    bw = BW1((m=3.1, Γ=0.1))
+    bw = BW1((m = 3.1, Γ = 0.1))
     @test pars(bw).m == 3.1
     @test pars(bw).Γ == 0.1
     @test bw(1.1) != 0.0
@@ -252,27 +243,27 @@ end
 struct BW2{P} <: AbstractFunctionWithParameters
     p::P
 end
-function AlgebraPDF.func(bw::BW2, x::NumberOrTuple; p=AlgebraPDF.pars(bw))
+function AlgebraPDF.func(bw::BW2, x::NumberOrTuple; p = AlgebraPDF.pars(bw))
     m, Γ = (getproperty(p, s) for s in keys(bw.p))
     m * Γ / (m^2 - x^2 - 1im * m * Γ)
 end
 
 
 @testset "User-def type with fixed order" begin
-    bw = BW2((m1=3.1, Γ1=0.1))
+    bw = BW2((m1 = 3.1, Γ1 = 0.1))
     #
     @test pars(bw).m1 == 3.1
     @test pars(bw).Γ1 == 0.1
     @test real(bw(3.1)) ≈ 0.0
-    @test real(bw(3.1; p=(m1=1.1, Γ1=3.3))) != 0
+    @test real(bw(3.1; p = (m1 = 1.1, Γ1 = 3.3))) != 0
     #
-    bw = BW2((m2=3.1, Γ2=0.1))
+    bw = BW2((m2 = 3.1, Γ2 = 0.1))
     @test pars(bw).m2 == 3.1
     @test pars(bw).Γ2 == 0.1
 end
 
 @makefuntype SuperF(x; p) = x^2 + p.a * x^3
-g = SuperF(p=(a=0.5,))
+g = SuperF(p = (a = 0.5,))
 
 @testset "@maketype macro" begin
     @test keys(pars(g)) == (:a,)

@@ -8,13 +8,15 @@ isfreepar(d, s::Symbol) = (s ∈ keys(freepars(d)))
 abstract type AbstractFunctionWithParameters end
 #
 nfreepars(d::AbstractFunctionWithParameters) = length(freepars(d))
-# 
-func(d::AbstractFunctionWithParameters, x::AbstractArray; p=freepars(d)) = func.(Ref(d), x; p=merge(p, fixedpars(p)))
-func(d::AbstractFunctionWithParameters, x::AbstractRange; p=freepars(d)) = func.(Ref(d), x; p=merge(p, fixedpars(p)))
-# 
-(d::AbstractFunctionWithParameters)(x; p=freepars(d)) = func(d, x; p)
+#
+func(d::AbstractFunctionWithParameters, x::AbstractArray; p = freepars(d)) =
+    func.(Ref(d), x; p = merge(p, fixedpars(p)))
+func(d::AbstractFunctionWithParameters, x::AbstractRange; p = freepars(d)) =
+    func.(Ref(d), x; p = merge(p, fixedpars(p)))
+#
+(d::AbstractFunctionWithParameters)(x; p = freepars(d)) = func(d, x; p)
 const ArrayOrRange = Union{AbstractArray,AbstractRange}
-(d::AbstractFunctionWithParameters)(x, v::ArrayOrRange) = d(x; p=v2p(v, d))
+(d::AbstractFunctionWithParameters)(x, v::ArrayOrRange) = d(x; p = v2p(v, d))
 
 # methods that call `updatevalueorflag`
 
@@ -27,7 +29,8 @@ updatevalue(d::AbstractFunctionWithParameters, s::Symbol, v) =
 updatepar(d::AbstractFunctionWithParameters, s::Symbol, v) = updatevalue(d, s, v)
 releasepar(d::AbstractFunctionWithParameters, s::Symbol) = updateisfree(d, s, true)
 fixpar(d::AbstractFunctionWithParameters, s::Symbol) = updateisfree(d, s, false)
-fixpar(d::AbstractFunctionWithParameters, s::Symbol, v) = updateisfree(updatepar(d, s, v), s, false)
+fixpar(d::AbstractFunctionWithParameters, s::Symbol, v) =
+    updateisfree(updatepar(d, s, v), s, false)
 # lambda versions
 updatepar(s::Symbol, v) = d -> updatepar(d, s, v)
 releasepar(s::Symbol) = d -> releasepar(d, s)
@@ -62,17 +65,17 @@ function updatepars(d::AbstractFunctionWithParameters, sequence::NamedTuple)
 end
 fixpars(d::AbstractFunctionWithParameters, sequence::NamedTuple) =
     fixpars(updatepars(d, sequence), keys(sequence))
-# 
+#
 updatepars(sequence::NamedTuple) = d -> updatepars(d, sequence)
 fixpars(sequence::NamedTuple) = d -> fixpars(d, sequence)
-# 
+#
 # Number <: AbstractFunctionWithParameters
 pars(d::Number, isfree::Bool) = ∅
-func(d::Number, x::NumberOrTuple; p=∅) = d
+func(d::Number, x::NumberOrTuple; p = ∅) = d
 
 # Function <: AbstractFunctionWithParameters
 pars(f::Function, isfree::Bool) = ∅
-func(f::Function, x::NumberOrTuple; p=∅) = f(x)
+func(f::Function, x::NumberOrTuple; p = ∅) = f(x)
 
 # # to be implemented for F <: AbstractFunctionWithParameters
 # func(d::F, x::NumberOrTuple; p)
@@ -81,8 +84,12 @@ func(f::Function, x::NumberOrTuple; p=∅) = f(x)
 
 # default method assumes that the d has d.p, and is a single arg
 pars(d::AbstractFunctionWithParameters, isfree::Bool) = pars(d.p, isfree)
-updatevalueorflag(d::AbstractFunctionWithParameters, s::Symbol, isfree::Bool, v=getproperty(pars(d), s)) =
-    typeof(d)(updatevalueorflag(d.p, s, isfree, v))
+updatevalueorflag(
+    d::AbstractFunctionWithParameters,
+    s::Symbol,
+    isfree::Bool,
+    v = getproperty(pars(d), s),
+) = typeof(d)(updatevalueorflag(d.p, s, isfree, v))
 #
 
 # wrap julia function
@@ -93,10 +100,15 @@ end
 FunctionWithParameters(f; p) = FunctionWithParameters(; f, p)
 
 # two methods to be defined
-func(d::FunctionWithParameters, x::NumberOrTuple; p=freepars(d)) = d.f(x; p=merge(p, fixedpars(d)))
+func(d::FunctionWithParameters, x::NumberOrTuple; p = freepars(d)) =
+    d.f(x; p = merge(p, fixedpars(d)))
 pars(d::FunctionWithParameters, isfree::Bool) = pars(d.p, isfree)
-updatevalueorflag(d::FunctionWithParameters, s::Symbol, isfree::Bool, v=getproperty(pars(d), s)) =
-    FunctionWithParameters(; f=d.f, p=updatevalueorflag(d.p, s, isfree, v))
+updatevalueorflag(
+    d::FunctionWithParameters,
+    s::Symbol,
+    isfree::Bool,
+    v = getproperty(pars(d), s),
+) = FunctionWithParameters(; f = d.f, p = updatevalueorflag(d.p, s, isfree, v))
 #
 
 
@@ -106,7 +118,7 @@ updatevalueorflag(d::FunctionWithParameters, s::Symbol, isfree::Bool, v=getprope
     Expected form of the expression is `f(x;p)` on the left
 """
 macro makefuntype(ex)
-    # 
+    #
     fpx = ex.args[1].args
     name = fpx[1]
     p = fpx[2].args[1]
@@ -119,10 +131,12 @@ macro makefuntype(ex)
             p::T
         end
         $(esc(name))(; p) = $(esc(name))(p)
-        # 
-        $(esc(:(AlgebraPDF.func)))(d::$(esc(name)), $(esc(x))::NumberOrTuple;
-            p=$(esc(:(AlgebraPDF.pars)))(d)) =
-            $(esc(body))
+        #
+        $(esc(:(AlgebraPDF.func)))(
+            d::$(esc(name)),
+            $(esc(x))::NumberOrTuple;
+            p = $(esc(:(AlgebraPDF.pars)))(d),
+        ) = $(esc(body))
     end
 end
 
@@ -132,4 +146,4 @@ p2v(p, d::AbstractFunctionWithParameters) = [getproperty(p, k) for k in keys(fre
 p2v(d::AbstractFunctionWithParameters) = p2v(freepars(d), d)
 
 # single-argument lambda-function with fixed parameters
-noparsf(d::AbstractFunctionWithParameters; p=pars(d)) = (x; kw...) -> func(d, x; p=p)
+noparsf(d::AbstractFunctionWithParameters; p = pars(d)) = (x; kw...) -> func(d, x; p = p)

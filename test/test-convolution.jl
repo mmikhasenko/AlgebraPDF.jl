@@ -5,26 +5,27 @@ using AlgebraPDF.SpecialFunctions
 #  _|        _|    _|  _|    _|    _|  _|
 #    _|_|_|    _|_|    _|    _|      _|
 
-@makepdftype myBW(x;p) = let xth = 2.961477
-    AlgebraPDF.amplitudeBWsq(x+xth, p.Δm+xth, p.Γ)
-end
-mybw = myBW(Ext(Δm=0.1, Γ=3e-3), (0,0.22))
+@makepdftype myBW(x; p) =
+    let xth = 2.961477
+        AlgebraPDF.amplitudeBWsq(x + xth, p.Δm + xth, p.Γ)
+    end
+mybw = myBW(Ext(Δm = 0.1, Γ = 3e-3), (0, 0.22))
 
 # convolute with average resolution
 const σ_mean = 5e-3
 mybw_conv = convGauss(mybw, σ_mean)
 
 @testset "convGauss: update pars works" begin
-    @test pars(updatepars(mybw_conv, (Δm=0.15,))).Δm == 0.15
+    @test pars(updatepars(mybw_conv, (Δm = 0.15,))).Δm == 0.15
 end
 
 function updategetmaxdensity(d, Δm)
-    xv = range(0,0.22,length=100)
-    maximum(updatepars(d,(Δm=Δm,))(xv))
+    xv = range(0, 0.22, length = 100)
+    maximum(updatepars(d, (Δm = Δm,))(xv))
 end
 
 # resolution is linear function of energy
-resolution_model = FunctionWithParameters((x;p)->σ_mean+(x-0.1)*3e-2; p=∅)
+resolution_model = FunctionWithParameters((x; p) -> σ_mean + (x - 0.1) * 3e-2; p = ∅)
 mybw_conv_dep = convGauss(mybw, resolution_model)
 
 @testset "convGauss energy-dependent gets wider" begin
