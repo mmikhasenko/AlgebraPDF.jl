@@ -1,3 +1,7 @@
+> [!NOTE]
+> Support and development of this package is being discontinued.
+> Parallel functionality is provided via `Distributions.jl` + [`NumericalDistributions.jl`](https://github.com/mmikhasenko/NumericalDistributions.jl) ecosystem.
+
 # AlgebraPDF
 
 [![Stable Documentation](https://img.shields.io/badge/docs-stable-blue.svg)](https://mmikhasenko.github.io/AlgebraPDF.jl/stable)
